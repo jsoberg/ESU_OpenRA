@@ -485,7 +485,7 @@ Player:
 			Refinery: proc
 			Power: powr
 		UnitsCommonNames:
-			# mcv is required to build the construction yard in the beginning; If 
+			# mcv is required to build the construction yard in the beginning; If
 			#    is left out, the game will never start. Reference InitializeBase()
 			#    in HackyAI.
 			Mcv: mcv
@@ -500,3 +500,5 @@ Player:
 		UnitsToBuild:
 			harv: 100%
 		SquadSize: 20
+	# Our custom AI that does not use HackyAI code.
+	SimpleTestAI@SimpleTestAI:
