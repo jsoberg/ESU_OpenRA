@@ -414,53 +414,21 @@ namespace OpenRA
             JoinServer(IPAddress.Loopback.ToString(), localPort, "");
             OrderManager.TickImmediate();
 
-            // Create "lobby". 
-            Order syncOrder = new Order("SyncInfo", null, false);
-            syncOrder.IsImmediate = true; 
-            syncOrder.TargetString = SYNC_COMMAND;
-            OrderManager.IssueOrder(syncOrder);
-            OrderManager.TickImmediate();
-
-            //OrderManager.LocalClient.State = OpenRA.Network.Session.ClientState.Ready;
-            //SetClientsAsReady();
-            //OrderManager.TickImmediate();
-
-            Game.RunAfterDelay(1000, () =>
+            Game.RunAfterDelay(500, () =>
             {
-                // Add bot to first open slot.
-                IssueAddBotOrders(myMap);
-                OrderManager.TickImmediate();
+                // Create bots.
+                OrderManager.IssueOrder(Order.Command("state NotReady"));
+                OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 Rush AI"));
+                OrderManager.IssueOrder(Order.Command("slot_bot Multi2 0 Turtle AI"));
 
                 // Issue command to spectate.
-                //OrderManager.IssueOrder(Order.Command("spectate"));
-                //OrderManager.TickImmediate();
-            });
+                OrderManager.IssueOrder(Order.Command("spectate"));
+                OrderManager.IssueOrder(Order.Command("startgame"));
 
-            Game.RunAfterDelay(2000, () =>
-            {
-                StartGame(myMap.Uid, WorldType.Regular);
+                // Issue all immediate orders.
+                OrderManager.TickImmediate();
             });
         }
-
-        /** Finds the first empty bot slot, and adds a random bot to it. */
-        private static void IssueAddBotOrders(MapPreview myMap)
-        {
-            var slot = OrderManager.LobbyInfo.FirstEmptyBotSlot();
-            var bot = myMap.Rules.Actors["player"].TraitInfos<IBotInfo>().Select(t => t.Name).FirstOrDefault();
-            var botController = OrderManager.LobbyInfo.Clients.FirstOrDefault(c => c.IsAdmin);
-            if (slot != null && bot != null)
-                 OrderManager.IssueOrder(Order.Command("slot_bot {0} {1} {2}".F(slot, botController.Index, bot)));
-        }
-
-        private static void SetClientsAsReady()
-        {
-            foreach (OpenRA.Network.Session.Client client in OrderManager.LobbyInfo.Clients) {
-                client.State = OpenRA.Network.Session.ClientState.Ready;
-            }
-        }
-
-        // TODO: Find out where exactly this is being built/ parsed from.
-        private const string SYNC_COMMAND = "Client@0:\n\tIndex: 0\n\tPreferredColor: 8CFF69\n\tColor: 8CFF69\n\tFaction: Random\n\tSpawnPoint: 0\n\tName: Newbie\n\tIpAddress: 127.0.0.1\n\tState: Invalid\n\tTeam: 0\n\tSlot: Multi0\n\tBot:\n\tBotControllerClientIndex: 0\n\tIsAdmin: True\n\nClientPing@0:\n\tIndex: 0\n\tLatency: -1\n\tLatencyJitter: -1\n\tLatencyHistory:\n\nSlot@Multi0:\n\tPlayerReference: Multi0\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi1:\n\tPlayerReference: Multi1\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi2:\n\tPlayerReference: Multi2\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi3:\n\tPlayerReference: Multi3\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi4:\n\tPlayerReference: Multi4\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi5:\n\tPlayerReference: Multi5\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi6:\n\tPlayerReference: Multi6\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi7:\n\tPlayerReference: Multi7\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nGlobalSettings:\n\tServerName: Skirmish Game\n\tMap: 602f16e64f2e10d4a11f5709348d6a1e923f2719\n\tTimestep: 40\n\tOrderLatency: 3\n\tRandomSeed: 39106490\n\tAllowCheats: False\n\tAllowSpectators: True\n\tDedicated: False\n\tDifficulty:\n\tCrates: True\n\tCreeps: False\n\tShroud: True\n\tFog: True\n\tAllyBuildRadius: True\n\tStartingCash: 5000\n\tTechLevel: Unrestricted\n\tStartingUnitsClass: none\n\tGameSpeedType: default\n\tShortGame: True\n\tAllowVersionMismatch: False\n\tGameUid:\n\tDisableSingleplayer: False\n";
 
         // ==============================================================================================================
         // END Headless Auto-Start Game Methods
