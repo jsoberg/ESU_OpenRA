@@ -421,18 +421,25 @@ namespace OpenRA
             OrderManager.IssueOrder(syncOrder);
             OrderManager.TickImmediate();
 
-            // Issue command to spectate.
-            OrderManager.IssueOrder(Order.Command("spectate"));
-            OrderManager.TickImmediate();
+            //OrderManager.LocalClient.State = OpenRA.Network.Session.ClientState.Ready;
+            //SetClientsAsReady();
+            //OrderManager.TickImmediate();
 
-            // Add bot to first open slot.
-            IssueAddBotOrders(myMap);
-            OrderManager.TickImmediate();
+            Game.RunAfterDelay(1000, () =>
+            {
+                // Add bot to first open slot.
+                IssueAddBotOrders(myMap);
+                OrderManager.TickImmediate();
 
-//            OrderManager.IssueOrder(Order.Command("startgame"));
-//            OrderManager.TickImmediate();
-            OrderManager.LocalClient.State = OpenRA.Network.Session.ClientState.Ready;
-            StartGame(myMap.Uid, WorldType.Regular);
+                // Issue command to spectate.
+                //OrderManager.IssueOrder(Order.Command("spectate"));
+                //OrderManager.TickImmediate();
+            });
+
+            Game.RunAfterDelay(2000, () =>
+            {
+                StartGame(myMap.Uid, WorldType.Regular);
+            });
         }
 
         /** Finds the first empty bot slot, and adds a random bot to it. */
@@ -443,6 +450,13 @@ namespace OpenRA
             var botController = OrderManager.LobbyInfo.Clients.FirstOrDefault(c => c.IsAdmin);
             if (slot != null && bot != null)
                  OrderManager.IssueOrder(Order.Command("slot_bot {0} {1} {2}".F(slot, botController.Index, bot)));
+        }
+
+        private static void SetClientsAsReady()
+        {
+            foreach (OpenRA.Network.Session.Client client in OrderManager.LobbyInfo.Clients) {
+                client.State = OpenRA.Network.Session.ClientState.Ready;
+            }
         }
 
         // TODO: Find out where exactly this is being built/ parsed from.
