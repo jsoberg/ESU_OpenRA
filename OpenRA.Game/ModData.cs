@@ -125,6 +125,22 @@ namespace OpenRA
 			CursorProvider = new CursorProvider(this);
 		}
 
+        // ===========================================================================================================================
+        // BEGIN No Graphics Implementation
+        // ===========================================================================================================================
+
+        public void InitializeLoadersNoGraphics(IReadOnlyFileSystem fileSystem)
+        {
+            // all this manipulation of static crap here is nasty and breaks
+            // horribly when you use ModData in unexpected ways.
+            ChromeMetrics.Initialize(this);
+            ChromeProvider.Initialize(this);
+        }
+
+        // ===========================================================================================================================
+        // END No Graphics Implementation
+        // ===========================================================================================================================
+
 		TLoader[] GetLoaders<TLoader>(IEnumerable<string> formats, string name)
 		{
 			var loaders = new List<TLoader>();
