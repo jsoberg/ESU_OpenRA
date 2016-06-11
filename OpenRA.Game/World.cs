@@ -174,7 +174,7 @@ namespace OpenRA
 					if (!p.Stances.ContainsKey(q))
 						p.Stances[q] = Stance.Neutral;
 
-			Game.Sound.SoundVolumeModifier = 1.0f;
+			//Game.Sound.SoundVolumeModifier = 1.0f;
 
 			gameInfo = new GameInformation
 			{
@@ -231,8 +231,8 @@ namespace OpenRA
 				if (wlh == ScreenMap)
 					continue;
 
-				using (new PerfTimer(wlh.GetType().Name + ".WorldLoaded"))
-					wlh.WorldLoaded(this, wr);
+				//using (new PerfTimer(wlh.GetType().Name + ".WorldLoaded"))
+					//wlh.WorldLoaded(this, wr);
 			}
 
 			gameInfo.StartTimeUtc = DateTime.UtcNow;

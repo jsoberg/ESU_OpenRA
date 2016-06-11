@@ -148,7 +148,7 @@ namespace OpenRA
 			if (worldRenderer != null)
 				worldRenderer.Dispose();
 
-			Cursor.SetCursor(null);
+			//Cursor.SetCursor(null);
 			BeforeGameStart();
 
 			Map map;
@@ -158,7 +158,7 @@ namespace OpenRA
 			using (new PerfTimer("NewWorld"))
 				OrderManager.World = new World(map, OrderManager, type);
 
-			worldRenderer = new WorldRenderer(OrderManager.World);
+			//worldRenderer = new WorldRenderer(OrderManager.World);
 
 			using (new PerfTimer("LoadComplete"))
 				OrderManager.World.LoadComplete(worldRenderer);
@@ -166,14 +166,14 @@ namespace OpenRA
 			if (OrderManager.GameStarted)
 				return;
 
-			Ui.MouseFocusWidget = null;
-			Ui.KeyboardFocusWidget = null;
+			//Ui.MouseFocusWidget = null;
+			//Ui.KeyboardFocusWidget = null;
 
 			OrderManager.LocalFrameNumber = 0;
 			OrderManager.LastTickTime = RunTime;
 			OrderManager.StartGame();
-			worldRenderer.RefreshPalette();
-			Cursor.SetCursor("default");
+			//worldRenderer.RefreshPalette();
+			//Cursor.SetCursor("default");
 
 			GC.Collect();
 		}
@@ -319,6 +319,9 @@ namespace OpenRA
             ModData.InitializeLoadersNoGraphics(ModData.DefaultFileSystem);
 
             JoinLocal();
+
+            // NOTE: Comment this out to run the game normally.
+            AutoStartGame();
         }
 
         internal static RunStatus LogicOnlyRun()
@@ -619,9 +622,6 @@ namespace OpenRA
 			JoinLocal();
 
             ModData.LoadScreen.StartGame(args);
-
-            // NOTE: Comment this out to run the game normally.
-            AutoStartGame();
 		}
 
         // ==============================================================================================================
