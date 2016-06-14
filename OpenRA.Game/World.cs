@@ -227,12 +227,12 @@ namespace OpenRA
 
 			foreach (var wlh in WorldActor.TraitsImplementing<IWorldLoaded>())
 			{
-				// These have already been initialized
-				if (wlh == ScreenMap)
-					continue;
+                // HACKY WORKAROUND: Only load non-graphics types. 
+                if (!IsAcceptedType(wlh))
+                    continue;
 
-				//using (new PerfTimer(wlh.GetType().Name + ".WorldLoaded"))
-					//wlh.WorldLoaded(this, wr);
+				using (new PerfTimer(wlh.GetType().Name + ".WorldLoaded"))
+					wlh.WorldLoaded(this, wr);
 			}
 
 			gameInfo.StartTimeUtc = DateTime.UtcNow;
@@ -245,6 +245,23 @@ namespace OpenRA
 			if (rc != null)
 				rc.Metadata = new ReplayMetadata(gameInfo);
 		}
+
+        private bool IsAcceptedType(IWorldLoaded wlh)
+        {
+            return ACCEPTED_TYPES.Contains(wlh.GetType().Name);
+        }
+
+        // Types which are necessary to load (Non-Graphic types)
+        private readonly string[] ACCEPTED_TYPES = {
+            "DevCommands",
+            "PlayerCommands",
+            "HelpCommand",
+            "DomainIndex",
+            "SpawnMapActors",
+            "MPStartLocations",
+            "SpawnMPUnits",
+            "ResourceClaimLayer"
+        };
 
 		public Actor CreateActor(string name, TypeDictionary initDict)
 		{
@@ -422,8 +439,8 @@ namespace OpenRA
 
 			frameEndActions.Clear();
 
-			Game.Sound.StopAudio();
-			Game.Sound.StopVideo();
+			//Game.Sound.StopAudio();
+			//Game.Sound.StopVideo();
 
 			// Dispose newer actors first, and the world actor last
 			foreach (var a in actors.Values.Reverse())

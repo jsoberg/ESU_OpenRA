@@ -158,7 +158,7 @@ namespace OpenRA
 			using (new PerfTimer("NewWorld"))
 				OrderManager.World = new World(map, OrderManager, type);
 
-			//worldRenderer = new WorldRenderer(OrderManager.World);
+		    worldRenderer = new WorldRenderer(OrderManager.World);
 
 			using (new PerfTimer("LoadComplete"))
 				OrderManager.World.LoadComplete(worldRenderer);
@@ -266,6 +266,8 @@ namespace OpenRA
 
             GeoIP.Initialize();
 
+            Sound = new Sound(Settings.Sound.Engine);
+
             Console.WriteLine("Available mods:");
             foreach (var mod in ModMetadata.AllMods)
                 Console.WriteLine("\t{0}: {1} ({2})", mod.Key, mod.Value.Title, mod.Value.Version);
@@ -315,10 +317,12 @@ namespace OpenRA
             var installData = ModData.Manifest.Get<ContentInstaller>();
             var isModContentInstalled = installData.TestFiles.All(f => File.Exists(Platform.ResolvePath(f)));
 
-
             ModData.InitializeLoadersNoGraphics(ModData.DefaultFileSystem);
 
             JoinLocal();
+
+            Game.LoadShellMap();
+            Game.Settings.Save();
 
             // NOTE: Comment this out to run the game normally.
             AutoStartGame();
