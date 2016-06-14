@@ -87,7 +87,8 @@ namespace OpenRA.Network
 		public void IssueOrder(Order order)
 		{
 			localOrders.Add(order);
-            Console.WriteLine(order.OrderString + " : " + order.TargetString + "\n");
+            Log.Write("order_manager", order.OrderString + " : " + order.TargetString + "\n");
+            Console.WriteLine(order.OrderString + " : " + order.TargetString);
 		}
 
 		public Action<Color, string, string> AddChatLine = (c, n, s) => { };
