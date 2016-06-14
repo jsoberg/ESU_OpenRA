@@ -26,6 +26,7 @@ using OpenRA.Support;
 using OpenRA.Widgets;
 using OpenRA.Traits;
 using System.Threading.Tasks;
+using FS = OpenRA.FileSystem.FileSystem;
 
 namespace OpenRA
 {
@@ -266,7 +267,7 @@ namespace OpenRA
 
             GeoIP.Initialize();
 
-            Sound = new Sound(Settings.Sound.Engine);
+            Sound = new Sound();
 
             Console.WriteLine("Available mods:");
             foreach (var mod in ModMetadata.AllMods)
@@ -278,16 +279,18 @@ namespace OpenRA
                 RunAfterDelay(Settings.Server.NatDiscoveryTimeout, UPnP.StoppingNatDiscovery);
         }
 
+        public static readonly string RED_ALERT = "ra";
+
         public static void InitializeModNoGraphics(string mod, Arguments args)
         {
+            Game.Settings.Save();
+
             // Clear static state if we have switched mods
             LobbyInfoChanged = () => { };
             ConnectionStateChanged = om => { };
             BeforeGameStart = () => { };
             OnRemoteDirectConnect = (a, b) => { };
             delayedActions = new ActionQueue();
-
-            Ui.ResetAll();
 
             if (server != null)
                 server.Shutdown();
@@ -300,26 +303,40 @@ namespace OpenRA
                 ModData.Dispose();
             }
 
-            ModData = null;
+            Console.WriteLine("Loading mod: {0}", RED_ALERT);
+            Settings.Game.Mod = RED_ALERT;
 
-            // Fall back to default if the mod doesn't exist or has missing prerequisites.
-            if (!ModMetadata.AllMods.ContainsKey(mod) || !IsModInstalled(mod))
-                mod = new GameSettings().Mod;
-
-            Console.WriteLine("Loading mod: {0}", mod);
-            Settings.Game.Mod = mod;
-
-            ModData = new ModData(mod, true);
+            ModData = new ModData(RED_ALERT, false);
 
             using (new PerfTimer("LoadMaps"))
                 ModData.MapCache.LoadMaps();
 
+            JoinLocal();
+
             var installData = ModData.Manifest.Get<ContentInstaller>();
             var isModContentInstalled = installData.TestFiles.All(f => File.Exists(Platform.ResolvePath(f)));
+            // Mod assets are missing, auto dl for Red Alert.
+            if (!isModContentInstalled)
+            {
+                Action afterInstall =(() =>
+                {
+                    InitializeModNoGraphics(mod, args);
+                });
+
+                Manifest manifest = new Manifest(mod);
+                FS files = new FS();
+                files.LoadFromManifest(manifest);
+                ObjectCreator objCreator = new ObjectCreator(manifest, files);
+
+
+                Dictionary<string, object> constParams = new Dictionary<string, object>();
+                constParams.Add("afterInstall", afterInstall);
+                objCreator.CreateObject<object>("AutoDownloadRedAlertPackagesLogic", constParams);
+
+                return;
+            }
 
             ModData.InitializeLoadersNoGraphics(ModData.DefaultFileSystem);
-
-            JoinLocal();
 
             Game.LoadShellMap();
             Game.Settings.Save();

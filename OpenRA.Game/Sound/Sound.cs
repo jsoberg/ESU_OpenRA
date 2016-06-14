@@ -42,6 +42,12 @@ namespace OpenRA
 		ISound video;
 		MusicInfo currentMusic;
 
+        /** No-Graphics constructor. */
+        public Sound()
+        {
+            soundEngine = null;
+        }
+
 		public Sound(string engineName)
 		{
 			var enginePath = Platform.ResolvePath(".", "OpenRA.Platforms." + engineName + ".dll");

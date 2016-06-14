@@ -152,6 +152,7 @@ namespace OpenRA
         // Types which may be graphical in nature.
         private static readonly string[] UNACCEPTED_TYPES = {
             "RenderDebugStateInfo",
+            "ShroudRendererInfo",
             "FloatingText"
         };
 
