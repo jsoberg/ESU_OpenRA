@@ -251,6 +251,8 @@ namespace OpenRA
 			Log.AddChannel("graphics", "graphics.log");
 			Log.AddChannel("geoip", "geoip.log");
 			Log.AddChannel("irc", "irc.log");
+			
+			Log.AddChannel("order_manager", "order_manager.log");
 
 			if (Settings.Server.DiscoverNatDevices)
 				UPnP.TryNatDiscovery();
