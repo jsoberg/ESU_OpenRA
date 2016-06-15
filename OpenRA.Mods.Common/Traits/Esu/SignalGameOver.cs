@@ -19,8 +19,31 @@ namespace OpenRA.Mods.Common.Traits.Esu
     {
         public void GameOver(World world)
         {
-            Console.WriteLine("Game Complete!");
-            Log.Write("order_manager", "Game Complete!");
+            PrintToConsoleAndLog("Game Complete!");
+            PrintPlayerFitnessInformation(world);
+        }
+
+        private void PrintPlayerFitnessInformation(World world)
+        {
+            foreach (var p in world.Players.Where(a => !a.NonCombatant))
+            {
+                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
+                if (stats == null)
+                {
+                    continue;
+                }
+
+                var totalKills = stats.UnitsKilled + stats.BuildingsKilled;
+                var totalDeaths = stats.UnitsDead + stats.BuildingsDead;
+
+                PrintToConsoleAndLog("Player {0}: {1} kills, {2} deaths".F(p.PlayerName, totalKills, totalDeaths));
+            }
+        }
+
+        private void PrintToConsoleAndLog(string message)
+        {
+            Console.WriteLine(message);
+            Log.Write("order_manager", message);
         }
     }
 }
