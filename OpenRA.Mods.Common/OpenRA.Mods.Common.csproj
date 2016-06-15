@@ -299,6 +299,7 @@
     <Compile Include="Traits\Buildings\Reservable.cs" />
     <Compile Include="Traits\Burns.cs" />
     <Compile Include="Traits\C4Demolition.cs" />
+    <Compile Include="Traits\Esu\SignalGameOver.cs" />
     <Compile Include="Traits\Health.cs" />
     <Compile Include="Traits\PowerTooltip.cs" />
     <Compile Include="Traits\VeteranProductionIconOverlay.cs" />
