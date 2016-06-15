@@ -134,6 +134,10 @@ namespace OpenRA
 				.Select(pair => new SyncHash(pair.First, pair.Second(pair.First)));
 		}
 
+        // ===========================================================================================================================
+        // BEGIN No Graphics Implementation
+        // ===========================================================================================================================
+
         private bool MayBeRenderable(ITraitInfo trait)
         {
             // If this is a necessary graphic type, allow it to be created.
@@ -149,18 +153,23 @@ namespace OpenRA
             return false;
         }
 
-        // Types which may be graphical in nature.
+        // Types which are ONLY graphical in nature.
         private static readonly string[] UNACCEPTED_TYPES = {
             "RenderDebugStateInfo",
             "ShroudRendererInfo",
             "FloatingText",
-            "ScreenShakerInfo"
+            "ScreenShakerInfo",
+            "ShakeOnDeathInfo"
         };
 
         // Types which are necessary to load (Even though they are Graphic types)
         private static readonly string[] ACCEPTED_TYPES = {
             "RenderSpritesInfo",
         };
+
+        // ===========================================================================================================================
+        // END No Graphics Implementation
+        // ===========================================================================================================================
 
 		Rectangle DetermineBounds()
 		{
