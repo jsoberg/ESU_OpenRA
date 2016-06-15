@@ -125,6 +125,22 @@ namespace OpenRA
 			CursorProvider = new CursorProvider(this);
 		}
 
+        // ===========================================================================================================================
+        // BEGIN No Graphics Implementation
+        // ===========================================================================================================================
+
+        public void InitializeLoadersNoGraphics(IReadOnlyFileSystem fileSystem)
+        {
+            // all this manipulation of static crap here is nasty and breaks
+            // horribly when you use ModData in unexpected ways.
+            ChromeMetrics.Initialize(this);
+            ChromeProvider.Initialize(this);
+        }
+
+        // ===========================================================================================================================
+        // END No Graphics Implementation
+        // ===========================================================================================================================
+
 		TLoader[] GetLoaders<TLoader>(IEnumerable<string> formats, string name)
 		{
 			var loaders = new List<TLoader>();
@@ -193,15 +209,15 @@ namespace OpenRA
 			LoadTranslations(map);
 
 			// Reinitialize all our assets
-			InitializeLoaders(map);
+			InitializeLoadersNoGraphics(map);
 
 			// Load music with map assets mounted
 			using (new Support.PerfTimer("Map.Music"))
 				foreach (var entry in map.Rules.Music)
 					entry.Value.Load(map);
 
-			VoxelProvider.Initialize(VoxelLoader, map, MiniYaml.Load(map, Manifest.VoxelSequences, map.VoxelSequenceDefinitions));
-			VoxelLoader.Finish();
+			//VoxelProvider.Initialize(VoxelLoader, map, MiniYaml.Load(map, Manifest.VoxelSequences, map.VoxelSequenceDefinitions));
+			//VoxelLoader.Finish();
 
 			return map;
 		}

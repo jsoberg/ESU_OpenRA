@@ -307,8 +307,8 @@ namespace OpenRA.Mods.Common.Traits
 			if (disposed)
 				return;
 
-			shroudLayer.Dispose();
-			fogLayer.Dispose();
+			//shroudLayer.Dispose();
+			//fogLayer.Dispose();
 			disposed = true;
 		}
 	}
