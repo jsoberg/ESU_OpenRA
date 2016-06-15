@@ -478,7 +478,7 @@ namespace OpenRA
                         else if (orderManager.NetFrameNumber == 0)
                             orderManager.LastTickTime = RunTime;
 
-                        Sync.CheckSyncUnchanged(world, () => world.TickRender(worldRenderer));
+                        //Sync.CheckSyncUnchanged(world, () => world.TickRender(worldRenderer));
                     }
                     else
                         PerfHistory.Tick();

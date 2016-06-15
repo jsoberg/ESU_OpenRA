@@ -153,7 +153,8 @@ namespace OpenRA
         private static readonly string[] UNACCEPTED_TYPES = {
             "RenderDebugStateInfo",
             "ShroudRendererInfo",
-            "FloatingText"
+            "FloatingText",
+            "ScreenShakerInfo"
         };
 
         // Types which are necessary to load (Even though they are Graphic types)
