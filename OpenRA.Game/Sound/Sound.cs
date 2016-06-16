@@ -42,6 +42,12 @@ namespace OpenRA
 		ISound video;
 		MusicInfo currentMusic;
 
+        /** No-Graphics constructor. */
+        public Sound()
+        {
+            soundEngine = null;
+        }
+
 		public Sound(string engineName)
 		{
 			var enginePath = Platform.ResolvePath(".", "OpenRA.Platforms." + engineName + ".dll");
@@ -107,14 +113,8 @@ namespace OpenRA
 
 		ISound Play(Player player, string name, bool headRelative, WPos pos, float volumeModifier = 1f, bool loop = false)
 		{
-			if (string.IsNullOrEmpty(name))
-				return null;
-			if (player != null && player != player.World.LocalPlayer)
-				return null;
-
-			return soundEngine.Play2D(sounds[name],
-				loop, headRelative, pos,
-				InternalSoundVolume * volumeModifier, true);
+            // No Graphic Implementation
+            return null;
 		}
 
 		public void StopAudio()
@@ -322,70 +322,14 @@ namespace OpenRA
 		public bool PlayPredefined(Ruleset ruleset, Player p, Actor voicedActor, string type, string definition, string variant,
 			bool relative, WPos pos, float volumeModifier, bool attenuateVolume)
 		{
-			if (ruleset == null)
-				throw new ArgumentNullException("ruleset");
-
-			if (definition == null)
-				return false;
-
-			if (ruleset.Voices == null || ruleset.Notifications == null)
-				return false;
-
-			var rules = (voicedActor != null) ? ruleset.Voices[type] : ruleset.Notifications[type];
-			if (rules == null)
-				return false;
-
-			var id = voicedActor != null ? voicedActor.ActorID : 0;
-
-			string clip;
-			var suffix = rules.DefaultVariant;
-			var prefix = rules.DefaultPrefix;
-
-			if (voicedActor != null)
-			{
-				if (!rules.VoicePools.Value.ContainsKey(definition))
-					throw new InvalidOperationException("Can't find {0} in voice pool.".F(definition));
-
-				clip = rules.VoicePools.Value[definition].GetNext();
-			}
-			else
-			{
-				if (!rules.NotificationsPools.Value.ContainsKey(definition))
-					throw new InvalidOperationException("Can't find {0} in notification pool.".F(definition));
-
-				clip = rules.NotificationsPools.Value[definition].GetNext();
-			}
-
-			if (string.IsNullOrEmpty(clip))
-				return false;
-
-			if (variant != null)
-			{
-				if (rules.Variants.ContainsKey(variant) && !rules.DisableVariants.Contains(definition))
-					suffix = rules.Variants[variant][id % rules.Variants[variant].Length];
-				if (rules.Prefixes.ContainsKey(variant) && !rules.DisablePrefixes.Contains(definition))
-					prefix = rules.Prefixes[variant][id % rules.Prefixes[variant].Length];
-			}
-
-			var name = prefix + clip + suffix;
-
-			if (!string.IsNullOrEmpty(name) && (p == null || p == p.World.LocalPlayer))
-				soundEngine.Play2D(sounds[name],
-					false, relative, pos,
-					InternalSoundVolume * volumeModifier, attenuateVolume);
-
-			return true;
+            // NO GRPAHICS OR SOUND - Do Nothing.
+            return true;
 		}
 
 		public bool PlayNotification(Ruleset rules, Player player, string type, string notification, string variant)
 		{
-			if (rules == null)
-				throw new ArgumentNullException("rules");
-
-			if (type == null || notification == null)
-				return false;
-
-			return PlayPredefined(rules, player, null, type.ToLowerInvariant(), notification, variant, true, WPos.Zero, 1f, false);
+			// NO GRPAHICS OR SOUND - Do Nothing.
+            return true;
 		}
 
 		public void Dispose()

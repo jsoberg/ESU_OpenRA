@@ -74,8 +74,8 @@ namespace OpenRA
 
 		readonly IFacing facing;
 		readonly IHealth health;
-		readonly IRenderModifier[] renderModifiers;
-		readonly IRender[] renders;
+		//readonly IRenderModifier[] renderModifiers;
+		//readonly IRender[] renders;
 		readonly IDisable[] disables;
 		readonly IVisibilityModifier[] visibilityModifiers;
 		readonly IDefaultVisibility defaultVisibility;
@@ -99,6 +99,10 @@ namespace OpenRA
 				Info = world.Map.Rules.Actors[name];
 				foreach (var trait in Info.TraitsInConstructOrder())
 				{
+                    /** HACKY WORKAROUND - Don't create traits that will try and render. */
+                    if (MayBeRenderable(trait))
+                        continue;
+
 					AddTrait(trait.Create(init));
 
 					// Some traits rely on properties provided by IOccupySpace in their initialization,
@@ -116,8 +120,8 @@ namespace OpenRA
 			EffectiveOwner = TraitOrDefault<IEffectiveOwner>();
 			facing = TraitOrDefault<IFacing>();
 			health = TraitOrDefault<IHealth>();
-			renderModifiers = TraitsImplementing<IRenderModifier>().ToArray();
-			renders = TraitsImplementing<IRender>().ToArray();
+			//renderModifiers = TraitsImplementing<IRenderModifier>().ToArray();
+			//renders = TraitsImplementing<IRender>().ToArray();
 			disables = TraitsImplementing<IDisable>().ToArray();
 			visibilityModifiers = TraitsImplementing<IVisibilityModifier>().ToArray();
 			defaultVisibility = Trait<IDefaultVisibility>();
@@ -129,6 +133,43 @@ namespace OpenRA
 				.ToArray()
 				.Select(pair => new SyncHash(pair.First, pair.Second(pair.First)));
 		}
+
+        // ===========================================================================================================================
+        // BEGIN No Graphics Implementation
+        // ===========================================================================================================================
+
+        private bool MayBeRenderable(ITraitInfo trait)
+        {
+            // If this is a necessary graphic type, allow it to be created.
+            if (ACCEPTED_TYPES.Contains(trait.GetType().Name))
+            {
+                return false;
+            }
+            else if (UNACCEPTED_TYPES.Contains(trait.GetType().Name))
+            {
+                return true;
+            }
+
+            return false;
+        }
+
+        // Types which are ONLY graphical in nature.
+        private static readonly string[] UNACCEPTED_TYPES = {
+            "RenderDebugStateInfo",
+            "ShroudRendererInfo",
+            "FloatingText",
+            "ScreenShakerInfo",
+            "ShakeOnDeathInfo"
+        };
+
+        // Types which are necessary to load (Even though they are Graphic types)
+        private static readonly string[] ACCEPTED_TYPES = {
+            "RenderSpritesInfo",
+        };
+
+        // ===========================================================================================================================
+        // END No Graphics Implementation
+        // ===========================================================================================================================
 
 		Rectangle DetermineBounds()
 		{
@@ -170,25 +211,12 @@ namespace OpenRA
 
 		public IEnumerable<IRenderable> Render(WorldRenderer wr)
 		{
-			// PERF: Avoid LINQ.
-			var renderables = Renderables(wr);
-			foreach (var modifier in renderModifiers)
-				renderables = modifier.ModifyRender(this, wr, renderables);
-			return renderables;
+			return null;
 		}
 
 		IEnumerable<IRenderable> Renderables(WorldRenderer wr)
 		{
-			// PERF: Avoid LINQ.
-			// Implementations of Render are permitted to return both an eagerly materialized collection or a lazily
-			// generated sequence.
-			// For large amounts of renderables, a lazily generated sequence (e.g. as returned by LINQ, or by using
-			// `yield`) will avoid the need to allocate a large collection.
-			// For small amounts of renderables, allocating a small collection can often be faster and require less
-			// memory than creating the objects needed to represent a sequence.
-			foreach (var render in renders)
-				foreach (var renderable in render.Render(this, wr))
-					yield return renderable;
+            return null;
 		}
 
 		public void QueueActivity(bool queued, Activity nextActivity)

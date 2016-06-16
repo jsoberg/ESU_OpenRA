@@ -167,6 +167,7 @@
     <Compile Include="Commands\DevCommands.cs" />
     <Compile Include="Commands\HelpCommand.cs" />
     <Compile Include="Commands\PlayerCommands.cs" />
+    <Compile Include="Esu\AutoDownloadRedAlertPackagesLogic.cs" />
     <Compile Include="Graphics\ActorPreview.cs" />
     <Compile Include="Graphics\BeamRenderable.cs" />
     <Compile Include="Graphics\ContrailRenderable.cs" />
@@ -298,6 +299,7 @@
     <Compile Include="Traits\Buildings\Reservable.cs" />
     <Compile Include="Traits\Burns.cs" />
     <Compile Include="Traits\C4Demolition.cs" />
+    <Compile Include="Traits\Esu\SignalGameOver.cs" />
     <Compile Include="Traits\Health.cs" />
     <Compile Include="Traits\PowerTooltip.cs" />
     <Compile Include="Traits\VeteranProductionIconOverlay.cs" />
