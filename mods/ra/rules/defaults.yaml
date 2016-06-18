@@ -5,7 +5,11 @@
 	ScriptTriggers:
 	UpgradeManager:
 	Huntable:
-	RenderDebugState:
+	
+	# ==============================
+	# Removed Graphics Traits
+	# ==============================
+	#RenderDebugState:
 
 ^SpriteActor:
 	BodyOrientation:
@@ -427,7 +431,6 @@
 	WithBuildingExplosion:
 		Sequences: building, building_napalm, large_explosion, self_destruct, large_napalm
 	CaptureNotification:
-	ShakeOnDeath:
 	ProximityCaptor:
 		Types: Building
 	GivesBounty:
@@ -438,6 +441,11 @@
 	Tooltip:
 		GenericName: Structure
 	Demolishable:
+	
+	# ==============================
+	# Removed Graphics Traits
+	# ==============================
+	# ShakeOnDeath:
 
 ^Building:
 	Inherits: ^BasicBuilding

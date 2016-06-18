@@ -140,12 +140,8 @@ namespace OpenRA
 
         private bool MayBeRenderable(ITraitInfo trait)
         {
-            // If this is a necessary graphic type, allow it to be created.
-            if (ACCEPTED_TYPES.Contains(trait.GetType().Name))
-            {
-                return false;
-            }
-            else if (UNACCEPTED_TYPES.Contains(trait.GetType().Name))
+            // If this is an unaccepted graphic type, don't allow it to be created.
+            if (UNACCEPTED_TYPES.Contains(trait.GetType().Name))
             {
                 return true;
             }
@@ -155,16 +151,7 @@ namespace OpenRA
 
         // Types which are ONLY graphical in nature.
         private static readonly string[] UNACCEPTED_TYPES = {
-            "RenderDebugStateInfo",
-            "ShroudRendererInfo",
-            "FloatingText",
-            "ScreenShakerInfo",
-            "ShakeOnDeathInfo"
-        };
-
-        // Types which are necessary to load (Even though they are Graphic types)
-        private static readonly string[] ACCEPTED_TYPES = {
-            "RenderSpritesInfo",
+            "FloatingText"
         };
 
         // ===========================================================================================================================
