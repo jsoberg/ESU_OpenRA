@@ -24,6 +24,9 @@ namespace OpenRA.Mods.Common.Traits.Esu
         {
             Console.WriteLine("Game Complete!");
             PrintPlayerFitnessInformation(world);
+
+             // Kill process.
+            System.Environment.Exit(0);
         }
 
         private void PrintPlayerFitnessInformation(World world)
