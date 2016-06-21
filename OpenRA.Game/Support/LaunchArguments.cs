@@ -25,6 +25,9 @@ namespace OpenRA
 		[Desc("Dump performance data into cpu.csv and render.csv in the logs folder.")]
 		public bool Benchmark;
 
+        [Desc("AI name to automatically start with.")]
+        public string Ai;
+
 		public LaunchArguments(Arguments args)
 		{
 			if (args == null)
