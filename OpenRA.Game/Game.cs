@@ -396,14 +396,16 @@ namespace OpenRA
             ModData.LoadScreen.StartGame(args);
 
             // NOTE: Comment this out to run the game normally.
-            AutoStartGame();
+            AutoStartGame(new LaunchArguments(args));
 		}
 
-        // ==============================================================================================================
+	    // ==============================================================================================================
         // BEGIN Headless Auto-Start Game Methods
         // ==============================================================================================================
 
-        private static void AutoStartGame()
+        private static readonly string DEFAULT_AI_NAME = "Rush AI";
+
+        private static void AutoStartGame(LaunchArguments args)
         {
             // Find a random 2 player map we can use.
             var usableMapList = ModData.MapCache
@@ -418,21 +420,21 @@ namespace OpenRA
 
             Game.RunAfterDelay(1000, () =>
             {
-                // Set to spectate and create bots.
+                // Set to spectate.
                 OrderManager.IssueOrder(Order.Command("state NotReady"));
                 OrderManager.IssueOrder(Order.Command("spectate"));
-                OrderManager.IssueOrder(Order.Command("slot_bot Multi0 0 Rush AI"));
-                OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 Rush AI"));
 
+                // Create bots.
+                string aiName = (args.Ai != null) ? args.Ai : DEFAULT_AI_NAME;
+                OrderManager.IssueOrder(Order.Command("slot_bot Multi0 0 {0}".F(aiName)));
+                OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 {0}".F(DEFAULT_AI_NAME)));
+
+                // Start game and issue all immediate orders.
                 OrderManager.IssueOrder(Order.Command("startgame"));
-
-                // Issue all immediate orders.
                 OrderManager.TickImmediate();
             });
         }
-
-        //private const string LOBBY_SYNC = "sync_lobby Client@0:\n\tIndex: 0\n\tPreferredColor: 8CFF69\n\tColor: 8CFF69\n\tFaction: Random\n\tSpawnPoint: 0\n\tName: Newbie\n\tIpAddress: 127.0.0.1\n\tState: Invalid\n\tTeam: 0\n\tSlot: Multi0\n\tBot:\n\tBotControllerClientIndex: 0\n\tIsAdmin: True\n\nClientPing@0:\n\tIndex: 0\n\tLatency: -1\n\tLatencyJitter: -1\n\tLatencyHistory:\n\nSlot@Multi0:\n\tPlayerReference: Multi0\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi1:\n\tPlayerReference: Multi1\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi2:\n\tPlayerReference: Multi2\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi3:\n\tPlayerReference: Multi3\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi4:\n\tPlayerReference: Multi4\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi5:\n\tPlayerReference: Multi5\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi6:\n\tPlayerReference: Multi6\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nSlot@Multi7:\n\tPlayerReference: Multi7\n\tClosed: False\n\tAllowBots: True\n\tLockFaction: False\n\tLockColor: False\n\tLockTeam: False\n\tLockSpawn: False\n\tRequired: False\n\nGlobalSettings:\n\tServerName: Skirmish Game\n\tMap: 602f16e64f2e10d4a11f5709348d6a1e923f2719\n\tTimestep: 40\n\tOrderLatency: 3\n\tRandomSeed: 39106490\n\tAllowCheats: False\n\tAllowSpectators: True\n\tDedicated: False\n\tDifficulty:\n\tCrates: True\n\tCreeps: False\n\tShroud: True\n\tFog: True\n\tAllyBuildRadius: True\n\tStartingCash: 5000\n\tTechLevel: Unrestricted\n\tStartingUnitsClass: none\n\tGameSpeedType: default\n\tShortGame: True\n\tAllowVersionMismatch: False\n\tGameUid:\n\tDisableSingleplayer: False\n";
-
+        
         // ==============================================================================================================
         // END Headless Auto-Start Game Methods
         // ==============================================================================================================
