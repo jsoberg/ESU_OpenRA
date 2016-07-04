@@ -497,7 +497,7 @@ namespace OpenRA
         // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
         // ===========================================================================================================================
 
-        private const int MAX_TICKS_BEFORE_END_GAME = 100000;
+        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
 
         private static void CheckMaxTicksReached(World world)
         {
