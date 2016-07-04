@@ -4,18 +4,20 @@ using System.Linq;
 using System.Text;
 using OpenRA.Traits;
 
-/** A simple AI used for testing. */
+/// <summary>
+///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
+/// </summary>
 namespace OpenRA.Mods.Common.AI
 {
-    public sealed class SimpleTestAI : ITick, IBot, INotifyDamage
+    public sealed class EsuAI : ITick, IBot, INotifyDamage
     {
-        private readonly SimpleTestAIInfo info;
+        private readonly EsuAiInfo info;
         private readonly World world;
 
         private bool isEnabled;
         private int tickCount;
 
-        public SimpleTestAI(SimpleTestAIInfo info, ActorInitializer init)
+        public EsuAI(EsuAiInfo info, ActorInitializer init)
         {
             this.info = info;
             this.world = init.World;
@@ -44,10 +46,11 @@ namespace OpenRA.Mods.Common.AI
 
             tickCount++;
 
-            if (tickCount == 1) {
+            if (tickCount == 1)
+            {
                 DeployMcv(self);
             }
-            
+
         }
 
         void DeployMcv(Actor self)
@@ -66,9 +69,9 @@ namespace OpenRA.Mods.Common.AI
 
     }
 
-    public sealed class SimpleTestAIInfo : IBotInfo, ITraitInfo
+    public sealed class EsuAiInfo : IBotInfo, ITraitInfo
     {
-        private const string AI_NAME = "Simple Test AI";
+        private const string AI_NAME = "ESU AI";
 
         string IBotInfo.Name
         {
@@ -77,7 +80,7 @@ namespace OpenRA.Mods.Common.AI
 
         object ITraitInfo.Create(ActorInitializer init)
         {
-            return new SimpleTestAI(this, init);
+            return new EsuAI(this, init);
         }
     }
 }

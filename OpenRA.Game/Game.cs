@@ -396,7 +396,7 @@ namespace OpenRA
             ModData.LoadScreen.StartGame(args);
 
             // NOTE: Comment this out to run the game normally.
-            AutoStartGame(new LaunchArguments(args));
+            //AutoStartGame(new LaunchArguments(args));
 		}
 
 	    // ==============================================================================================================
