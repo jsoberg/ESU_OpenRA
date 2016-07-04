@@ -423,6 +423,9 @@ namespace OpenRA
             }
 
             LogicOnlyInnerLogicTick(OrderManager);
+
+            // Check for max ticks.
+            CheckMaxTicksReached(OrderManager.World);
         }
 
         static void LogicOnlyInnerLogicTick(OrderManager orderManager)
@@ -488,6 +491,24 @@ namespace OpenRA
 
         // ===========================================================================================================================
         // END No Graphics Implementation
+        // ===========================================================================================================================
+
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
+        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
+
+        private static void CheckMaxTicksReached(World world)
+        {
+            if (LocalTick >= MAX_TICKS_BEFORE_END_GAME) {
+                Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
+                world.EndGame();
+            }
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 9 - End game after pre-determined amount of ticks
         // ===========================================================================================================================
 
 		internal static void Initialize(Arguments args)
