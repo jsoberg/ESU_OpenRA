@@ -477,3 +477,8 @@ Player:
 				Attractiveness: -10
 				TargetMetric: Value
 				CheckRadius: 7c0
+				
+	# ============================================
+	# Custom AI Code
+	# ============================================
+	EsuAi@EsuAi:
