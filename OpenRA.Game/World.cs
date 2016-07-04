@@ -35,6 +35,19 @@ namespace OpenRA
 		public int Timestep;
 
 		internal readonly OrderManager OrderManager;
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
+        public int GetCurrentLocalTickCount()
+        {
+            return OrderManager.LocalFrameNumber;
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
 		public Session LobbyInfo { get { return OrderManager.LobbyInfo; } }
 
 		public readonly MersenneTwister SharedRandom;

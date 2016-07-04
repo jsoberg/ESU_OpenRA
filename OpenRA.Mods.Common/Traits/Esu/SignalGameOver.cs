@@ -18,7 +18,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
     /** A simple callback to tell us when the game is over. */
     public class SignalGameOver : IGameOver
     {
-        private const string FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30}\n";
+        private const string FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30} | {3,-30}\n";
 
         public void GameOver(World world)
         {
@@ -31,7 +31,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
 
         private void PrintPlayerFitnessInformation(World world)
         {
-            PrintToConsoleAndLog(String.Format(FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST"));
+            PrintToConsoleAndLog(String.Format(FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT"));
            
             foreach (var p in world.Players.Where(a => !a.NonCombatant))
             {
@@ -41,7 +41,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
                     continue;
                 }
 
-                PrintToConsoleAndLog(String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost));
+                PrintToConsoleAndLog(String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount()));
             }
         }
 
