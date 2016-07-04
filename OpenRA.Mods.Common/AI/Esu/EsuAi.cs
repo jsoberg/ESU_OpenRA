@@ -7,7 +7,7 @@ using OpenRA.Traits;
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
 /// </summary>
-namespace OpenRA.Mods.Common.AI
+namespace OpenRA.Mods.Common.AI.Esu
 {
     public sealed class EsuAI : ITick, IBot, INotifyDamage
     {
@@ -22,7 +22,6 @@ namespace OpenRA.Mods.Common.AI
             this.info = info;
             this.world = init.World;
         }
-
 
         IBotInfo IBot.Info
         {
