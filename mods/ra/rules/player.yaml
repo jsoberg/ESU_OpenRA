@@ -73,3 +73,8 @@ Player:
 		Image: iconchevrons
 		Sequence: veteran
 	ResourceStorageWarning:
+	
+	# ========================================
+	# CUSTOM PLAYER TRAITS
+	# ========================================
+	DiscoveryNotificationWatcher
