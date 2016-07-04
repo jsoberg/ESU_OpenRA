@@ -439,6 +439,25 @@ namespace OpenRA
         // END Headless Auto-Start Game Methods
         // ==============================================================================================================
 
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
+        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
+
+        private static void CheckMaxTicksReached(World world)
+        {
+            if (LocalTick >= MAX_TICKS_BEFORE_END_GAME)
+            {
+                Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
+                world.EndGame();
+            }
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
 		public static void LoadEditor(string mapUid)
 		{
 			StartGame(mapUid, WorldType.Editor);
@@ -589,8 +608,13 @@ namespace OpenRA
 			}
 
 			InnerLogicTick(OrderManager);
-			if (worldRenderer != null && OrderManager.World != worldRenderer.World)
-				InnerLogicTick(worldRenderer.World.OrderManager);
+            if (worldRenderer != null && OrderManager.World != worldRenderer.World)
+            {
+                InnerLogicTick(worldRenderer.World.OrderManager);
+            }
+
+            // Check for max ticks.
+            CheckMaxTicksReached(OrderManager.World);
 		}
 
 		public static bool TakeScreenshot = false;
