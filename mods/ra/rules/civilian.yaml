@@ -258,13 +258,9 @@ BARL:
 		Type: None
 	Targetable:
 		TargetTypes: Ground, DemoTruck, Barrel
+	-ShakeOnDeath:
+	-SoundOnDamageTransition:
 	-Demolishable:
-	
-	# ==============================
-	# Removed Graphics Traits
-	# ==============================
-	#-ShakeOnDeath:
-	#-SoundOnDamageTransition:
 
 BRL3:
 	Inherits: ^TechBuilding
@@ -283,13 +279,9 @@ BRL3:
 		Type: None
 	Targetable:
 		TargetTypes: Ground, DemoTruck, Barrel
+	-ShakeOnDeath:
+	-SoundOnDamageTransition:
 	-Demolishable:
-	
-	# ==============================
-	# Removed Graphics Traits
-	# ==============================
-	#-ShakeOnDeath:
-	#-SoundOnDamageTransition:
 
 AMMOBOX1:
 	Inherits: ^AmmoBox
