@@ -26,6 +26,7 @@ using OpenRA.Support;
 using OpenRA.Widgets;
 using OpenRA.Traits;
 using System.Threading.Tasks;
+using FS = OpenRA.FileSystem.FileSystem;
 
 namespace OpenRA
 {
@@ -148,7 +149,7 @@ namespace OpenRA
 			if (worldRenderer != null)
 				worldRenderer.Dispose();
 
-			Cursor.SetCursor(null);
+			//Cursor.SetCursor(null);
 			BeforeGameStart();
 
 			Map map;
@@ -158,7 +159,7 @@ namespace OpenRA
 			using (new PerfTimer("NewWorld"))
 				OrderManager.World = new World(map, OrderManager, type);
 
-			worldRenderer = new WorldRenderer(OrderManager.World);
+		    worldRenderer = new WorldRenderer(OrderManager.World);
 
 			using (new PerfTimer("LoadComplete"))
 				OrderManager.World.LoadComplete(worldRenderer);
@@ -166,14 +167,14 @@ namespace OpenRA
 			if (OrderManager.GameStarted)
 				return;
 
-			Ui.MouseFocusWidget = null;
-			Ui.KeyboardFocusWidget = null;
+			//Ui.MouseFocusWidget = null;
+			//Ui.KeyboardFocusWidget = null;
 
 			OrderManager.LocalFrameNumber = 0;
 			OrderManager.LastTickTime = RunTime;
 			OrderManager.StartGame();
-			worldRenderer.RefreshPalette();
-			Cursor.SetCursor("default");
+			//worldRenderer.RefreshPalette();
+			//Cursor.SetCursor("default");
 
 			GC.Collect();
 		}
@@ -237,6 +238,279 @@ namespace OpenRA
 			Settings = new Settings(Platform.ResolvePath(Path.Combine("^", "settings.yaml")), args);
 		}
 
+        // ===========================================================================================================================
+        // BEGIN No Graphics Implementation
+        // ===========================================================================================================================
+
+        internal static void InitializeNoGraphics(Arguments args)
+        {
+            Console.WriteLine("Platform is {0}", Platform.CurrentPlatform);
+
+            InitializeSettings(args);
+
+            Log.AddChannel("perf", "perf.log");
+            Log.AddChannel("debug", "debug.log");
+            Log.AddChannel("sync", "syncreport.log");
+            Log.AddChannel("server", "server.log");
+            Log.AddChannel("sound", "sound.log");
+            Log.AddChannel("graphics", "graphics.log");
+            Log.AddChannel("geoip", "geoip.log");
+            Log.AddChannel("irc", "irc.log");
+
+            Log.AddChannel("order_manager", "order_manager.log");
+
+            if (Settings.Server.DiscoverNatDevices)
+                UPnP.TryNatDiscovery();
+            else
+            {
+                Settings.Server.NatDeviceAvailable = false;
+                Settings.Server.AllowPortForward = false;
+            }
+
+            GeoIP.Initialize();
+
+            Sound = new Sound();
+
+            Console.WriteLine("Available mods:");
+            foreach (var mod in ModMetadata.AllMods)
+                Console.WriteLine("\t{0}: {1} ({2})", mod.Key, mod.Value.Title, mod.Value.Version);
+
+            InitializeModNoGraphics(Settings.Game.Mod, args);
+
+            if (Settings.Server.DiscoverNatDevices)
+                RunAfterDelay(Settings.Server.NatDiscoveryTimeout, UPnP.StoppingNatDiscovery);
+        }
+
+        public static readonly string RED_ALERT = "ra";
+
+        public static void InitializeModNoGraphics(string mod, Arguments args)
+        {
+            Game.Settings.Save();
+
+            // Clear static state if we have switched mods
+            LobbyInfoChanged = () => { };
+            ConnectionStateChanged = om => { };
+            BeforeGameStart = () => { };
+            OnRemoteDirectConnect = (a, b) => { };
+            delayedActions = new ActionQueue();
+
+            if (server != null)
+                server.Shutdown();
+            if (OrderManager != null)
+                OrderManager.Dispose();
+
+            if (ModData != null)
+            {
+                ModData.ModFiles.UnmountAll();
+                ModData.Dispose();
+            }
+
+            Console.WriteLine("Loading mod: {0}", RED_ALERT);
+            Settings.Game.Mod = RED_ALERT;
+
+            ModData = new ModData(RED_ALERT, false);
+
+            using (new PerfTimer("LoadMaps"))
+                ModData.MapCache.LoadMaps();
+
+            JoinLocal();
+
+            var installData = ModData.Manifest.Get<ContentInstaller>();
+            var isModContentInstalled = installData.TestFiles.All(f => File.Exists(Platform.ResolvePath(f)));
+            // Mod assets are missing, auto dl for Red Alert.
+            if (!isModContentInstalled)
+            {
+                Action afterInstall =(() =>
+                {
+                    InitializeModNoGraphics(mod, args);
+                });
+
+                Manifest manifest = new Manifest(mod);
+                FS files = new FS();
+                files.LoadFromManifest(manifest);
+                ObjectCreator objCreator = new ObjectCreator(manifest, files);
+
+
+                Dictionary<string, object> constParams = new Dictionary<string, object>();
+                constParams.Add("afterInstall", afterInstall);
+                objCreator.CreateObject<object>("AutoDownloadRedAlertPackagesLogic", constParams);
+
+                return;
+            }
+
+            ModData.InitializeLoadersNoGraphics(ModData.DefaultFileSystem);
+
+            Game.LoadShellMap();
+            Game.Settings.Save();
+
+            // NOTE: Comment this out to run the game normally.
+            AutoStartGame(new LaunchArguments(args));
+        }
+
+        internal static RunStatus LogicOnlyRun()
+        {
+            try
+            {
+                LogicOnlyLoop();
+            }
+            finally
+            {
+                // Ensure that the active replay is properly saved
+                if (OrderManager != null)
+                    OrderManager.Dispose();
+            }
+
+            ModData.Dispose();
+            ChromeProvider.Deinitialize();
+
+            GlobalChat.Dispose();
+            OnQuit();
+
+            return state;
+        }
+
+        static void LogicOnlyLoop()
+        {
+            // When the logic has fallen behind by this much, skip the pending
+            // updates and start fresh.
+            // For example, if we want to update logic every 10 ms but each loop
+            // temporarily takes 100 ms, the 'nextLogic' timestamp will be too low
+            // and the current timestamp ('now') will have moved on. Even if the
+            // update time returns to normal, it will take a long time to catch up
+            // (if ever).
+            // This also means that the 'logicInterval' cannot be longer than this
+            // value.
+            const int MaxLogicTicksBehind = 250;
+
+            // Timestamps for when the next logic and rendering should run
+            var nextLogic = RunTime;
+
+            while (state == RunStatus.Running)
+            {
+                // Ideal time between logic updates. Timestep = 0 means the game is paused
+                // but we still call LogicTick() because it handles pausing internally.
+                var logicInterval = worldRenderer != null && worldRenderer.World.Timestep != 0 ? worldRenderer.World.Timestep : Timestep;
+
+                var now = RunTime;
+
+                // If the logic has fallen behind too much, skip it and catch up
+                if (now - nextLogic > MaxLogicTicksBehind)
+                    nextLogic = now;
+
+                if (now >= nextLogic)
+                {
+                    if (now >= nextLogic)
+                    {
+                        nextLogic += logicInterval;
+                        LogicOnlyLogicTick();
+                    }
+
+                    var haveSomeTimeUntilNextLogic = now < nextLogic;
+                }
+                else
+                    Thread.Sleep(nextLogic - now);
+            }
+        }
+
+        static void LogicOnlyLogicTick()
+        {
+            delayedActions.PerformActions(RunTime);
+
+            if (OrderManager.Connection.ConnectionState != lastConnectionState)
+            {
+                lastConnectionState = OrderManager.Connection.ConnectionState;
+                ConnectionStateChanged(OrderManager);
+            }
+
+            LogicOnlyInnerLogicTick(OrderManager);
+
+            // Check for max ticks.
+            CheckMaxTicksReached(OrderManager.World);
+        }
+
+        static void LogicOnlyInnerLogicTick(OrderManager orderManager)
+        {
+            var tick = RunTime;
+
+            var world = orderManager.World;
+            var worldTimestep = world == null ? Timestep : world.Timestep;
+            var worldTickDelta = tick - orderManager.LastTickTime;
+            if (worldTimestep != 0 && worldTickDelta >= worldTimestep)
+            {
+                using (new PerfSample("tick_time"))
+                {
+                    // Tick the world to advance the world time to match real time:
+                    //    If dt < TickJankThreshold then we should try and catch up by repeatedly ticking
+                    //    If dt >= TickJankThreshold then we should accept the jank and progress at the normal rate
+                    // dt is rounded down to an integer tick count in order to preserve fractional tick components.
+                    var integralTickTimestep = (worldTickDelta / worldTimestep) * worldTimestep;
+                    orderManager.LastTickTime += integralTickTimestep >= TimestepJankThreshold ? integralTickTimestep : worldTimestep;
+
+                    Sync.CheckSyncUnchanged(world, orderManager.TickImmediate);
+
+                    if (world == null)
+                        return;
+
+                    // Don't tick when the shellmap is disabled
+                    if (world.ShouldTick)
+                    {
+                        var isNetTick = LocalTick % NetTickScale == 0;
+
+                        if (!isNetTick || orderManager.IsReadyForNextFrame)
+                        {
+                            ++orderManager.LocalFrameNumber;
+
+                            Log.Write("debug", "--Tick: {0} ({1})", LocalTick, isNetTick ? "net" : "local");
+
+                            if (BenchmarkMode)
+                                Log.Write("cpu", "{0};{1}".F(LocalTick, PerfHistory.Items["tick_time"].LastValue));
+
+                            if (isNetTick)
+                                orderManager.Tick();
+
+                            Sync.CheckSyncUnchanged(world, () =>
+                            {
+                                world.OrderGenerator.Tick(world);
+                                world.Selection.Tick(world);
+                            });
+
+                            world.Tick();
+
+                            PerfHistory.Tick();
+                        }
+                        else if (orderManager.NetFrameNumber == 0)
+                            orderManager.LastTickTime = RunTime;
+
+                        //Sync.CheckSyncUnchanged(world, () => world.TickRender(worldRenderer));
+                    }
+                    else
+                        PerfHistory.Tick();
+                }
+            }
+        }
+
+        // ===========================================================================================================================
+        // END No Graphics Implementation
+        // ===========================================================================================================================
+
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
+        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
+
+        private static void CheckMaxTicksReached(World world)
+        {
+            if (LocalTick >= MAX_TICKS_BEFORE_END_GAME) {
+                Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
+                world.EndGame();
+            }
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
 		internal static void Initialize(Arguments args)
 		{
 			Console.WriteLine("Platform is {0}", Platform.CurrentPlatform);
@@ -251,8 +525,6 @@ namespace OpenRA
 			Log.AddChannel("graphics", "graphics.log");
 			Log.AddChannel("geoip", "geoip.log");
 			Log.AddChannel("irc", "irc.log");
-			
-			Log.AddChannel("order_manager", "order_manager.log");
 
 			if (Settings.Server.DiscoverNatDevices)
 				UPnP.TryNatDiscovery();
@@ -394,12 +666,9 @@ namespace OpenRA
 			JoinLocal();
 
             ModData.LoadScreen.StartGame(args);
-
-            // NOTE: Comment this out to run the game normally.
-            AutoStartGame(new LaunchArguments(args));
 		}
 
-	    // ==============================================================================================================
+        // ==============================================================================================================
         // BEGIN Headless Auto-Start Game Methods
         // ==============================================================================================================
 
@@ -438,25 +707,6 @@ namespace OpenRA
         // ==============================================================================================================
         // END Headless Auto-Start Game Methods
         // ==============================================================================================================
-
-        // ===========================================================================================================================
-        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
-        // ===========================================================================================================================
-
-        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
-
-        private static void CheckMaxTicksReached(World world)
-        {
-            if (LocalTick >= MAX_TICKS_BEFORE_END_GAME)
-            {
-                Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
-                world.EndGame();
-            }
-        }
-
-        // ===========================================================================================================================
-        // END JJS - Issue 9 - End game after pre-determined amount of ticks
-        // ===========================================================================================================================
 
 		public static void LoadEditor(string mapUid)
 		{
@@ -608,13 +858,8 @@ namespace OpenRA
 			}
 
 			InnerLogicTick(OrderManager);
-            if (worldRenderer != null && OrderManager.World != worldRenderer.World)
-            {
-                InnerLogicTick(worldRenderer.World.OrderManager);
-            }
-
-            // Check for max ticks.
-            CheckMaxTicksReached(OrderManager.World);
+			if (worldRenderer != null && OrderManager.World != worldRenderer.World)
+				InnerLogicTick(worldRenderer.World.OrderManager);
 		}
 
 		public static bool TakeScreenshot = false;

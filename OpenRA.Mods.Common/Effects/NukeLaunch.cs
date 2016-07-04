@@ -95,7 +95,7 @@ namespace OpenRA.Mods.Common.Effects
             {
                 world.WorldActor.Trait<ScreenShaker>().AddEffect(20, pos, 5);
             }
-            catch (InvalidOperationException)
+            catch (InvalidOperationException e)
             {
                 Console.WriteLine("Attempted to shake screen for nuke launch");
             }
