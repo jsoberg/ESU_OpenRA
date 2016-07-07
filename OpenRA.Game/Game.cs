@@ -676,11 +676,7 @@ namespace OpenRA
 
         private static void AutoStartGame(LaunchArguments args)
         {
-            // Find a random 2 player map we can use.
-            var usableMapList = ModData.MapCache
-                .Where(m => m.Status == MapStatus.Available && m.Visibility.HasFlag(MapVisibility.Lobby) && m.PlayerCount == 2);
-            var myMap = usableMapList.Random(CosmeticRandom);
-            myMap.PreloadRules();
+            var myMap = GetSpecifiedLaunchMapOrRandom(args);
 
             // Create "local server" for game and join it.
             var localPort = CreateLocalServer(myMap.Uid);
@@ -702,6 +698,30 @@ namespace OpenRA
                 OrderManager.IssueOrder(Order.Command("startgame"));
                 OrderManager.TickImmediate();
             });
+        }
+
+        private static MapPreview GetSpecifiedLaunchMapOrRandom(LaunchArguments args)
+        {
+            MapPreview myMap = null;
+            if (args.MapName != null)
+            {
+                myMap = ModData.MapCache.Where(m => m.Title == args.MapName).FirstOrDefault();
+                if (myMap == null)
+                {
+                    throw new SystemException("Unkown map with name " + args.MapName);
+                }
+            }
+            else
+            {
+                // We have not specified a map, so load random 2 player map.
+                var usableMapList = ModData.MapCache
+                                .Where(m => m.Status == MapStatus.Available && m.Visibility.HasFlag(MapVisibility.Lobby) && m.PlayerCount == 2);
+                myMap = usableMapList.Random(CosmeticRandom);
+            }
+
+            Log.Write("order_manager", "Map loaded with name " + myMap.Title);
+            myMap.PreloadRules();
+            return myMap;
         }
         
         // ==============================================================================================================
