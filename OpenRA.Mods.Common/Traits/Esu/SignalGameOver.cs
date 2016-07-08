@@ -10,7 +10,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
     {
         public object Create(ActorInitializer init)
         {
-            Log.AddChannel("end_game_fitness", "end_game_fitness.log");
+            Log.AddChannel(init.World.FitnessLogName, init.World.FitnessLogName + ".log");
             return new SignalGameOver();
         }
     }
@@ -31,7 +31,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
 
         private void PrintPlayerFitnessInformation(World world)
         {
-            PrintToConsoleAndLog(String.Format(FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT"));
+            PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT"));
            
             foreach (var p in world.Players.Where(a => !a.NonCombatant))
             {
@@ -41,14 +41,14 @@ namespace OpenRA.Mods.Common.Traits.Esu
                     continue;
                 }
 
-                PrintToConsoleAndLog(String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount()));
+                PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount()));
             }
         }
 
-        private void PrintToConsoleAndLog(string message)
+        private void PrintToConsoleAndLog(World world, string message)
         {
             Console.WriteLine(message);
-            Log.Write("end_game_fitness", message);
+            Log.Write(world.FitnessLogName, message);
         }
     }
 }
