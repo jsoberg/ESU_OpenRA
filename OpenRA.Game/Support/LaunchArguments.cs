@@ -35,6 +35,9 @@ namespace OpenRA
         [Desc("Map name to automatically load.")]
         public string MapName;
 
+        [Desc("Name for the end game fitness log.")]
+        public string FitnessLog;
+
 		public LaunchArguments(Arguments args)
 		{
 			if (args == null)
