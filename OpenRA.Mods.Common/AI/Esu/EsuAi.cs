@@ -9,7 +9,7 @@ using OpenRA.Traits;
 /// </summary>
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    public sealed class EsuAI : ITick, IBot, INotifyDamage
+    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered
     {
         private readonly EsuAiInfo info;
         private readonly World world;
@@ -36,6 +36,11 @@ namespace OpenRA.Mods.Common.AI.Esu
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
 
+        }
+
+        void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)
+        {
+            // stub
         }
 
         void ITick.Tick(Actor self)
