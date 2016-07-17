@@ -12,17 +12,31 @@ namespace OpenRA.Mods.Common.AI.Esu
         public static VisibilityBounds CalculateCurrentVisibleAreaForPlayer(World world, Player owner)
         {
             // Get all Actors owned by specified owner that have the RevealsShroud trait.
-            var ownedActors = world.Actors.Where(a => a.Owner == owner && a.IsInWorld 
+            var ownedActors = world.Actors.Where(a => a.Owner == owner && a.IsInWorld
                 && !a.IsDead && a.TraitOrDefault<RevealsShroud>() != null);
 
             VisibilityBounds bounds = new VisibilityBounds();
-            foreach (Actor actor in ownedActors) {
+            foreach (Actor actor in ownedActors)
+            {
                 WDist range = actor.Trait<RevealsShroud>().Range;
                 Rect visibleRect = new Rect(actor.CenterPosition, range.Length);
                 bounds.AddRect(visibleRect);
             }
 
             return bounds;
+        }
+
+        public static IEnumerable<ProductionQueue> FindProductionQueues(World world, Player owner, string category)
+        {
+            return world.ActorsWithTrait<ProductionQueue>()
+                .Where(a => a.Actor.Owner == owner && a.Trait.Info.Type == category && a.Trait.Enabled)
+                .Select(a => a.Trait);
+        }
+
+        public static bool CanBuildItemWithNameForCategory(World world, Player owner, string category, string name)
+        {
+            return world.ActorsWithTrait<ProductionQueue>()
+                .Any(pq => pq.Actor.Owner == owner && pq.Trait.Info.Type == category && pq.Trait.Enabled && pq.Trait.BuildableItems().Any(ai => ai.Name == name));
         }
     }
 }
