@@ -138,7 +138,12 @@
     <Compile Include="ActorExts.cs" />
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
-    <Compile Include="AI\Esu\EsuAi.cs" />
+    <Compile Include="AI\Esu\EsuAI.cs" />
+    <Compile Include="AI\Esu\EsuAIConstants.cs" />
+    <Compile Include="AI\Esu\EsuAIRuleset.cs" />
+    <Compile Include="AI\Esu\EsuAIUtils.cs" />
+    <Compile Include="AI\Esu\Geometry\Rect.cs" />
+    <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />
     <Compile Include="AI\HackyAI.cs" />
     <Compile Include="AI\Squad.cs" />
     <Compile Include="AI\StateMachine.cs" />
@@ -299,6 +304,7 @@
     <Compile Include="Traits\Buildings\Reservable.cs" />
     <Compile Include="Traits\Burns.cs" />
     <Compile Include="Traits\C4Demolition.cs" />
+    <Compile Include="Traits\Esu\DiscoveryNotificationWatcher.cs" />
     <Compile Include="Traits\Esu\SignalGameOver.cs" />
     <Compile Include="Traits\Health.cs" />
     <Compile Include="Traits\PowerTooltip.cs" />
