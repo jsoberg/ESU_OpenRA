@@ -26,6 +26,38 @@ namespace OpenRA.Mods.Common.AI.Esu
             return bounds;
         }
 
+        public static bool IsAnyItemCurrentlyInProductionForCategory(World world, Player owner, string category)
+        {
+            IEnumerable<ProductionItem> items = ItemsCurrentlyInProductionQueuesForCategory(world, owner, category);
+            return (items.Count() > 0);
+        }
+
+        public static bool IsItemCurrentlyInProductionForCategory(World world, Player owner, string category, string itemName)
+        {
+            IEnumerable<ProductionItem> items = ItemsCurrentlyInProductionQueuesForCategory(world, owner, category);
+            foreach (ProductionItem item in items) {
+                if (item.Item == itemName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static IEnumerable<ProductionItem> ItemsCurrentlyInProductionQueuesForCategory(World world, Player owner, string category)
+        {
+            IEnumerable<ProductionQueue> productionQueues = FindProductionQueues(world, owner, category);
+
+            List<ProductionItem> itemsInQueues = new List<ProductionItem>();
+            foreach (ProductionQueue queue in productionQueues) {
+                if (queue.CurrentItem() != null) {
+                    itemsInQueues.Add(queue.CurrentItem());
+                }
+            }
+
+            return itemsInQueues;
+        }
+
         public static IEnumerable<ProductionQueue> FindProductionQueues(World world, Player owner, string category)
         {
             return world.ActorsWithTrait<ProductionQueue>()

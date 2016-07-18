@@ -11,6 +11,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             public const string CONSTRUCTION_YARD = "fact";
             public const string POWER_PLANT = "powr";
+            public const string ORE_REFINERY = "proc";
         }
 
         public static class ProductionCategories
