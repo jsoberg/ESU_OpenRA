@@ -139,6 +139,8 @@
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
+    <Compile Include="AI\Esu\EsuAIConstants.cs" />
+    <Compile Include="AI\Esu\EsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAIUtils.cs" />
     <Compile Include="AI\Esu\Geometry\Rect.cs" />
     <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />

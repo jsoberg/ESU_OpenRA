@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -14,6 +15,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private readonly EsuAIInfo info;
         private readonly World world;
+        private readonly EsuAIRuleset ruleset;
 
         private Player selfPlayer;
         private bool isEnabled;
@@ -23,6 +25,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             this.info = info;
             this.world = init.World;
+            this.ruleset = new EsuAIRuleset(init.World, info);
         }
 
         IBotInfo IBot.Info
@@ -34,6 +37,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             isEnabled = true;
             selfPlayer = p;
+            ruleset.Activate(p);
         }
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
@@ -54,8 +58,18 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             tickCount++;
 
+            // Check for initial tick.
             if (tickCount == 1) {
                 DeployMcv(self);
+            }
+
+            if (tickCount < 10) {
+                return;
+            }
+
+            IEnumerable<Order> orders = ruleset.Tick(self);
+            foreach (Order order in orders) {
+                world.IssueOrder(order);
             }
         }
 
@@ -69,11 +83,29 @@ namespace OpenRA.Mods.Common.AI.Esu
                 throw new ArgumentNullException("Cannot find MCV");
             }
         }
+
+        private void BuildOreRefinery(Actor self)
+        {
+            var tileset = world.Map.Rules.TileSet;
+            BitArray resourceTypeIndices = new BitArray(tileset.TerrainInfo.Length);
+            foreach (var t in world.Map.Rules.Actors["world"].TraitInfos<ResourceTypeInfo>()) {
+                resourceTypeIndices.Set(tileset.GetTerrainIndex(t.TerrainType), true);
+            }
+
+            
+        }
     }
 
     public sealed class EsuAIInfo : IBotInfo, ITraitInfo
     {
         private const string AI_NAME = "ESU AI";
+
+        [Desc("Minimum excess power we should maintain.")]
+        public readonly int MinimumExcessPower = 100;
+
+        // TODO: Do we care about this?
+        [Desc("Radius in cells around the center of the base to expand.")]
+        public readonly int MaxBaseRadius = 20;
 
         string IBotInfo.Name
         {
