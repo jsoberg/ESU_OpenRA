@@ -103,6 +103,10 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Minimum excess power we should maintain.")]
         public readonly int MinimumExcessPower = 100;
 
+        // TODO: Do we care about this?
+        [Desc("Radius in cells around the center of the base to expand.")]
+        public readonly int MaxBaseRadius = 20;
+
         string IBotInfo.Name
         {
             get { return AI_NAME; }

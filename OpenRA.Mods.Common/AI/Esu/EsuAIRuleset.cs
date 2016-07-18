@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -122,41 +123,71 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public CPos? FindBuildLocation(string actorType, BuildingType type)
         {
-            var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
-            if (bi == null)
-                return null;
-
-            // Find the buildable cell that is closest to pos and centered around center
-            Func<CPos, int, int, CPos?> findPos = (center, minRange, maxRange) =>
-            {
-                var cells = world.Map.FindTilesInAnnulus(center, minRange, maxRange);
-
-                foreach (var cell in cells) {
-                    if (!world.CanPlaceBuilding(actorType, bi, cell, null))
-                        continue;
-                    if (!bi.IsCloseEnoughToBase(world, selfPlayer, actorType, cell))
-                        continue;
-
-                    return cell;
-                }
-                return null;
-            };
-
-            var baseCenter = GetRandomBaseCenter();
             switch (type) {
                 case BuildingType.Defense:
                     // TODO find optimal placement.
                 case BuildingType.Refinery:
-                    // TODO find placement nearest to resources.
+                    // Try and place the refinery near a resource field
+                    return GetBuildableLocationNearResources();
                 case BuildingType.Building:
-                    return findPos(baseCenter, 0, world.Map.Grid.MaximumTileSearchRange);
+                    var baseCenter = GetRandomBaseCenter();
+                    return FindBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
             }
 
             // Can't find a build location
             return null;
         }
 
-        public readonly MersenneTwister Random = new MersenneTwister();
+        [Desc("Attempts to find a buildable location close to resources that are nearest to the base.")]
+        private CPos? GetBuildableLocationNearResources()
+        {
+            var baseCenter = GetRandomBaseCenter();
+
+            var tileset = world.Map.Rules.TileSet;
+            var resourceTypeIndices = new BitArray(tileset.TerrainInfo.Length);
+            foreach (var t in world.Map.Rules.Actors["world"].TraitInfos<ResourceTypeInfo>())
+                resourceTypeIndices.Set(tileset.GetTerrainIndex(t.TerrainType), true);
+
+            // We want to start the seach close to base center, expanding further out until we find something.
+            int maxRad_4 = info.MaxBaseRadius / 4;
+            for (int radius = maxRad_4 / 4; radius <= info.MaxBaseRadius; radius += maxRad_4) {
+
+                // TODO: Figure out obstacles in the way (i.e water separating ore from harvester, cliffs etc).
+                var nearbyResources = world.Map.FindTilesInAnnulus(baseCenter, 0, info.MaxBaseRadius)
+                    .Where(a => resourceTypeIndices.Get(world.Map.GetTerrainIndex(a)))
+                    .Shuffle(Random).Take(6);
+
+                foreach (var r in nearbyResources) {
+                    var found = FindBuildableLocation(r, 0, info.MaxBaseRadius, EsuAIConstants.Buildings.ORE_REFINERY);
+                    if (found != null) {
+                        return found;
+                    }
+                }
+            }
+            return null;
+        }
+
+        private CPos? FindBuildableLocation(CPos center, int minRange, int maxRange, string actorType)
+        {
+            var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
+            if (bi == null) {
+                return null;
+            }
+
+            var cells = world.Map.FindTilesInAnnulus(center, minRange, maxRange);
+
+            foreach (var cell in cells) {
+                if (!world.CanPlaceBuilding(actorType, bi, cell, null))
+                    continue;
+                if (!bi.IsCloseEnoughToBase(world, selfPlayer, actorType, cell))
+                    continue;
+
+                return cell;
+            }
+            return null;
+        }
+
+        private readonly MersenneTwister Random = new MersenneTwister();
 
         // TODO: This was copied from HackyAI; We want to be smarter about this than 
         // just building at a random construction yard, but this will do for now.
