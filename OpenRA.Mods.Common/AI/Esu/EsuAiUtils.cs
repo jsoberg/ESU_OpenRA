@@ -70,5 +70,11 @@ namespace OpenRA.Mods.Common.AI.Esu
             return world.ActorsWithTrait<ProductionQueue>()
                 .Any(pq => pq.Actor.Owner == owner && pq.Trait.Info.Type == category && pq.Trait.Enabled && pq.Trait.BuildableItems().Any(ai => ai.Name == name));
         }
+
+        public static int BuildingCountForPlayerOfType(World world, Player owner, string buildingName)
+        {
+            return world.ActorsHavingTrait<Building>()
+                .Count(a => a.Owner == owner && a.Info.Name == buildingName);
+        }
     }
 }

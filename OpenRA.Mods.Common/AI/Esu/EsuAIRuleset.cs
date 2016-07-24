@@ -69,6 +69,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             {
                 Rule1_BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
                 Rule2_BuildOreRefineryIfApplicable(self, orders);
+                Rule3_BuildOffensiveUnitProductionStructures(self, orders);
             }
 
             // Place completed buildings.
@@ -78,7 +79,6 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Tunable rule: Build power plant if below X power.")]
         private void Rule1_BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
         {
-            // Return if we can't build a power plant or we're already building a power plant.
             if (!EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
             }
@@ -94,10 +94,6 @@ namespace OpenRA.Mods.Common.AI.Esu
         // TODO: Tunable portion incomplete.
         private void Rule2_BuildOreRefineryIfApplicable(Actor self, Queue<Order> orders)
         {
-            if (EsuAIUtils.IsItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.ORE_REFINERY)) {
-                return;
-            }
-
             // Static portion of rule: we need at least two ore refineries.
             var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
                 && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
@@ -108,6 +104,16 @@ namespace OpenRA.Mods.Common.AI.Esu
             }
 
             // Tunable portion of rule: TBD
+        }
+
+        private void Rule3_BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
+        {
+            // TODO: Right now we just build barracks, obviously this needs to do something more.
+            var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
+            if (ownedBarracks < 1) {
+                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), 1));
+                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+            }
         }
     }
 }
