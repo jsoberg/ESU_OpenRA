@@ -143,6 +143,8 @@
     <Compile Include="AI\Esu\EsuAIBuildHelper.cs" />
     <Compile Include="AI\Esu\EsuAIConstants.cs" />
     <Compile Include="AI\Esu\EsuAIBuildRuleset.cs" />
+    <Compile Include="AI\Esu\EsuAIScoutHelper.cs" />
+    <Compile Include="AI\Esu\EsuAIUnitRuleset.cs" />
     <Compile Include="AI\Esu\EsuAIUtils.cs" />
     <Compile Include="AI\Esu\Geometry\Rect.cs" />
     <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />

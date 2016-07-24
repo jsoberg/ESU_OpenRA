@@ -26,7 +26,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Adds order to place building if any buildings are complete.")]
         public void PlaceBuildingsIfComplete(Queue<Order> orders)
         {
-            IEnumerable<ProductionQueue> productionQueues = EsuAIUtils.FindProductionQueues(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING);
+            var productionQueues = EsuAIUtils.FindProductionQueues(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING);
             foreach (ProductionQueue queue in productionQueues) {
                 var currentBuilding = queue.CurrentItem();
                 if (currentBuilding == null || !currentBuilding.Done) {

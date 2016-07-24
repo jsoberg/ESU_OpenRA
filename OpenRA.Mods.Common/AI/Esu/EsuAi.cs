@@ -17,7 +17,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         private readonly World world;
 
         // Rulesets.
-        private readonly EsuAIBuildRuleset ruleset;
+        private readonly List<BaseEsuAIRuleset> rulesets;
 
         private Player selfPlayer;
         private bool isEnabled;
@@ -28,7 +28,14 @@ namespace OpenRA.Mods.Common.AI.Esu
             this.info = info;
             this.world = init.World;
 
-            this.ruleset = new EsuAIBuildRuleset(init.World, info);
+            rulesets = new List<BaseEsuAIRuleset>();
+            addRulesets();
+        }
+
+        private void addRulesets()
+        {
+            rulesets.Add(new EsuAIBuildRuleset(world, info));
+            rulesets.Add(new EsuAIUnitRuleset(world, info));
         }
 
         IBotInfo IBot.Info
@@ -40,7 +47,10 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             isEnabled = true;
             selfPlayer = p;
-            ruleset.Activate(p);
+
+            foreach (BaseEsuAIRuleset rs in rulesets) {
+                rs.Activate(p);
+            }
         }
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
@@ -50,7 +60,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)
         {
-            // stub
+            Console.WriteLine("Discovery!");
         }
 
         void ITick.Tick(Actor self)
@@ -66,7 +76,12 @@ namespace OpenRA.Mods.Common.AI.Esu
                 DeployMcv(self);
             }
 
-            IEnumerable<Order> orders = ruleset.Tick(self);
+            // Get and issue orders.
+            Queue<Order> orders = new Queue<Order>();
+            foreach (BaseEsuAIRuleset rs in rulesets) {
+                rs.Tick(self, orders);
+            }
+
             foreach (Order order in orders) {
                 world.IssueOrder(order);
             }

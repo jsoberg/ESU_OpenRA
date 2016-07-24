@@ -22,7 +22,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
         }
 
-        public new void Activate(Player selfPlayer)
+        public override void Activate(Player selfPlayer)
         {
             base.Activate(selfPlayer);
             this.buildHelper = new EsuAIBuildHelper(world, selfPlayer, info);

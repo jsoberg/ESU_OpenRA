@@ -32,9 +32,19 @@ namespace OpenRA.Mods.Common.AI.Esu
             }
         }
 
+        public static class Infantry
+        {
+            public const string RIFLE_INFANTRY = "e1";
+            public const string GRENADIER = "e2";
+            public const string ROCKET_SOLDIER = "e3";
+            public const string FLAMETHROWER = "e4";
+            public const string ENGINEER = "e6";
+        }
+
         public static class ProductionCategories
         {
             public const string BUILDING = "Building";
+            public const string INFANTRY = "Infantry";
         }
     }
 }

@@ -19,16 +19,14 @@ namespace OpenRA.Mods.Common.AI.Esu
             this.info = info;
         }
 
-        public void Activate(Player selfPlayer)
+        public virtual void Activate(Player selfPlayer)
         {
             this.selfPlayer = selfPlayer;
         }
 
-        public IEnumerable<Order> Tick(Actor self)
+        public virtual void Tick(Actor self, Queue<Order> orders)
         {
-            Queue<Order> orders = new Queue<Order>();
             AddOrdersForTick(self, orders);
-            return orders;
         }
 
         public abstract void AddOrdersForTick(Actor self, Queue<Order> orders);
