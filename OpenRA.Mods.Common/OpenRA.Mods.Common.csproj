@@ -138,10 +138,11 @@
     <Compile Include="ActorExts.cs" />
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
+    <Compile Include="AI\Esu\BaseEsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
     <Compile Include="AI\Esu\EsuAIBuildHelper.cs" />
     <Compile Include="AI\Esu\EsuAIConstants.cs" />
-    <Compile Include="AI\Esu\EsuAIRuleset.cs" />
+    <Compile Include="AI\Esu\EsuAIBuildRuleset.cs" />
     <Compile Include="AI\Esu\EsuAIUtils.cs" />
     <Compile Include="AI\Esu\Geometry\Rect.cs" />
     <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />

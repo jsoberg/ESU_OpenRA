@@ -10,37 +10,27 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    class EsuAIRuleset
+    public class EsuAIBuildRuleset : BaseEsuAIRuleset
     {
-        private readonly World world;
-        private readonly EsuAIInfo info;
-
-        private Player selfPlayer;
         private EsuAIBuildHelper buildHelper;
 
         [Desc("Amount of ticks to wait after issuing a build order before we start analyzing rules again.")]
         private const int BUILDING_ORDER_COOLDOWN = 5;
         private int buildingOrderCooldown = 0;
 
-        public EsuAIRuleset(World world, EsuAIInfo info)
+        public EsuAIBuildRuleset(World world, EsuAIInfo info) : base(world, info)
         {
-            this.world = world;
-            this.info = info;
         }
 
-        public void Activate(Player selfPlayer)
+        public new void Activate(Player selfPlayer)
         {
-            this.selfPlayer = selfPlayer;
+            base.Activate(selfPlayer);
             this.buildHelper = new EsuAIBuildHelper(world, selfPlayer, info);
         }
 
-        public IEnumerable<Order> Tick(Actor self)
+        public override void AddOrdersForTick(Actor self, Queue<Order> orders)
         {
-            Queue<Order> orders = new Queue<Order>();
-
             AddApplicableBuildRules(self, orders);
-
-            return orders;
         }
 
         // ============================================

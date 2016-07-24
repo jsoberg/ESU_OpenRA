@@ -15,7 +15,9 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private readonly EsuAIInfo info;
         private readonly World world;
-        private readonly EsuAIRuleset ruleset;
+
+        // Rulesets.
+        private readonly EsuAIBuildRuleset ruleset;
 
         private Player selfPlayer;
         private bool isEnabled;
@@ -25,7 +27,8 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             this.info = info;
             this.world = init.World;
-            this.ruleset = new EsuAIRuleset(init.World, info);
+
+            this.ruleset = new EsuAIBuildRuleset(init.World, info);
         }
 
         IBotInfo IBot.Info
@@ -63,10 +66,6 @@ namespace OpenRA.Mods.Common.AI.Esu
                 DeployMcv(self);
             }
 
-            if (tickCount < 10) {
-                return;
-            }
-
             IEnumerable<Order> orders = ruleset.Tick(self);
             foreach (Order order in orders) {
                 world.IssueOrder(order);
@@ -82,17 +81,6 @@ namespace OpenRA.Mods.Common.AI.Esu
             } else {
                 throw new ArgumentNullException("Cannot find MCV");
             }
-        }
-
-        private void BuildOreRefinery(Actor self)
-        {
-            var tileset = world.Map.Rules.TileSet;
-            BitArray resourceTypeIndices = new BitArray(tileset.TerrainInfo.Length);
-            foreach (var t in world.Map.Rules.Actors["world"].TraitInfos<ResourceTypeInfo>()) {
-                resourceTypeIndices.Set(tileset.GetTerrainIndex(t.TerrainType), true);
-            }
-
-            
         }
     }
 
