@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 
 namespace OpenRA.Mods.Common.AI.Esu
@@ -12,7 +13,8 @@ namespace OpenRA.Mods.Common.AI.Esu
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
-        private readonly List<Actor> currentScouts;
+        private readonly List<ScoutActor> currentScouts;
+        private readonly List<ScoutActor> deadScouts;
         private string scoutInProductionName;
 
         public EsuAIScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
@@ -21,10 +23,29 @@ namespace OpenRA.Mods.Common.AI.Esu
             this.selfPlayer = selfPlayer;
             this.info = info;
 
-            this.currentScouts = new List<Actor>();
+            this.currentScouts = new List<ScoutActor>();
+            this.deadScouts = new List<ScoutActor>();
         }
 
-        public void AddBuildNewScoutOrderIfApplicable(Actor self, Queue<Order> orders) 
+        public void UnitProduced(Actor self, Actor other)
+        {
+            if (other.Info.Name == scoutInProductionName) {
+                currentScouts.Add(new ScoutActor(other));
+                scoutInProductionName = null;
+            }
+        }
+
+        public void AddScoutOrdersIfApplicable(Actor self, Queue<Order> orders) 
+        {
+            IssueBuildScoutOrdersIfApplicable(self, orders);
+            PerformCurrentScoutMaintenance(self, orders);
+        }
+
+        // ========================================
+        // Scout Build Orders
+        // ========================================
+
+        private void IssueBuildScoutOrdersIfApplicable(Actor self, Queue<Order> orders)
         {
             if (!ShouldBuildNewScout()) {
                 return;
@@ -71,6 +92,64 @@ namespace OpenRA.Mods.Common.AI.Esu
             }
 
             return null;
+        }
+
+        // ========================================
+        // Scout Movement/ Upkeep
+        // ========================================
+
+        private void PerformCurrentScoutMaintenance(Actor self, Queue<Order> orders)
+        {
+            RemoveDeadScouts();
+            if (currentScouts.Count() == 0) {
+                return;
+            }
+
+            IssueMovementOrdersForScouts(self, orders);
+        }
+
+        private void RemoveDeadScouts()
+        {
+            for (int i = (currentScouts.Count() - 1); i >= 0; i--) {
+                ScoutActor scout = currentScouts[i];
+                if (scout.Actor.IsDead) {
+                    currentScouts.RemoveAt(i);
+                    deadScouts.Add(scout);
+                }
+            }
+        }
+
+        private void IssueMovementOrdersForScouts(Actor self, Queue<Order> orders)
+        {
+            foreach (ScoutActor scout in currentScouts) {
+                if (scout.TargetLocation == null) {
+                    scout.TargetLocation = GetNewTargetLocationForScout(scout);
+                    orders.Enqueue(new Order("Move", scout.Actor, false) { TargetLocation = scout.TargetLocation });
+                }
+            }
+        }
+
+        private CPos GetNewTargetLocationForScout(ScoutActor scout)
+        {
+            // TODO right now just return opposite of construction yard; this can be improved.
+            var constructionYard = world.Actors.Where(a => a.Owner == selfPlayer &&
+                a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
+
+            var selfLocation = constructionYard.Location;
+            // Maps start at top left 0,0: so X,Y will be opposite location of Y,X
+            return new CPos(selfLocation.Y, selfLocation.X);
+        }
+    }
+
+    internal class ScoutActor
+    {
+        public readonly Actor Actor;
+
+        public CPos TargetLocation { get; set; }
+
+        public ScoutActor(Actor actor)
+        {
+            this.Actor = actor;
         }
     }
 }

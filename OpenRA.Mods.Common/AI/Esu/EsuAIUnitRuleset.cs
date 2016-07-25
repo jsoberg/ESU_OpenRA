@@ -2,11 +2,12 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    class EsuAIUnitRuleset : BaseEsuAIRuleset
+    class EsuAIUnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction
     {
         private EsuAIScoutHelper scoutHelper;
 
@@ -20,10 +21,16 @@ namespace OpenRA.Mods.Common.AI.Esu
             this.scoutHelper = new EsuAIScoutHelper(world, selfPlayer, info);
         }
 
-        public override void AddOrdersForTick(Actor self, Queue<Order> orders)
+        void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
         {
-            scoutHelper.AddBuildNewScoutOrderIfApplicable(self, orders);
+            if (producer.Owner == selfPlayer) {
+                scoutHelper.UnitProduced(self, produced);
+            }
         }
 
+        public override void AddOrdersForTick(Actor self, Queue<Order> orders)
+        {
+            scoutHelper.AddScoutOrdersIfApplicable(self, orders);
+        }
     }
 }

@@ -11,7 +11,7 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 /// </summary>
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered
+    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered, INotifyOtherProduction
     {
         private readonly EsuAIInfo info;
         private readonly World world;
@@ -60,7 +60,15 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)
         {
-            Console.WriteLine("Discovery!");
+
+        }
+
+        void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
+        {
+            var notifyOtherProductionRulesets = rulesets.Where(a => a is INotifyOtherProduction);
+            foreach (INotifyOtherProduction rs in notifyOtherProductionRulesets) {
+                rs.UnitProducedByOther(self, producer, produced);
+            }
         }
 
         void ITick.Tick(Actor self)
