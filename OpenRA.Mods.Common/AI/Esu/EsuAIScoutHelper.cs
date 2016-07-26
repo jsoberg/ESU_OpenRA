@@ -122,7 +122,8 @@ namespace OpenRA.Mods.Common.AI.Esu
         private void IssueMovementOrdersForScouts(Actor self, Queue<Order> orders)
         {
             foreach (ScoutActor scout in currentScouts) {
-                if (scout.TargetLocation == null) {
+                scout.ProductionCooldown--;
+                if (scout.TargetLocation == CPos.Invalid && scout.ProductionCooldown > 0) {
                     scout.TargetLocation = GetNewTargetLocationForScout(scout);
                     orders.Enqueue(new Order("Move", scout.Actor, false) { TargetLocation = scout.TargetLocation });
                 }
@@ -136,8 +137,10 @@ namespace OpenRA.Mods.Common.AI.Esu
                 a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
 
             var selfLocation = constructionYard.Location;
+
             // Maps start at top left 0,0: so X,Y will be opposite location of Y,X
-            return new CPos(selfLocation.Y, selfLocation.X);
+            CPos newPos = new CPos(selfLocation.Y, selfLocation.X);
+            return newPos;
         }
     }
 
@@ -146,10 +149,12 @@ namespace OpenRA.Mods.Common.AI.Esu
         public readonly Actor Actor;
 
         public CPos TargetLocation { get; set; }
+        public int ProductionCooldown = 4;
 
         public ScoutActor(Actor actor)
         {
             this.Actor = actor;
+            this.TargetLocation = CPos.Invalid;
         }
     }
 }
