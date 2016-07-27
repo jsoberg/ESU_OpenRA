@@ -705,6 +705,12 @@ namespace OpenRA
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi0 0 {0}".F(aiName)));
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 {0}".F(DEFAULT_AI_NAME)));
 
+		        // Specify AI faction if argument was given.
+                if (args.AiFaction != null) {
+                    // Note: the index is 1 here for the specified AI. This is because index 0 is the 'bot controller' (human player that is spectating).
+                    OrderManager.IssueOrder(Order.Command("faction 1 {0}".F(args.AiFaction)));
+                }
+
                 // Start game and issue all immediate orders.
                 OrderManager.IssueOrder(Order.Command("startgame"));
                 OrderManager.TickImmediate();

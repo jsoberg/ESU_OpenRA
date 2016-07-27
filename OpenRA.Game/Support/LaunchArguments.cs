@@ -38,6 +38,9 @@ namespace OpenRA
         [Desc("Name for the end game fitness log.")]
         public string FitnessLog;
 
+        [Desc("Name for the faction to set for the specified AI.")]
+        public string AiFaction;
+
 		public LaunchArguments(Arguments args)
 		{
 			if (args == null)
