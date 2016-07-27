@@ -41,6 +41,9 @@ namespace OpenRA
         [Desc("Name for the faction to set for the specified AI.")]
         public string AiFaction;
 
+        [Desc("Spawn point index for the specified AI.")]
+        public string AiSpawnPoint;
+
 		public LaunchArguments(Arguments args)
 		{
 			if (args == null)
