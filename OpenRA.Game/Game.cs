@@ -413,8 +413,7 @@ namespace OpenRA
 
         private static void AutoStartGame(LaunchArguments args)
         {
-            if (args.FitnessLog != null)
-            {
+            if (args.FitnessLog != null) {
                 FitnessLogName = args.FitnessLog;
             }
 
@@ -435,11 +434,17 @@ namespace OpenRA
                 string aiName = (args.Ai != null) ? args.Ai : DEFAULT_AI_NAME;
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi0 0 {0}".F(aiName)));
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 {0}".F(DEFAULT_AI_NAME)));
+                OrderManager.TickImmediate();
 
                 // Specify AI faction if argument was given.
                 if (args.AiFaction != null) {
                     // Note: the index is 1 here for the specified AI. This is because index 0 is the 'bot controller' (human player that is spectating).
                     OrderManager.IssueOrder(Order.Command("faction 1 {0}".F(args.AiFaction)));
+                }
+
+                // Specify spawn point if argument was given.
+                if (args.AiSpawnPoint != null) {
+                    OrderManager.IssueOrder(Order.Command("spawn 1 {0}".F(args.AiSpawnPoint)));
                 }
 
                 // Start game and issue all immediate orders.
