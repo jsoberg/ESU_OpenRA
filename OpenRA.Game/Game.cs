@@ -440,6 +440,7 @@ namespace OpenRA
                 if (args.AiFaction != null) {
                     // Note: the index is 1 here for the specified AI. This is because index 0 is the 'bot controller' (human player that is spectating).
                     OrderManager.IssueOrder(Order.Command("faction 1 {0}".F(args.AiFaction)));
+                    OrderManager.IssueOrder(Order.Command("faction 2 {0}".F(args.AiFaction)));
                 }
 
                 // Specify spawn point if argument was given.
