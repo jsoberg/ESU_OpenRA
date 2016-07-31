@@ -4,6 +4,8 @@ using System.Linq;
 using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Activities;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
@@ -124,7 +126,9 @@ namespace OpenRA.Mods.Common.AI.Esu
             foreach (ScoutActor scout in currentScouts) {
                 scout.ProductionCooldown--;
                 if (scout.TargetLocation == CPos.Invalid && scout.ProductionCooldown > 0) {
-                    scout.TargetLocation = GetNewTargetLocationForScout(scout);
+                    CPos targetLocation = GetNewTargetLocationForScout(scout);
+
+                    scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
                     orders.Enqueue(new Order("Move", scout.Actor, false) { TargetLocation = scout.TargetLocation });
                 }
             }
@@ -137,10 +141,32 @@ namespace OpenRA.Mods.Common.AI.Esu
                 a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
 
             var selfLocation = constructionYard.Location;
+            return OppositeCornerOfNearestCorner(selfLocation);
+        }
 
-            // Maps start at top left 0,0: so X,Y will be opposite location of Y,X
-            CPos newPos = new CPos(selfLocation.Y, selfLocation.X);
-            return newPos;
+        private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
+        {
+            var width = world.Map.MapSize.X;
+            var height = world.Map.MapSize.Y;
+
+            var topLeft = new CPos(0, 0);
+            var topRight = new CPos(width, 0);
+            var botLeft = new CPos(0, height);
+            var botRight = new CPos(width, height);
+
+            // Opposite corner will be farthest away.
+            CPos[] corners = new CPos[] { topLeft, topRight, botLeft, botRight };
+            int largestDistIndex = 0;
+            double largestDist = double.MinValue;
+            for (int i = 0; i < corners.Count(); i ++) {
+                double dist = GeometryUtils.EuclideanDistance(currentLoc, corners[i]);
+                if (dist > largestDist) {
+                    largestDistIndex = i;
+                    largestDist = dist;
+                }
+            }
+
+            return corners[largestDistIndex];
         }
     }
 

@@ -146,6 +146,7 @@
     <Compile Include="AI\Esu\EsuAIScoutHelper.cs" />
     <Compile Include="AI\Esu\EsuAIUnitRuleset.cs" />
     <Compile Include="AI\Esu\EsuAIUtils.cs" />
+    <Compile Include="AI\Esu\Geometry\GeometryUtils.cs" />
     <Compile Include="AI\Esu\Geometry\Rect.cs" />
     <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />
     <Compile Include="AI\HackyAI.cs" />
