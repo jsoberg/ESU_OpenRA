@@ -6,6 +6,7 @@ using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Activities;
+using OpenRA.Mods.Common.Activities;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
@@ -129,7 +130,9 @@ namespace OpenRA.Mods.Common.AI.Esu
                     CPos targetLocation = GetNewTargetLocationForScout(scout);
 
                     scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
-                    orders.Enqueue(new Order("Move", scout.Actor, false) { TargetLocation = scout.TargetLocation });
+                    Target moveTarget = Target.FromCell(world, scout.TargetLocation);
+                    Activity move = new MoveAdjacentTo(scout.Actor, moveTarget);
+                    scout.Actor.QueueActivity(move);
                 }
             }
         }
