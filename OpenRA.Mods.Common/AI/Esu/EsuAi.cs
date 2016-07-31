@@ -50,7 +50,6 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             isEnabled = true;
             selfPlayer = p;
-            worldState.Initalize(world, p);
 
             foreach (BaseEsuAIRuleset rs in rulesets) {
                 rs.Activate(p);
@@ -86,6 +85,11 @@ namespace OpenRA.Mods.Common.AI.Esu
             // Check for initial tick.
             if (tickCount == 1) {
                 DeployMcv(self);
+                return;
+            }
+
+            if (!worldState.IsInitialized) {
+                worldState.Initalize(world, selfPlayer);
             }
 
             // Get and issue orders.

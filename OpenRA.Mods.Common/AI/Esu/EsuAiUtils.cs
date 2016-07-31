@@ -38,6 +38,10 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             var constructionYard = world.Actors.Where(a => a.Owner == player &&
                 a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
+            if (constructionYard == null) {
+                throw new NoConstructionYardException("Contruction yard not yet created");
+            }
+
             var selfLocation = constructionYard.Location;
 
             return GeometryUtils.OppositeLocationOnMap(selfLocation, world.Map);
@@ -97,5 +101,14 @@ namespace OpenRA.Mods.Common.AI.Esu
             return world.ActorsHavingTrait<Building>()
                 .Count(a => a.Owner == owner && a.Info.Name == buildingName);
         }
+    }
+
+    // ========================================
+    // Various Exceptions
+    // ========================================
+
+    public class NoConstructionYardException : NullReferenceException
+    {
+        public NoConstructionYardException(String message) : base(message) { }
     }
 }

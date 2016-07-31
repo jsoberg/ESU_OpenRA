@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Mods.Common.AI.Esu;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
@@ -12,6 +13,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     public class StrategicWorldState
     {
         public readonly List<EnemyInfo> EnemyInfoList;
+        public bool IsInitialized { get; private set; }
 
         public StrategicWorldState()
         {
@@ -20,10 +22,18 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public void Initalize(World world, Player selfPlayer)
         {
-            var enemyPlayers = world.Players.Where(p => p != selfPlayer);
+            var enemyPlayers = world.Players.Where(p => p != selfPlayer && !p.NonCombatant && p.IsBot);
             foreach (Player p in enemyPlayers) {
-                EnemyInfo enemy = new EnemyInfo(p.InternalName, world, selfPlayer);
+                try {
+                    EnemyInfo enemy = new EnemyInfo(p.InternalName, world, selfPlayer);
+                    EnemyInfoList.Add(enemy);
+                } catch (NoConstructionYardException) {
+                    // Try again until we have a contruction yard.
+                    return;
+                }
             }
+
+            IsInitialized = true;
         }
     }
 
