@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace OpenRA.Mods.Common.AI.Esu
+namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     [Desc("Base class for the EsuAI to use to get and execute rules.")]
     public abstract class BaseEsuAIRuleset

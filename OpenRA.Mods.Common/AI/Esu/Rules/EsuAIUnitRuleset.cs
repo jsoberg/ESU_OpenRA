@@ -5,7 +5,7 @@ using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 
-namespace OpenRA.Mods.Common.AI.Esu
+namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     class EsuAIUnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction
     {

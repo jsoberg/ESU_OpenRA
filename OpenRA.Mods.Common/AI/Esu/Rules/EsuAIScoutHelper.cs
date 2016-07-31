@@ -8,7 +8,7 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Activities;
 using OpenRA.Mods.Common.Activities;
 
-namespace OpenRA.Mods.Common.AI.Esu
+namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     class EsuAIScoutHelper
     {

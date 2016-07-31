@@ -8,7 +8,7 @@ using OpenRA.Support;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
-namespace OpenRA.Mods.Common.AI.Esu
+namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class EsuAIBuildRuleset : BaseEsuAIRuleset
     {
