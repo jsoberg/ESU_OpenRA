@@ -28,7 +28,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
         }
 
-        public override void AddOrdersForTick(Actor self, Queue<Order> orders)
+        public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             scoutHelper.AddScoutOrdersIfApplicable(self, orders);
         }

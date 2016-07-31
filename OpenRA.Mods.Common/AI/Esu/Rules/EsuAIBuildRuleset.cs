@@ -28,7 +28,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             this.buildHelper = new EsuAIBuildHelper(world, selfPlayer, info);
         }
 
-        public override void AddOrdersForTick(Actor self, Queue<Order> orders)
+        public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             AddApplicableBuildRules(self, orders);
         }

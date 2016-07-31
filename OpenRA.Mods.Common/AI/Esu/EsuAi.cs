@@ -95,7 +95,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             // Get and issue orders.
             Queue<Order> orders = new Queue<Order>();
             foreach (BaseEsuAIRuleset rs in rulesets) {
-                rs.Tick(self, orders);
+                rs.Tick(self, worldState, orders);
             }
 
             foreach (Order order in orders) {

@@ -24,11 +24,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             this.selfPlayer = selfPlayer;
         }
 
-        public virtual void Tick(Actor self, Queue<Order> orders)
+        public virtual void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            AddOrdersForTick(self, orders);
+            AddOrdersForTick(self, state, orders);
         }
 
-        public abstract void AddOrdersForTick(Actor self, Queue<Order> orders);
+        public abstract void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders);
     }
 }
