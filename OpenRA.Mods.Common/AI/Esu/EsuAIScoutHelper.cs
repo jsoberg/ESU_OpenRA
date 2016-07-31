@@ -140,11 +140,22 @@ namespace OpenRA.Mods.Common.AI.Esu
         private CPos GetNewTargetLocationForScout(ScoutActor scout)
         {
             // TODO right now just return opposite of construction yard; this can be improved.
+            return PredictedEnemyLocation();
+        }
+
+        private CPos PredictedEnemyLocation()
+        {
             var constructionYard = world.Actors.Where(a => a.Owner == selfPlayer &&
                 a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
-
             var selfLocation = constructionYard.Location;
-            return OppositeCornerOfNearestCorner(selfLocation);
+
+            var width = world.Map.MapSize.X;
+            var height = world.Map.MapSize.Y;
+
+            var enemyX = width - selfLocation.X;
+            var enemyY = height - selfLocation.Y;
+
+            return new CPos(enemyX, enemyY);
         }
 
         private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
