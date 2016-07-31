@@ -16,6 +16,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private readonly EsuAIInfo info;
         private readonly World world;
+        private readonly StrategicWorldState worldState;
 
         // Rulesets.
         private readonly List<BaseEsuAIRuleset> rulesets;
@@ -28,6 +29,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             this.info = info;
             this.world = init.World;
+            this.worldState = new StrategicWorldState();
 
             rulesets = new List<BaseEsuAIRuleset>();
             addRulesets();
@@ -48,6 +50,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             isEnabled = true;
             selfPlayer = p;
+            worldState.Initalize(world, p);
 
             foreach (BaseEsuAIRuleset rs in rulesets) {
                 rs.Activate(p);

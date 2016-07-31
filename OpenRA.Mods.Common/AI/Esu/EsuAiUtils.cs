@@ -9,6 +9,10 @@ namespace OpenRA.Mods.Common.AI.Esu
 {
     class EsuAIUtils
     {
+        // ========================================
+        // Visibility Tasks
+        // ========================================
+
         public static VisibilityBounds CalculateCurrentVisibleAreaForPlayer(World world, Player owner)
         {
             // Get all Actors owned by specified owner that have the RevealsShroud trait.
@@ -25,6 +29,23 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             return bounds;
         }
+
+        // ========================================
+        // Location Tasks
+        // ========================================
+
+        public static CPos OppositeBaseLocationOfPlayer(World world, Player player)
+        {
+            var constructionYard = world.Actors.Where(a => a.Owner == player &&
+                a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
+            var selfLocation = constructionYard.Location;
+
+            return GeometryUtils.OppositeLocationOnMap(selfLocation, world.Map);
+        }
+
+        // ========================================
+        // Production Tasks
+        // ========================================
 
         public static bool IsAnyItemCurrentlyInProductionForCategory(World world, Player owner, string category)
         {
