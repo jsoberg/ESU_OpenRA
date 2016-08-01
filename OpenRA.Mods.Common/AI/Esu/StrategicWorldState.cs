@@ -24,6 +24,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             var enemyPlayers = world.Players.Where(p => p != selfPlayer && !p.NonCombatant && p.IsBot);
             foreach (Player p in enemyPlayers) {
+
                 try {
                     EnemyInfo enemy = new EnemyInfo(p.InternalName, world, selfPlayer);
                     EnemyInfoList.Add(enemy);

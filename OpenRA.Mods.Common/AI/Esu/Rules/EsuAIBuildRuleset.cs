@@ -30,7 +30,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            AddApplicableBuildRules(self, orders);
+            AddApplicableBuildRules(self, state, orders);
         }
 
         // ============================================
@@ -38,7 +38,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         // ============================================
 
         [Desc("Determines orders to be created from build rules.")]
-        private void AddApplicableBuildRules(Actor self, Queue<Order> orders)
+        private void AddApplicableBuildRules(Actor self, StrategicWorldState state,Queue<Order> orders)
         {
             buildingOrderCooldown--;
 
@@ -58,7 +58,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             // Build rules.
             {
                 Rule1_BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
-                Rule2_BuildOreRefineryIfApplicable(self, orders);
+                Rule2_BuildOreRefineryIfApplicable(self, state, orders);
                 Rule3_BuildOffensiveUnitProductionStructures(self, orders);
             }
 
@@ -82,18 +82,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         // TODO: Tunable portion incomplete.
-        private void Rule2_BuildOreRefineryIfApplicable(Actor self, Queue<Order> orders)
+        private void Rule2_BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            // Static portion of rule: we need at least two ore refineries.
-            var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
-                && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
-
-            if (ownedActors != null && ownedActors.Count() < 2) {
+            if (ShouldBuildRefinery(state)) {
                 orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.ORE_REFINERY, 1));
                 buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
             }
+        }
 
-            // Tunable portion of rule: TBD
+        private bool ShouldBuildRefinery(StrategicWorldState state)
+        {
+            // If ShouldProduceScoutBeforeRefinery is true and we don't yet have any scouts, we don't want to build a refinery yet.
+            if (info.ShouldProduceScoutBeforeRefinery != 0 && !state.EnemyInfoList.Any(a => a.IsScouting)) {
+                return false;
+            }
+
+            // Else, if we can and haven't yet met the minimum, then we should issue the build.
+            var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
+                && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
+            return (ownedActors != null && ownedActors.Count() < 2);
         }
 
         private void Rule3_BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)

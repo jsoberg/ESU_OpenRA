@@ -119,10 +119,19 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private const string AI_NAME = "ESU AI";
 
-        [Desc("Minimum excess power we should maintain.")]
-        public readonly int MinimumExcessPower = 100;
+        // ========================================
+        // Rule Tunable
+        // ========================================
 
-        // TODO: Do we care about this?
+        [Desc("Minimum excess power we should maintain (Rule BuildPowerPlantIfBelowMinimumExcessPower)")]
+        public readonly int MinimumExcessPower = 50;
+
+        [Desc("Determines whether we should produce a scout before a refinery (Rule ShouldProduceScoutBeforeRefinery)")]
+        public readonly int ShouldProduceScoutBeforeRefinery = 1;
+
+        // ========================================
+        // Static
+        // ========================================
         [Desc("Radius in cells around the center of the base to expand.")]
         public readonly int MaxBaseRadius = 20;
 
