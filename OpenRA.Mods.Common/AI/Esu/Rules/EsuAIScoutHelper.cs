@@ -38,17 +38,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
         }
 
-        public void AddScoutOrdersIfApplicable(Actor self, Queue<Order> orders) 
+        public void AddScoutOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders) 
         {
-            IssueBuildScoutOrdersIfApplicable(self, orders);
-            PerformCurrentScoutMaintenance(self, orders);
+            IssueBuildScoutOrdersIfApplicable(self, state, orders);
+            PerformCurrentScoutMaintenance(self, state, orders);
         }
 
         // ========================================
         // Scout Build Orders
         // ========================================
 
-        private void IssueBuildScoutOrdersIfApplicable(Actor self, Queue<Order> orders)
+        private void IssueBuildScoutOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             if (!ShouldBuildNewScout()) {
                 return;
@@ -101,14 +101,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         // Scout Movement/ Upkeep
         // ========================================
 
-        private void PerformCurrentScoutMaintenance(Actor self, Queue<Order> orders)
+        private void PerformCurrentScoutMaintenance(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             RemoveDeadScouts();
             if (currentScouts.Count() == 0) {
                 return;
             }
 
-            IssueMovementOrdersForScouts(self, orders);
+            IssueMovementOrdersForScouts(self, state, orders);
         }
 
         private void RemoveDeadScouts()
@@ -122,25 +122,27 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
         }
 
-        private void IssueMovementOrdersForScouts(Actor self, Queue<Order> orders)
+        private void IssueMovementOrdersForScouts(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             foreach (ScoutActor scout in currentScouts) {
                 scout.ProductionCooldown--;
                 if (scout.TargetLocation == CPos.Invalid && scout.ProductionCooldown > 0) {
-                    CPos targetLocation = GetNewTargetLocationForScout(scout);
-
-                    scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
-                    Target moveTarget = Target.FromCell(world, scout.TargetLocation);
-                    Activity move = new MoveAdjacentTo(scout.Actor, moveTarget);
-                    scout.Actor.QueueActivity(move);
+                    ChooseEnemyLocationForScout(scout, state);
                 }
             }
         }
 
-        private CPos GetNewTargetLocationForScout(ScoutActor scout)
+        private void ChooseEnemyLocationForScout(ScoutActor scout, StrategicWorldState state)
         {
-            // TODO right now just return opposite of construction yard; this can be improved.
-            return EsuAIUtils.OppositeBaseLocationOfPlayer(world, selfPlayer);
+            var enemy = state.EnemyInfoList.First(a => !a.IsScouting);
+            enemy.IsScouting = true;
+            scout.EnemyName = enemy.EnemyName;
+            CPos targetLocation = enemy.PredictedEnemyLocation;
+
+            scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
+            Target moveTarget = Target.FromCell(world, scout.TargetLocation);
+            Activity move = new MoveAdjacentTo(scout.Actor, moveTarget);
+            scout.Actor.QueueActivity(move);
         }
 
         private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
@@ -173,6 +175,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
     {
         public readonly Actor Actor;
 
+        public string EnemyName { get; internal set; }
         public CPos TargetLocation { get; set; }
         public int ProductionCooldown = 4;
 

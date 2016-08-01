@@ -44,6 +44,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         public readonly string EnemyName;
         public readonly CPos PredictedEnemyLocation;
+        public bool IsScouting { get; set; }
         public CPos FoundEnemyLocation { get; set; }
 
         public EnemyInfo(string name, World world, Player selfPlayer)
