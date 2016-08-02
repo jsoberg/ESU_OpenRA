@@ -50,17 +50,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private void IssueBuildScoutOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            if (!ShouldBuildNewScout()) {
+            if (!ShouldBuildNewScout(state)) {
                 return;
             }
 
             AddBuildNewScoutOrder(self, orders);
         }
 
-        private bool ShouldBuildNewScout()
+        private bool ShouldBuildNewScout(StrategicWorldState state)
         {
-            // TODO: We might want more than one scout, so the second half of this check might not make sense.
-            if (scoutInProductionName != null || currentScouts.Count > 0) {
+            // TODO: If a scout dies without finding enemy location, IsScouting is still true.
+            if (scoutInProductionName != null || currentScouts.Count > 0 || state.EnemyInfoList.All(a => a.IsScouting)) {
                 return false;
             }
 
