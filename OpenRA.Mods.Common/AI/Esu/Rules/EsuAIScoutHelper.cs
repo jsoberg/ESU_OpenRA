@@ -141,7 +141,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
             scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
             Target moveTarget = Target.FromCell(world, scout.TargetLocation);
-            Activity move = new MoveAdjacentTo(scout.Actor, moveTarget);
+            Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
             scout.Actor.QueueActivity(move);
         }
 
