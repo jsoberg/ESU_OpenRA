@@ -13,6 +13,9 @@ namespace OpenRA.Mods.Common.AI.Esu
     public class StrategicWorldState
     {
         public readonly List<EnemyInfo> EnemyInfoList;
+
+        public World world;
+        public Player selfPlayer;
         public bool IsInitialized { get; private set; }
 
         public StrategicWorldState()
@@ -22,6 +25,9 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public void Initalize(World world, Player selfPlayer)
         {
+            this.world = world;
+            this.selfPlayer = selfPlayer;
+
             var enemyPlayers = world.Players.Where(p => p != selfPlayer && !p.NonCombatant && p.IsBot);
             foreach (Player p in enemyPlayers) {
 
@@ -36,6 +42,27 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             IsInitialized = true;
         }
+
+        public void UpdateCurrentWorldState()
+        {
+            VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(world, selfPlayer);
+            foreach (EnemyInfo info in EnemyInfoList) {
+                TryFindEnemyConstructionYard(info, visibility);
+            }
+        }
+
+        private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
+        {
+            var enemyConstructionYard = world.Actors.FirstOrDefault(a => a.Owner.InternalName == info.EnemyName && a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD);
+            if (enemyConstructionYard == null) {
+                return;
+            }
+
+            // If we're just finding this enemy's location now, set it for later.
+            if (info.FoundEnemyLocation != CPos.Invalid && visibility.ContainsPosition(enemyConstructionYard.CenterPosition)) {
+                info.FoundEnemyLocation = enemyConstructionYard.Location;
+            }
+        }
     }
 
     /// <summary>
@@ -45,6 +72,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         public readonly string EnemyName;
         public readonly CPos PredictedEnemyLocation;
+
         public bool IsScouting { get; set; }
         public CPos FoundEnemyLocation { get; set; }
 
@@ -54,6 +82,9 @@ namespace OpenRA.Mods.Common.AI.Esu
             // TODO: This is "2-player centric", in that it's predicting the same location for every enemy player. 
             // This works fine for one enemy, but once we begin facing more than that we'll need a better method.
             this.PredictedEnemyLocation = EsuAIUtils.OppositeBaseLocationOfPlayer(world, selfPlayer);
+
+            // Default
+            FoundEnemyLocation = CPos.Invalid;
         }
     }
 }

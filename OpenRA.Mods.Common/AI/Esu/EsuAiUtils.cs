@@ -10,27 +10,6 @@ namespace OpenRA.Mods.Common.AI.Esu
     class EsuAIUtils
     {
         // ========================================
-        // Visibility Tasks
-        // ========================================
-
-        public static VisibilityBounds CalculateCurrentVisibleAreaForPlayer(World world, Player owner)
-        {
-            // Get all Actors owned by specified owner that have the RevealsShroud trait.
-            var ownedActors = world.Actors.Where(a => a.Owner == owner && a.IsInWorld
-                && !a.IsDead && a.TraitOrDefault<RevealsShroud>() != null);
-
-            VisibilityBounds bounds = new VisibilityBounds();
-            foreach (Actor actor in ownedActors)
-            {
-                WDist range = actor.Trait<RevealsShroud>().Range;
-                Rect visibleRect = new Rect(actor.CenterPosition, range.Length);
-                bounds.AddRect(visibleRect);
-            }
-
-            return bounds;
-        }
-
-        // ========================================
         // Location Tasks
         // ========================================
 

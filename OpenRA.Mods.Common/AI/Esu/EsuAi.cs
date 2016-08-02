@@ -90,6 +90,8 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             if (!worldState.IsInitialized) {
                 worldState.Initalize(world, selfPlayer);
+            } else {
+                worldState.UpdateCurrentWorldState();
             }
 
             // Get and issue orders.
