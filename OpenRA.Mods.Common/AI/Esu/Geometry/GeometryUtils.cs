@@ -22,5 +22,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
 
             return new CPos(x, y);
         }
+
+        public static CPos MoveTowards(CPos start, CPos end, int distance)
+        {
+            int deltaX = start.X - end.X;
+            int deltaY = start.Y - end.Y;
+            double angle = Math.Atan2(deltaY, deltaX);
+
+            int changeX = (int) (distance * Math.Cos(angle));
+            int changeY = (int) (distance * Math.Sin(angle));
+            
+            return new CPos(start.X + changeX, start.Y + changeY);
+        }
     }
 }

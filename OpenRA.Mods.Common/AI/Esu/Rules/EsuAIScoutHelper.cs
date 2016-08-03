@@ -126,24 +126,43 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             foreach (ScoutActor scout in currentScouts) {
                 scout.ProductionCooldown--;
+                scout.MovementCooldown--;
+
                 if (scout.TargetLocation == CPos.Invalid && scout.ProductionCooldown > 0) {
-                    ChooseEnemyLocationForScout(scout, state);
+                    CPos newScoutLoc = ChooseEnemyLocationForScout(scout, state);
+                    scout.TargetLocation = newScoutLoc;
+                    IssueActivityToMoveScout(scout);
+                } else if (scout.TargetLocation != CPos.Invalid && scout.InitialLocation == scout.Actor.Location 
+                    && scout.MovementCooldown <= 0) {
+
+                    // Scout hasn't moved even though we told it to. Adjust the target location closer to our base and try to get it going.
+                    CPos currentTarget = scout.TargetLocation;
+                    CPos adjustedTarget = GeometryUtils.MoveTowards(currentTarget, scout.Actor.Location, 2);
+                    scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(adjustedTarget);
+                    IssueActivityToMoveScout(scout);
                 }
             }
         }
 
-        private void ChooseEnemyLocationForScout(ScoutActor scout, StrategicWorldState state)
+        private CPos ChooseEnemyLocationForScout(ScoutActor scout, StrategicWorldState state)
         {
             var enemy = state.EnemyInfoList.First(a => !a.IsScouting);
             enemy.IsScouting = true;
             scout.EnemyName = enemy.EnemyName;
             CPos targetLocation = enemy.PredictedEnemyLocation;
 
-            scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
+            return scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
+        }
+
+        private void IssueActivityToMoveScout(ScoutActor scout)
+        {
             Target moveTarget = Target.FromCell(world, scout.TargetLocation);
             Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
             scout.Actor.QueueActivity(move);
+            scout.InitialLocation = scout.Actor.Location;
+            scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
         }
+
 
         private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
         {
@@ -173,11 +192,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
     internal class ScoutActor
     {
+        public const int MOVEMENT_COOLDOWN_TICKS = 100;
+
         public readonly Actor Actor;
 
         public string EnemyName { get; internal set; }
         public CPos TargetLocation { get; set; }
         public int ProductionCooldown = 4;
+
+        public CPos InitialLocation { get; set; }
+        public int MovementCooldown = 0;
 
         public ScoutActor(Actor actor)
         {
