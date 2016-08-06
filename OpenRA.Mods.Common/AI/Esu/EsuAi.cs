@@ -5,17 +5,21 @@ using System.Linq;
 using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Mods.Common.AI.Esu.Rules;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
 /// </summary>
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered
+    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered, INotifyOtherProduction
     {
         private readonly EsuAIInfo info;
         private readonly World world;
-        private readonly EsuAIRuleset ruleset;
+        private readonly StrategicWorldState worldState;
+
+        // Rulesets.
+        private readonly List<BaseEsuAIRuleset> rulesets;
 
         private Player selfPlayer;
         private bool isEnabled;
@@ -25,7 +29,16 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             this.info = info;
             this.world = init.World;
-            this.ruleset = new EsuAIRuleset(init.World, info);
+            this.worldState = new StrategicWorldState();
+
+            rulesets = new List<BaseEsuAIRuleset>();
+            addRulesets();
+        }
+
+        private void addRulesets()
+        {
+            rulesets.Add(new EsuAIBuildRuleset(world, info));
+            rulesets.Add(new EsuAIUnitRuleset(world, info));
         }
 
         IBotInfo IBot.Info
@@ -37,7 +50,10 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             isEnabled = true;
             selfPlayer = p;
-            ruleset.Activate(p);
+
+            foreach (BaseEsuAIRuleset rs in rulesets) {
+                rs.Activate(p);
+            }
         }
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
@@ -47,7 +63,15 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)
         {
-            // stub
+
+        }
+
+        void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
+        {
+            var notifyOtherProductionRulesets = rulesets.Where(a => a is INotifyOtherProduction);
+            foreach (INotifyOtherProduction rs in notifyOtherProductionRulesets) {
+                rs.UnitProducedByOther(self, producer, produced);
+            }
         }
 
         void ITick.Tick(Actor self)
@@ -61,13 +85,21 @@ namespace OpenRA.Mods.Common.AI.Esu
             // Check for initial tick.
             if (tickCount == 1) {
                 DeployMcv(self);
-            }
-
-            if (tickCount < 10) {
                 return;
             }
 
-            IEnumerable<Order> orders = ruleset.Tick(self);
+            if (!worldState.IsInitialized) {
+                worldState.Initalize(world, selfPlayer);
+            } else {
+                worldState.UpdateCurrentWorldState();
+            }
+
+            // Get and issue orders.
+            Queue<Order> orders = new Queue<Order>();
+            foreach (BaseEsuAIRuleset rs in rulesets) {
+                rs.Tick(self, worldState, orders);
+            }
+
             foreach (Order order in orders) {
                 world.IssueOrder(order);
             }
@@ -83,27 +115,25 @@ namespace OpenRA.Mods.Common.AI.Esu
                 throw new ArgumentNullException("Cannot find MCV");
             }
         }
-
-        private void BuildOreRefinery(Actor self)
-        {
-            var tileset = world.Map.Rules.TileSet;
-            BitArray resourceTypeIndices = new BitArray(tileset.TerrainInfo.Length);
-            foreach (var t in world.Map.Rules.Actors["world"].TraitInfos<ResourceTypeInfo>()) {
-                resourceTypeIndices.Set(tileset.GetTerrainIndex(t.TerrainType), true);
-            }
-
-            
-        }
     }
 
     public sealed class EsuAIInfo : IBotInfo, ITraitInfo
     {
         private const string AI_NAME = "ESU AI";
 
-        [Desc("Minimum excess power we should maintain.")]
-        public readonly int MinimumExcessPower = 100;
+        // ========================================
+        // Rule Tunable
+        // ========================================
 
-        // TODO: Do we care about this?
+        [Desc("Minimum excess power we should maintain (Rule BuildPowerPlantIfBelowMinimumExcessPower)")]
+        public readonly int MinimumExcessPower = 50;
+
+        [Desc("Determines whether we should produce a scout before a refinery (Rule ShouldProduceScoutBeforeRefinery)")]
+        public readonly int ShouldProduceScoutBeforeRefinery = 1;
+
+        // ========================================
+        // Static
+        // ========================================
         [Desc("Radius in cells around the center of the base to expand.")]
         public readonly int MaxBaseRadius = 20;
 
