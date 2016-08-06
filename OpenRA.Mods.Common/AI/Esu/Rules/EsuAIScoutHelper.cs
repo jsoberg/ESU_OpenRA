@@ -7,11 +7,14 @@ using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Activities;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Support;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     class EsuAIScoutHelper
     {
+        private readonly MersenneTwister random;
+
         private readonly World world;
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
@@ -22,6 +25,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         public EsuAIScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
+            this.random = new MersenneTwister();
+
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;
@@ -132,14 +137,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                     CPos newScoutLoc = ChooseEnemyLocationForScout(scout, state);
                     scout.TargetLocation = newScoutLoc;
                     IssueActivityToMoveScout(scout);
-                } else if (scout.TargetLocation != CPos.Invalid && scout.InitialLocation == scout.Actor.Location 
-                    && scout.MovementCooldown <= 0) {
+                } else if (scout.MovementCooldown <= 0) {
 
-                    // Scout hasn't moved even though we told it to. Adjust the target location closer to our base and try to get it going.
-                    CPos currentTarget = scout.TargetLocation;
-                    CPos adjustedTarget = GeometryUtils.MoveTowards(currentTarget, scout.Actor.Location, 2);
-                    scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(adjustedTarget);
-                    IssueActivityToMoveScout(scout);
+                    if (scout.TargetLocation != CPos.Invalid && scout.PreviousCheckedLocation == scout.Actor.Location) {
+                        // Scout hasn't moved in awhile. Adjust the target location try to get it going.
+                        CPos currentTarget = scout.TargetLocation;
+                        CPos adjustedTarget = world.Map.AllCells.Where(c => scout.Actor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(random);
+                        scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(adjustedTarget);
+                        IssueActivityToMoveScout(scout);
+                    } else {
+                        // Scout has moved, so lets reset and check in on it next cooldown.
+                        scout.PreviousCheckedLocation = scout.Actor.Location;
+                        scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
+                    }
                 }
             }
         }
@@ -158,11 +168,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             Target moveTarget = Target.FromCell(world, scout.TargetLocation);
             Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
+            scout.Actor.CancelActivity();
             scout.Actor.QueueActivity(move);
-            scout.InitialLocation = scout.Actor.Location;
+
+            scout.PreviousCheckedLocation = scout.Actor.Location;
             scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
         }
-
 
         private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
         {
@@ -200,13 +211,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         public CPos TargetLocation { get; set; }
         public int ProductionCooldown = 4;
 
-        public CPos InitialLocation { get; set; }
+        public CPos PreviousCheckedLocation { get; set; }
         public int MovementCooldown = 0;
 
         public ScoutActor(Actor actor)
         {
             this.Actor = actor;
             this.TargetLocation = CPos.Invalid;
+            this.PreviousCheckedLocation = CPos.Invalid;
         }
     }
 }
