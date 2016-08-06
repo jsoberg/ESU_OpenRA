@@ -163,8 +163,12 @@ namespace OpenRA
 			}
 		}
 
-		internal World(Map map, OrderManager orderManager, WorldType type)
+        // JJS Issue 12, specify fitness log name in arguments.
+        public readonly string FitnessLogName;
+
+		internal World(Map map, OrderManager orderManager, WorldType type, string fitnessLogName)
 		{
+            FitnessLogName = fitnessLogName;
 			Type = type;
 			OrderManager = orderManager;
 			orderGenerator = new UnitOrderGenerator();

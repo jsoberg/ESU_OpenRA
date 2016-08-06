@@ -25,8 +25,24 @@ namespace OpenRA
 		[Desc("Dump performance data into cpu.csv and render.csv in the logs folder.")]
 		public bool Benchmark;
 
+        // ========================================
+        // Custom Launch Args
+        // ========================================
+
         [Desc("AI name to automatically start with.")]
         public string Ai;
+
+        [Desc("Map name to automatically load.")]
+        public string MapName;
+
+        [Desc("Name for the end game fitness log.")]
+        public string FitnessLog;
+
+        [Desc("Name for the faction to set for the specified AI.")]
+        public string AiFaction;
+
+        [Desc("Spawn point index for the specified AI.")]
+        public string AiSpawnPoint;
 
 		public LaunchArguments(Arguments args)
 		{
