@@ -9,22 +9,26 @@ namespace OpenRA.Mods.Common.AI.Esu
 {
     class EsuAIUtils
     {
-        public static VisibilityBounds CalculateCurrentVisibleAreaForPlayer(World world, Player owner)
-        {
-            // Get all Actors owned by specified owner that have the RevealsShroud trait.
-            var ownedActors = world.Actors.Where(a => a.Owner == owner && a.IsInWorld
-                && !a.IsDead && a.TraitOrDefault<RevealsShroud>() != null);
+        // ========================================
+        // Location Tasks
+        // ========================================
 
-            VisibilityBounds bounds = new VisibilityBounds();
-            foreach (Actor actor in ownedActors)
-            {
-                WDist range = actor.Trait<RevealsShroud>().Range;
-                Rect visibleRect = new Rect(actor.CenterPosition, range.Length);
-                bounds.AddRect(visibleRect);
+        public static CPos OppositeBaseLocationOfPlayer(World world, Player player)
+        {
+            var constructionYard = world.Actors.Where(a => a.Owner == player &&
+                a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
+            if (constructionYard == null) {
+                throw new NoConstructionYardException("Contruction yard not yet created");
             }
 
-            return bounds;
+            var selfLocation = constructionYard.Location;
+
+            return GeometryUtils.OppositeLocationOnMap(selfLocation, world.Map);
         }
+
+        // ========================================
+        // Production Tasks
+        // ========================================
 
         public static bool IsAnyItemCurrentlyInProductionForCategory(World world, Player owner, string category)
         {
@@ -70,5 +74,20 @@ namespace OpenRA.Mods.Common.AI.Esu
             return world.ActorsWithTrait<ProductionQueue>()
                 .Any(pq => pq.Actor.Owner == owner && pq.Trait.Info.Type == category && pq.Trait.Enabled && pq.Trait.BuildableItems().Any(ai => ai.Name == name));
         }
+
+        public static int BuildingCountForPlayerOfType(World world, Player owner, string buildingName)
+        {
+            return world.ActorsHavingTrait<Building>()
+                .Count(a => a.Owner == owner && a.Info.Name == buildingName);
+        }
+    }
+
+    // ========================================
+    // Various Exceptions
+    // ========================================
+
+    public class NoConstructionYardException : NullReferenceException
+    {
+        public NoConstructionYardException(String message) : base(message) { }
     }
 }
