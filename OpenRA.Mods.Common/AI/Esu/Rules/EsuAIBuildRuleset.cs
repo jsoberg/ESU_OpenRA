@@ -8,39 +8,29 @@ using OpenRA.Support;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
-namespace OpenRA.Mods.Common.AI.Esu
+namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    class EsuAIRuleset
+    public class EsuAIBuildRuleset : BaseEsuAIRuleset
     {
-        private readonly World world;
-        private readonly EsuAIInfo info;
-
-        private Player selfPlayer;
         private EsuAIBuildHelper buildHelper;
 
         [Desc("Amount of ticks to wait after issuing a build order before we start analyzing rules again.")]
         private const int BUILDING_ORDER_COOLDOWN = 5;
         private int buildingOrderCooldown = 0;
 
-        public EsuAIRuleset(World world, EsuAIInfo info)
+        public EsuAIBuildRuleset(World world, EsuAIInfo info) : base(world, info)
         {
-            this.world = world;
-            this.info = info;
         }
 
-        public void Activate(Player selfPlayer)
+        public override void Activate(Player selfPlayer)
         {
-            this.selfPlayer = selfPlayer;
+            base.Activate(selfPlayer);
             this.buildHelper = new EsuAIBuildHelper(world, selfPlayer, info);
         }
 
-        public IEnumerable<Order> Tick(Actor self)
+        public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            Queue<Order> orders = new Queue<Order>();
-
-            AddApplicableBuildRules(self, orders);
-
-            return orders;
+            AddApplicableBuildRules(self, state, orders);
         }
 
         // ============================================
@@ -48,7 +38,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         // ============================================
 
         [Desc("Determines orders to be created from build rules.")]
-        private void AddApplicableBuildRules(Actor self, Queue<Order> orders)
+        private void AddApplicableBuildRules(Actor self, StrategicWorldState state,Queue<Order> orders)
         {
             buildingOrderCooldown--;
 
@@ -68,7 +58,8 @@ namespace OpenRA.Mods.Common.AI.Esu
             // Build rules.
             {
                 Rule1_BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
-                Rule2_BuildOreRefineryIfApplicable(self, orders);
+                Rule2_BuildOreRefineryIfApplicable(self, state, orders);
+                Rule3_BuildOffensiveUnitProductionStructures(self, orders);
             }
 
             // Place completed buildings.
@@ -78,7 +69,6 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Tunable rule: Build power plant if below X power.")]
         private void Rule1_BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
         {
-            // Return if we can't build a power plant or we're already building a power plant.
             if (!EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
             }
@@ -92,22 +82,35 @@ namespace OpenRA.Mods.Common.AI.Esu
         }
 
         // TODO: Tunable portion incomplete.
-        private void Rule2_BuildOreRefineryIfApplicable(Actor self, Queue<Order> orders)
+        private void Rule2_BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            if (EsuAIUtils.IsItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.ORE_REFINERY)) {
-                return;
-            }
-
-            // Static portion of rule: we need at least two ore refineries.
-            var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
-                && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
-
-            if (ownedActors != null && ownedActors.Count() < 2) {
+            if (ShouldBuildRefinery(state)) {
                 orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.ORE_REFINERY, 1));
                 buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
             }
+        }
 
-            // Tunable portion of rule: TBD
+        private bool ShouldBuildRefinery(StrategicWorldState state)
+        {
+            // If ShouldProduceScoutBeforeRefinery is true and we don't yet have any scouts, we don't want to build a refinery yet.
+            if (info.ShouldProduceScoutBeforeRefinery != 0 && !state.EnemyInfoList.Any(a => a.IsScouting)) {
+                return false;
+            }
+
+            // Else, if we can and haven't yet met the minimum, then we should issue the build.
+            var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
+                && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
+            return (ownedActors != null && ownedActors.Count() < 2);
+        }
+
+        private void Rule3_BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
+        {
+            // TODO: Right now we just build barracks, obviously this needs to do something more.
+            var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
+            if (ownedBarracks < 1) {
+                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), 1));
+                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+            }
         }
     }
 }
