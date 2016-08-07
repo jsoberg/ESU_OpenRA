@@ -38,7 +38,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         // ============================================
 
         [Desc("Determines orders to be created from build rules.")]
-        private void AddApplicableBuildRules(Actor self, StrategicWorldState state,Queue<Order> orders)
+        private void AddApplicableBuildRules(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             buildingOrderCooldown--;
 
@@ -48,22 +48,28 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return;
             }
 
-            // Building is already being built, so try to place any finished buildings and wait until building queue is available.
+            ExecuteBuildingRules(self, state, orders);
+            ExecuteDefensiveBuildingRules(self, state, orders);
+
+            // Place any completed buildings.
+            buildHelper.PlaceBuildingsIfComplete(orders);
+        }
+
+        // ========================================
+        // Buildings
+        // ========================================
+
+        private void ExecuteBuildingRules(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            // If a building is already being built or we're waiting for the cooldown, wait.
             if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING)
                 || buildingOrderCooldown > 0) {
-                buildHelper.PlaceBuildingsIfComplete(orders);
                 return;
             }
 
-            // Build rules.
-            {
-                Rule1_BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
-                Rule2_BuildOreRefineryIfApplicable(self, state, orders);
-                Rule3_BuildOffensiveUnitProductionStructures(self, orders);
-            }
-
-            // Place completed buildings.
-            buildHelper.PlaceBuildingsIfComplete(orders);
+            Rule1_BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
+            Rule2_BuildOreRefineryIfApplicable(self, state, orders);
+            Rule3_BuildOffensiveUnitProductionStructures(self, orders);
         }
 
         [Desc("Tunable rule: Build power plant if below X power.")]
@@ -109,6 +115,55 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
             if (ownedBarracks < 1) {
                 orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), 1));
+                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+            }
+        }
+
+        // ========================================
+        // Defensive Buildings
+        // ========================================
+
+        private void ExecuteDefensiveBuildingRules(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            // If a defensive building is already being built or we're waiting for the cooldown, wait.
+            if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE)
+                || buildingOrderCooldown > 0)
+            {
+                return;
+            }
+
+            Rule4_BuildDefensiveStructures(self, orders);
+        }
+
+        private void Rule4_BuildDefensiveStructures(Actor self, Queue<Order> orders)
+        {
+            double percentageSpentOnDefense;
+            try {
+                percentageSpentOnDefense = EsuAIUtils.GetPercentageOfResourcesSpentOnType(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
+            } catch (NullReferenceException) {
+                // Noting yet earned.
+                return;
+            }
+
+            if (percentageSpentOnDefense < info.PercentageOfResourcesToSpendOnDefensiveBuildings) {
+
+                var defenseiveBuilding = EsuAIConstants.Defense.GetRandomDefenseStructureForPlayer(selfPlayer);
+                var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
+                // TODO not first, decide where to go.
+                var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == defenseiveBuilding);
+                var prereqs = buildable.TraitInfo<BuildableInfo>().Prerequisites.Where(s => !s.StartsWith("~"));
+
+                foreach (string req in prereqs) {
+                    if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, req)) {
+                        // We need to build the prerequisite building first.
+                        orders.Enqueue(Order.StartProduction(self, req, 1));
+                        buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+                        return;
+                    }
+                }
+
+                // We can build now.
+                orders.Enqueue(Order.StartProduction(self, defenseiveBuilding, 1));
                 buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
             }
         }
