@@ -8,9 +8,11 @@ namespace OpenRA.Mods.Common.Traits.Esu
 {
     public class SignalGameOverInfo : ITraitInfo
     {
+        public const string DEFAULT_FITNESS_LOG_NAME = "end_game_fitness";
+
         public object Create(ActorInitializer init)
         {
-            Log.AddChannel(init.World.FitnessLogName, init.World.FitnessLogName + ".log");
+            Log.AddChannel(DEFAULT_FITNESS_LOG_NAME, DEFAULT_FITNESS_LOG_NAME + ".log");
             return new SignalGameOver();
         }
     }
@@ -48,7 +50,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
         private void PrintToConsoleAndLog(World world, string message)
         {
             Console.WriteLine(message);
-            Log.Write(world.FitnessLogName, message);
+            Log.Write(SignalGameOverInfo.DEFAULT_FITNESS_LOG_NAME, message);
         }
     }
 }
