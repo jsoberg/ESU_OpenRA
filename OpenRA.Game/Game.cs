@@ -239,9 +239,13 @@ namespace OpenRA
 		public static Modifiers GetModifierKeys() { return modifiers; }
 		internal static void HandleModifierKeys(Modifiers mods) { modifiers = mods; }
 
+        // ========================================================================================================================
+        // JJS Issue 21 - We don't want to read from the settings.yaml file, instead just use defaults.
+        // ========================================================================================================================
+
 		public static void InitializeSettings(Arguments args)
 		{
-			Settings = new Settings(Platform.ResolvePath(Path.Combine("^", "settings.yaml")), args);
+			Settings = new Settings();
 		}
 
         // ===========================================================================================================================
