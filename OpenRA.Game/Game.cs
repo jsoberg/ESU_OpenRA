@@ -32,8 +32,6 @@ namespace OpenRA
 {
 	public static class Game
 	{
-        private const string DEFAULT_FITNESS_LOG_NAME = "end_game_fitness";
-
 		public const int NetTickScale = 3; // 120 ms net tick for 40 ms local tick
 		public const int Timestep = 1;
 		public const int TimestepJankThreshold = 250; // Don't catch up for delays larger than 250ms
@@ -55,9 +53,6 @@ namespace OpenRA
 		public static bool BenchmarkMode = false;
 
 		public static GlobalChat GlobalChat;
-
-        // JJS Issue 12, specify fitness log name in arguments.
-        private static string FitnessLogName = DEFAULT_FITNESS_LOG_NAME;
 
 		public static OrderManager JoinServer(string host, int port, string password, bool recordReplay = true)
 		{
@@ -163,7 +158,7 @@ namespace OpenRA
 				map = ModData.PrepareMap(mapUID);
 			using (new PerfTimer("NewWorld"))
                 // JJS Issue 12, specify fitness log name in arguments
-				OrderManager.World = new World(map, OrderManager, type, FitnessLogName);
+				OrderManager.World = new World(map, OrderManager, type);
 
 		    worldRenderer = new WorldRenderer(OrderManager.World);
 
@@ -257,6 +252,13 @@ namespace OpenRA
             Console.WriteLine("Platform is {0}", Platform.CurrentPlatform);
 
             InitializeSettings(args);
+            LaunchArguments launchArgs = new LaunchArguments(args);
+            // ===========================================================================================================================
+            // JJS Issue 22 - Add log prepend
+            // ===========================================================================================================================
+            if (launchArgs.LogPrepend != null) {
+                Log.Initialize(launchArgs.LogPrepend);
+            }
 
             Log.AddChannel("perf", "perf.log");
             Log.AddChannel("debug", "debug.log");
@@ -686,10 +688,6 @@ namespace OpenRA
 
         private static void AutoStartGame(LaunchArguments args)
         {
-            if (args.FitnessLog != null) {
-                FitnessLogName = args.FitnessLog;
-            }
-
             var myMap = GetSpecifiedLaunchMapOrRandom(args);
 
             // Create "local server" for game and join it.
