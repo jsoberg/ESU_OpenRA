@@ -110,7 +110,10 @@ namespace OpenRA
 		public string Renderer = "Default";
 
 		[Desc("This can be set to Windowed, Fullscreen or PseudoFullscreen.")]
-		public WindowMode Mode = WindowMode.PseudoFullscreen;
+        // =====================================
+        // JJS Issue 21 - Desired default.
+        // =====================================
+		public WindowMode Mode = WindowMode.Windowed;
 
 		[Desc("Screen resolution in fullscreen mode.")]
 		public int2 FullscreenSize = new int2(0, 0);
@@ -164,7 +167,10 @@ namespace OpenRA
 	public class GameSettings
 	{
 		[Desc("Load a specific mod on startup. Shipped ones include: ra, cnc and d2k")]
-		public string Mod = "modchooser";
+        // =====================================
+        // JJS Issue 21 - Desired default.
+        // =====================================
+        public string Mod = "ra";
 		public string PreviousMod = "ra";
 
 		public bool ShowShellmap = true;
@@ -340,6 +346,26 @@ namespace OpenRA
 
 		public Dictionary<string, object> Sections;
 
+        // ========================================================================================================================
+        // JJS Issue 21 - This constructor will only load the default settings, rather than reading from settings.yaml.
+        // ========================================================================================================================
+
+        public Settings()
+        {
+            Sections = new Dictionary<string, object>()
+			{
+				{ "Player", Player },
+				{ "Game", Game },
+				{ "Sound", Sound },
+				{ "Graphics", Graphics },
+				{ "Server", Server },
+				{ "Debug", Debug },
+				{ "Keys", Keys },
+				{ "Chat", Chat }
+			};
+        }
+
+        // Unused
 		public Settings(string file, Arguments args)
 		{
 			settingsFile = file;
@@ -384,13 +410,17 @@ namespace OpenRA
 			}
 		}
 
+        // ========================================================================================================================
+        // JJS Issue 21 - We disable this method so that there is no contention over the settings.yaml file.
+        // ========================================================================================================================
+
 		public void Save()
 		{
-			var root = new List<MiniYamlNode>();
-			foreach (var kv in Sections)
-				root.Add(new MiniYamlNode(kv.Key, FieldSaver.SaveDifferences(kv.Value, Activator.CreateInstance(kv.Value.GetType()))));
+			//var root = new List<MiniYamlNode>();
+			//foreach (var kv in Sections)
+				//root.Add(new MiniYamlNode(kv.Key, FieldSaver.SaveDifferences(kv.Value, Activator.CreateInstance(kv.Value.GetType()))));
 
-			root.WriteToFile(settingsFile);
+			//root.WriteToFile(settingsFile);
 		}
 
 		static string SanitizedName(string dirty)
