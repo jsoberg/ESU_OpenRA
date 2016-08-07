@@ -8,7 +8,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 {
     public static class EsuAIConstants
     {
-        private const MersenneTwister RANDOM = new MersenneTwister(DateTime.Now.Millisecond);
+        private static MersenneTwister RANDOM = new MersenneTwister(DateTime.Now.Millisecond);
 
         private const string ALLIES = "Allies";
         private const string SOVIET = "Soviet";
