@@ -2,11 +2,14 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Support;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
     public static class EsuAIConstants
     {
+        private const MersenneTwister RANDOM = new MersenneTwister(DateTime.Now.Millisecond);
+
         private const string ALLIES = "Allies";
         private const string SOVIET = "Soviet";
 
@@ -49,6 +52,13 @@ namespace OpenRA.Mods.Common.AI.Esu
                 public static string ANTI_AIR_GUN = "agun";
                 public static string PILL_BOX = "pbox";
                 public static string CAMO_PILL_BOX = "hbox";
+
+                public static string[] VALUES = {
+                    TURRET,
+                    ANTI_AIR_GUN,
+                    PILL_BOX,
+                    CAMO_PILL_BOX
+                };
             }
 
             public static class Soviet
@@ -56,6 +66,25 @@ namespace OpenRA.Mods.Common.AI.Esu
                 public static string SAM_SITE = "sam";
                 public static string FLAME_TOWER = "ftur";
                 public static string TESLA = "tsla";
+
+                public static string[] VALUES = {
+                    SAM_SITE,
+                    FLAME_TOWER,
+                    TESLA
+                };
+            }
+
+            public static string GetRandomDefenseStructureForPlayer(Player player)
+            {
+                switch (player.Faction.Side)
+                {
+                    case ALLIES:
+                        return Allies.VALUES.Random(RANDOM);
+                    case SOVIET:
+                        return Soviet.VALUES.Random(RANDOM);
+                    default:
+                        throw new SystemException("Unknown faction side: " + player.Faction.Side);
+                }
             }
         }
 

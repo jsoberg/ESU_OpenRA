@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
@@ -79,6 +80,33 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return world.ActorsHavingTrait<Building>()
                 .Count(a => a.Owner == owner && a.Info.Name == buildingName);
+        }
+
+        public static double GetPercentageOfResourcesSpentOnType(World world, Player owner, string productionType)
+        {
+            switch (productionType) {
+                case EsuAIConstants.ProductionCategories.BUILDING:
+                    return GetPercentageOfResourcesSpentOnTypeWithTrait<Building>(world, owner);
+                case EsuAIConstants.ProductionCategories.DEFENSE:
+                    return GetPercentageOfResourcesSpentOnTypeWithTrait<AttackBaseInfo>(world, owner);
+                case EsuAIConstants.ProductionCategories.INFANTRY:
+                    // TODO: what should we look for here?
+                default:
+                    throw new SystemException("Unknown production type: " + productionType);
+            }
+        }
+
+        private static double GetPercentageOfResourcesSpentOnTypeWithTrait<T>(World world, Player owner)
+        {
+            int totalEarned = owner.PlayerActor.Trait<PlayerResources>().Earned;
+
+            var ownedActorsWithTrait = world.ActorsHavingTrait<T>().Where(a => a.Owner == owner);
+            int totalCost = 0;
+            foreach (Actor a in ownedActorsWithTrait) {
+                totalCost += a.Trait<ValuedInfo>().Cost;
+            }
+
+            return (totalCost / totalEarned);
         }
     }
 
