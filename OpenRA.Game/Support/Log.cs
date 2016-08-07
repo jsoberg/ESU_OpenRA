@@ -23,6 +23,21 @@ namespace OpenRA
 
 	public static class Log
 	{
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 22 - Add log prepend
+        // ===========================================================================================================================
+
+        private static string LogPrepend;
+
+        public static void Initialize(string prepend)
+        {
+            LogPrepend = prepend;
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 22 - Add log prepend
+        // ===========================================================================================================================
+
 		static readonly Dictionary<string, ChannelInfo> Channels = new Dictionary<string, ChannelInfo>();
 
 		static IEnumerable<string> FilenamesForChannel(string channelName, string baseFilename)
@@ -56,16 +71,23 @@ namespace OpenRA
 					return;
 				}
 
+                // ===========================================================================================================================
+                // JJS - Issue 22 - Add log prepend
+                // ===========================================================================================================================
+                if (LogPrepend != null) {
+                    baseFilename = LogPrepend + "_" + baseFilename;
+                }
+
 				foreach (var filename in FilenamesForChannel(channelName, baseFilename))
 					try
 					{
-						var writer = File.CreateText(filename);
+                        var writer = File.CreateText(filename);
 						writer.AutoFlush = true;
 
 						Channels.Add(channelName,
 							new ChannelInfo
 							{
-								Filename = filename,
+                                Filename = filename,
 								Writer = TextWriter.Synchronized(writer)
 							});
 

@@ -35,8 +35,8 @@ namespace OpenRA
         [Desc("Map name to automatically load.")]
         public string MapName;
 
-        [Desc("Name for the end game fitness log.")]
-        public string FitnessLog;
+        [Desc("Name to prepend each log with.")]
+        public string LogPrepend;
 
         [Desc("Name for the faction to set for the specified AI.")]
         public string AiFaction;
