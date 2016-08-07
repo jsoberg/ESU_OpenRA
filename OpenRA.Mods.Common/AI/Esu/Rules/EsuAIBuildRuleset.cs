@@ -112,15 +112,5 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
             }
         }
-
-        private void Rule4_BuildDefensiveStructures(Actor self, Queue<Order> orders)
-        {
-            var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
-            if (ownedBarracks < 1)
-            {
-                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), 1));
-                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
-            }
-        }
     }
 }
