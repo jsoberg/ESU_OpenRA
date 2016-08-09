@@ -529,12 +529,6 @@ namespace OpenRA
 
             InitializeSettings(args);
             LaunchArguments launchArgs = new LaunchArguments(args);
-            // ===========================================================================================================================
-            // JJS Issue 22 - Add log prepend
-            // ===========================================================================================================================
-            if (launchArgs.LogPrepend != null) {
-                Log.Initialize(launchArgs.LogPrepend);
-            }
 
 			Log.AddChannel("perf", "perf.log");
 			Log.AddChannel("debug", "debug.log");
