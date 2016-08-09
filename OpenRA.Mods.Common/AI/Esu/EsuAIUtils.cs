@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
@@ -48,9 +49,27 @@ namespace OpenRA.Mods.Common.AI.Esu
             return false;
         }
 
-        public static IEnumerable<ProductionItem> ItemsCurrentlyInProductionQueuesForCategory(World world, Player owner, string category)
+        public static bool IsItemCurrentlyInProduction(World world, Player owner, string itemName)
         {
-            IEnumerable<ProductionQueue> productionQueues = FindProductionQueues(world, owner, category);
+            var queues = FindAllProductionQueuesForPlayer(world, owner);
+            foreach (ProductionQueue q in queues) {
+                if (q.CurrentItem() != null && q.CurrentItem().Item == itemName) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public static bool DoesItemCurrentlyExistOrIsBeingProducedForPlayer(World world, Player owner, string item)
+        {
+            bool currentlyExists = world.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead && a.IsInWorld);
+            return (currentlyExists) ? currentlyExists : IsItemCurrentlyInProduction(world, owner, item);
+        }
+
+        public static IEnumerable<ProductionItem>ItemsCurrentlyInProductionQueuesForCategory(World world, Player owner, string category)
+        {
+            IEnumerable<ProductionQueue> productionQueues = FindProductionQueuesForPlayerAndCategory(world, owner, category);
 
             List<ProductionItem> itemsInQueues = new List<ProductionItem>();
             foreach (ProductionQueue queue in productionQueues) {
@@ -62,10 +81,17 @@ namespace OpenRA.Mods.Common.AI.Esu
             return itemsInQueues;
         }
 
-        public static IEnumerable<ProductionQueue> FindProductionQueues(World world, Player owner, string category)
+        public static IEnumerable<ProductionQueue> FindProductionQueuesForPlayerAndCategory(World world, Player owner, string category)
         {
             return world.ActorsWithTrait<ProductionQueue>()
                 .Where(a => a.Actor.Owner == owner && a.Trait.Info.Type == category && a.Trait.Enabled)
+                .Select(a => a.Trait);
+        }
+
+        public static IEnumerable<ProductionQueue> FindAllProductionQueuesForPlayer(World world, Player owner)
+        {
+            return world.ActorsWithTrait<ProductionQueue>()
+                .Where(a => a.Actor.Owner == owner && a.Trait.Enabled)
                 .Select(a => a.Trait);
         }
 
@@ -79,6 +105,22 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return world.ActorsHavingTrait<Building>()
                 .Count(a => a.Owner == owner && a.Info.Name == buildingName);
+        }
+
+        public static double GetPercentageOfResourcesSpentOnProductionType(World world, Player owner, string productionType)
+        {
+            double totalEarned = owner.PlayerActor.Trait<PlayerResources>().Earned;
+            if (totalEarned == 0) {
+                throw new NullReferenceException("Nothing yet earned");
+            }
+
+            var ownedActorsWithTrait = world.ActorsHavingTrait<Buildable>().Where(a => a.Owner == owner && a.Info.TraitInfo<BuildableInfo>().Queue.Contains(productionType));
+            double totalCost = 0;
+            foreach (Actor a in ownedActorsWithTrait) {
+                totalCost += a.Info.TraitInfoOrDefault<ValuedInfo>().Cost;
+            }
+
+            return (totalCost / totalEarned);
         }
     }
 

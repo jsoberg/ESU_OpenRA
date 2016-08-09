@@ -26,7 +26,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Adds order to place building if any buildings are complete.")]
         public void PlaceBuildingsIfComplete(Queue<Order> orders)
         {
-            var productionQueues = EsuAIUtils.FindProductionQueues(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING);
+            var productionQueues = EsuAIUtils.FindAllProductionQueuesForPlayer(world, selfPlayer);
             foreach (ProductionQueue queue in productionQueues) {
                 var currentBuilding = queue.CurrentItem();
                 if (currentBuilding == null || !currentBuilding.Done) {
@@ -53,14 +53,18 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         public CPos? FindBuildLocation(string actorType)
         {
             var type = GetBuildingTypeForActorType(actorType);
+            var baseCenter = GetRandomBaseCenter();
+
             switch (type) {
-                case BuildingType.Defense:
-                // TODO find optimal placement.
                 case BuildingType.Refinery:
                     // Try and place the refinery near a resource field
                     return FindBuildableLocationNearResources();
+                case BuildingType.Defense:
+                    // TODO find optimal placement.
+                    
+                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
                 case BuildingType.Building:
-                    var baseCenter = GetRandomBaseCenter();
+                    //var baseCenter = GetRandomBaseCenter();
                     return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
             }
 
