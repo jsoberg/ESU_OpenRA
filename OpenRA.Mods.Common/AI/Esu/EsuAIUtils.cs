@@ -107,31 +107,17 @@ namespace OpenRA.Mods.Common.AI.Esu
                 .Count(a => a.Owner == owner && a.Info.Name == buildingName);
         }
 
-        public static double GetPercentageOfResourcesSpentOnType(World world, Player owner, string productionType)
+        public static double GetPercentageOfResourcesSpentOnProductionType(World world, Player owner, string productionType)
         {
-            switch (productionType) {
-                case EsuAIConstants.ProductionCategories.BUILDING:
-                    return GetPercentageOfResourcesSpentOnTypeWithTrait<Building>(world, owner);
-                case EsuAIConstants.ProductionCategories.DEFENSE:
-                    return GetPercentageOfResourcesSpentOnTypeWithTrait<AttackBaseInfo>(world, owner);
-                case EsuAIConstants.ProductionCategories.INFANTRY:
-                    // TODO: what should we look for here?
-                default:
-                    throw new SystemException("Unknown production type: " + productionType);
-            }
-        }
-
-        private static double GetPercentageOfResourcesSpentOnTypeWithTrait<T>(World world, Player owner)
-        {
-            int totalEarned = owner.PlayerActor.Trait<PlayerResources>().Earned;
+            double totalEarned = owner.PlayerActor.Trait<PlayerResources>().Earned;
             if (totalEarned == 0) {
-                throw new NullReferenceException("Noting yet earned");
+                throw new NullReferenceException("Nothing yet earned");
             }
 
-            var ownedActorsWithTrait = world.ActorsHavingTrait<T>().Where(a => a.Owner == owner);
-            int totalCost = 0;
+            var ownedActorsWithTrait = world.ActorsHavingTrait<Buildable>().Where(a => a.Owner == owner && a.Info.TraitInfo<BuildableInfo>().Queue.Contains(productionType));
+            double totalCost = 0;
             foreach (Actor a in ownedActorsWithTrait) {
-                totalCost += a.Trait<ValuedInfo>().Cost;
+                totalCost += a.Info.TraitInfoOrDefault<ValuedInfo>().Cost;
             }
 
             return (totalCost / totalEarned);

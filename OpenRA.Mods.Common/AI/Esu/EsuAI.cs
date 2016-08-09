@@ -132,7 +132,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         public readonly int ShouldProduceScoutBeforeRefinery = 1;
 
         [Desc("Determines precentage of resources to spend on defensive buildings (Rule PercentageOfResourcesToSpendOnDefensiveBuildings)")]
-        public readonly int PercentageOfResourcesToSpendOnDefensiveBuildings = 20;
+        public readonly double PercentageOfResourcesToSpendOnDefensiveBuildings = 20;
 
         // ========================================
         // Static

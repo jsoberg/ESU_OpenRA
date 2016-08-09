@@ -139,13 +139,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             double percentageSpentOnDefense;
             try {
-                percentageSpentOnDefense = EsuAIUtils.GetPercentageOfResourcesSpentOnType(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
+                percentageSpentOnDefense = EsuAIUtils.GetPercentageOfResourcesSpentOnProductionType(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
             } catch (NullReferenceException) {
                 // Noting yet earned.
                 return;
             }
 
-            if (percentageSpentOnDefense < info.PercentageOfResourcesToSpendOnDefensiveBuildings) {
+            double percentageToSpend = (info.PercentageOfResourcesToSpendOnDefensiveBuildings / 100.0);
+            if (percentageSpentOnDefense < percentageToSpend) {
 
                 var defenseiveBuilding = EsuAIConstants.Defense.GetRandomDefenseStructureForPlayer(selfPlayer);
                 var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
