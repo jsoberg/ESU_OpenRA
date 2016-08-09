@@ -69,7 +69,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return false;
             }
 
-            var productionQueues = EsuAIUtils.FindProductionQueues(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY);
+            var productionQueues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY);
             if (productionQueues.Count() == 0) {
                 // We aren't able to build a scout right now.
                 return false;
@@ -91,7 +91,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Uses the current world state to find the best available scouting unit to build.")]
         private string GetBestAvailableScoutName()
         {
-            var productionQueues = EsuAIUtils.FindProductionQueues(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY);
+            var productionQueues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY);
             foreach (ProductionQueue queue in productionQueues) {
                 // TODO faction checks for dogs?
                 if (queue.BuildableItems().Count(a => a.Name == EsuAIConstants.Infantry.RIFLE_INFANTRY) > 0) {
