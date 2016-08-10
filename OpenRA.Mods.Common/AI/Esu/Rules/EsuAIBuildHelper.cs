@@ -6,17 +6,23 @@ using System.Text;
 using OpenRA.Traits;
 using OpenRA.Support;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.AI.Esu.Rules;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class EsuAIBuildHelper
     {
+        // Cooldown in ticks to wait before attempting to place a building again.
+        private const int MAX_PLACEMENT_COOLDOWN = 4;
+
         private readonly MersenneTwister Random = new MersenneTwister();
 
         private readonly World world;
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
+
+        private int placementCooldown;
 
         public EsuAIBuildHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
@@ -28,10 +34,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Adds order to place building if any buildings are complete.")]
         public void PlaceBuildingsIfComplete(Queue<Order> orders)
         {
-            var productionQueues = EsuAIUtils.FindAllProductionQueuesForPlayer(world, selfPlayer);
+            // We don't want to be trying to place the same building over and over again before the initial order actually goes through.
+            placementCooldown--;
+            if (placementCooldown > 0) {
+                return;
+            }
+
+            var productionQueues = EsuAIUtils.FindAllProductionQueuesForPlayerExcluding(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY);
             foreach (ProductionQueue queue in productionQueues) {
                 var currentBuilding = queue.CurrentItem();
-                if (currentBuilding == null || !currentBuilding.Done) {
+                if (currentBuilding == null || !currentBuilding.Done || !IsBuilding(currentBuilding.Item)) {
                     continue;
                 }
 
@@ -39,6 +51,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
                 // TODO: handle null location found (cancel production?)
                 if (location != CPos.Invalid) {
+                    placementCooldown = MAX_PLACEMENT_COOLDOWN;
+
                     orders.Enqueue(new Order("PlaceBuilding", selfPlayer.PlayerActor, false)
                     {
                         TargetLocation = location,
@@ -48,6 +62,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                     });
                 }
             }
+        }
+
+        private bool IsBuilding(string actorType)
+        {
+            return world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>() != null;
         }
 
         [Desc("Returns an acceptable build location for the specified type.")]
@@ -63,7 +82,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 case BuildingType.Building:
                     return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
                 case BuildingType.Defense:
-                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+                    return Rule5_FindDefensiveBuildingPlacement(baseCenter, actorType);
             }
 
             // Can't find a build location
@@ -166,6 +185,30 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
             // TODO: Possible NPE
             return randomConstructionYard.Location;
+        }
+
+        [Desc("Attempts to find a location to place a defensive structure, based on the DefensiveBuildingPlacement rule.")]
+        private CPos Rule5_FindDefensiveBuildingPlacement(CPos baseCenter, string actorType)
+        {
+            switch (info.DefensiveBuildingPlacement) {
+                case RuleConstants.DefensiveBuildingPlacementValues.CLOSEST_TO_CONSTRUCTION_YARD:
+                    return FindFirstBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+                case RuleConstants.DefensiveBuildingPlacementValues.DISTRIBUTED_TO_IMPORTANT_STRUCTURES:
+                    return FindBuildableLocationForImportantStructure(actorType);
+                case RuleConstants.DefensiveBuildingPlacementValues.RANDOM:
+                default:
+                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+            }
+        }
+
+        [Desc("Attempts to find a location that is nearest to a designated 'important structure'.")]
+        private CPos FindBuildableLocationForImportantStructure(string actorType)
+        {
+            var importantOwnedActors = world.Actors.Where(a => a.Owner == selfPlayer && RuleConstants.DefensiveBuildingPlacementValues.IMPORTANT_STRUCTURES.Contains(a.Info.Name));
+            // TODO: Choose at random here?
+            var chosenActor = importantOwnedActors.Random(Random);
+
+            return FindFirstBuildableLocation(chosenActor.Location, 0, info.MaxBaseRadius, actorType);
         }
     }
 }

@@ -95,6 +95,17 @@ namespace OpenRA.Mods.Common.AI.Esu
                 .Select(a => a.Trait);
         }
 
+        public static IEnumerable<ProductionQueue> FindAllProductionQueuesForPlayerExcluding(World world, Player owner, params string[] excluded)
+        {
+            if (excluded == null || excluded.Count() == 0) {
+                return FindAllProductionQueuesForPlayer(world, owner);
+            }
+
+            return world.ActorsWithTrait<ProductionQueue>()
+                .Where(a => a.Actor.Owner == owner && a.Trait.Enabled && !excluded.Contains(a.Trait.Info.Type))
+                .Select(a => a.Trait);
+        }
+
         public static bool CanBuildItemWithNameForCategory(World world, Player owner, string category, string name)
         {
             return world.ActorsWithTrait<ProductionQueue>()
