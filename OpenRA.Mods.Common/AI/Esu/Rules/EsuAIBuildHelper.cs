@@ -36,11 +36,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 var location = FindBuildLocation(currentBuilding.Item);
 
                 // TODO: handle null location found (cancel production?)
-                if (location != null) {
-
+                if (location != CPos.Invalid) {
                     orders.Enqueue(new Order("PlaceBuilding", selfPlayer.PlayerActor, false)
                     {
-                        TargetLocation = location.Value,
+                        TargetLocation = location,
                         TargetString = currentBuilding.Item,
                         TargetActor = queue.Actor,
                         SuppressVisualFeedback = true
@@ -50,7 +49,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         [Desc("Returns an acceptable build location for the specified type.")]
-        public CPos? FindBuildLocation(string actorType)
+        public CPos FindBuildLocation(string actorType)
         {
             var type = GetBuildingTypeForActorType(actorType);
             var baseCenter = GetRandomBaseCenter();
@@ -69,7 +68,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
 
             // Can't find a build location
-            return null;
+            return CPos.Invalid;
         }
 
         private BuildingType GetBuildingTypeForActorType(string actorType)
@@ -85,7 +84,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         [Desc("Attempts to find a buildable location close to resources that are nearest to the base.")]
-        public CPos? FindBuildableLocationNearResources()
+        public CPos FindBuildableLocationNearResources()
         {
             var baseCenter = GetRandomBaseCenter();
 
@@ -98,7 +97,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             int maxRad_4 = info.MaxBaseRadius / 4;
             for (int radius = maxRad_4 / 4; radius <= info.MaxBaseRadius; radius += maxRad_4)
             {
-
                 // TODO: Figure out obstacles in the way (i.e water separating ore from harvester, cliffs etc).
                 var nearbyResources = world.Map.FindTilesInAnnulus(baseCenter, 0, info.MaxBaseRadius)
                     .Where(a => resourceTypeIndices.Get(world.Map.GetTerrainIndex(a)))
@@ -106,26 +104,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
                 foreach (var r in nearbyResources)
                 {
-                    var found = FindRandomBuildableLocation(r, 0, info.MaxBaseRadius, EsuAIConstants.Buildings.ORE_REFINERY);
-                    if (found != null)
-                    {
+                    var found = FindFirstBuildableLocation(r, 0, info.MaxBaseRadius, EsuAIConstants.Buildings.ORE_REFINERY);
+                    if (found != CPos.Invalid) {
                         return found;
                     }
                 }
             }
-            return null;
+            return CPos.Invalid;
         }
 
-        [Desc("Attempts to find a random location close to base center where a building can be placed.")]
-        private CPos? FindRandomBuildableLocation(CPos center, int minRange, int maxRange, string actorType)
+        [Desc("Attempts to find the first buildable location close to base center where a building can be placed.")]
+        private CPos FindFirstBuildableLocation(CPos center, int minRange, int maxRange, string actorType)
         {
             var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
-            if (bi == null)
-                return null;
+            if (bi == null) {
+                return CPos.Invalid;
+            }
 
             var cells = world.Map.FindTilesInAnnulus(center, minRange, maxRange);
             foreach (var cell in cells) {
-
                 if (!world.CanPlaceBuilding(actorType, bi, cell, null))
                     continue;
                 if (!bi.IsCloseEnoughToBase(world, selfPlayer, actorType, cell))
@@ -133,7 +130,29 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
                 return cell;
             }
-            return null;
+            return CPos.Invalid;
+        }
+
+        [Desc("Attempts to find a random location close to base center where a building can be placed.")]
+        private CPos FindRandomBuildableLocation(CPos center, int minRange, int maxRange, string actorType)
+        {
+            var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
+            if (bi == null) {
+                return CPos.Invalid;
+            }
+
+            var cells = world.Map.FindTilesInAnnulus(center, minRange, maxRange);
+            List<CPos> usableCells = new List<CPos>();
+            foreach (var cell in cells) {
+                if (!world.CanPlaceBuilding(actorType, bi, cell, null))
+                    continue;
+                if (!bi.IsCloseEnoughToBase(world, selfPlayer, actorType, cell))
+                    continue;
+
+                usableCells.Add(cell);
+            }
+
+            return usableCells.Count == 0 ? CPos.Invalid : usableCells.Random(Random);
         }
 
         private readonly MersenneTwister Random = new MersenneTwister();
