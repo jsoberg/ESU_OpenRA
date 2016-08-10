@@ -134,6 +134,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines precentage of resources to spend on defensive buildings (Rule PercentageOfResourcesToSpendOnDefensiveBuildings)")]
         public readonly double PercentageOfResourcesToSpendOnDefensiveBuildings = 20;
 
+        [Desc("Determines where to place defensive buildings (Rule DefensiveBuildingPlacement)")]
+        public readonly int DefensiveBuildingPlacement = 0;
+
         // ========================================
         // Static
         // ========================================
