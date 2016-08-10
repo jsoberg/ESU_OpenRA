@@ -12,6 +12,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class EsuAIBuildHelper
     {
+        private readonly MersenneTwister Random = new MersenneTwister();
+
         private readonly World world;
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
@@ -58,12 +60,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 case BuildingType.Refinery:
                     // Try and place the refinery near a resource field
                     return FindBuildableLocationNearResources();
-                case BuildingType.Defense:
-                    // TODO find optimal placement.
-                    
-                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
                 case BuildingType.Building:
-                    //var baseCenter = GetRandomBaseCenter();
+                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+                case BuildingType.Defense:
                     return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
             }
 
@@ -116,12 +115,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Attempts to find the first buildable location close to base center where a building can be placed.")]
         private CPos FindFirstBuildableLocation(CPos center, int minRange, int maxRange, string actorType)
         {
-            var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
-            if (bi == null) {
-                return CPos.Invalid;
-            }
-
+            BuildingInfo bi = GetBuildingInfoForActorType(actorType);
             var cells = world.Map.FindTilesInAnnulus(center, minRange, maxRange);
+
             foreach (var cell in cells) {
                 if (!world.CanPlaceBuilding(actorType, bi, cell, null))
                     continue;
@@ -136,12 +132,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Attempts to find a random location close to base center where a building can be placed.")]
         private CPos FindRandomBuildableLocation(CPos center, int minRange, int maxRange, string actorType)
         {
-            var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
-            if (bi == null) {
-                return CPos.Invalid;
-            }
-
+            BuildingInfo bi = GetBuildingInfoForActorType(actorType);
             var cells = world.Map.FindTilesInAnnulus(center, minRange, maxRange);
+
             List<CPos> usableCells = new List<CPos>();
             foreach (var cell in cells) {
                 if (!world.CanPlaceBuilding(actorType, bi, cell, null))
@@ -151,11 +144,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
                 usableCells.Add(cell);
             }
-
             return usableCells.Count == 0 ? CPos.Invalid : usableCells.Random(Random);
         }
 
-        private readonly MersenneTwister Random = new MersenneTwister();
+        private BuildingInfo GetBuildingInfoForActorType(string actorType)
+        {
+            var bi = world.Map.Rules.Actors[actorType].TraitInfoOrDefault<BuildingInfo>();
+            if (bi == null) {
+                throw new SystemException("Unsupported actor type: " + actorType);
+            }
+            return bi;
+        }
 
         // TODO: This was copied from HackyAI; We want to be smarter about this than 
         // just building at a random construction yard, but this will do for now.
