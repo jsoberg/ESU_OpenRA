@@ -64,8 +64,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private bool ShouldBuildNewScout(StrategicWorldState state)
         {
-            // TODO: If a scout dies without finding enemy location, IsScouting is still true.
-            if (scoutInProductionName != null || currentScouts.Count > 0 || state.EnemyInfoList.All(a => a.IsScouting)) {
+            if (scoutInProductionName != null || currentScouts.Count >= info.NumberOfScoutsToProduce || state.EnemyInfoList.All(a => a.FoundEnemyLocation != CPos.Invalid)) {
                 return false;
             }
 
@@ -142,8 +141,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                     if (scout.TargetLocation != CPos.Invalid && scout.PreviousCheckedLocation == scout.Actor.Location) {
                         // Scout hasn't moved in awhile. Adjust the target location try to get it going.
                         CPos currentTarget = scout.TargetLocation;
-                        CPos adjustedTarget = world.Map.AllCells.Where(c => scout.Actor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(random);
-                        scout.TargetLocation = scout.Actor.Trait<Mobile>().NearestMoveableCell(adjustedTarget);
+                        scout.TargetLocation = world.Map.AllCells.Where(c => scout.Actor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(random);
                         IssueActivityToMoveScout(scout);
                     } else {
                         // Scout has moved, so lets reset and check in on it next cooldown.
@@ -156,37 +154,32 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private CPos ChooseEnemyLocationForScout(ScoutActor scout, StrategicWorldState state)
         {
-            var enemy = state.EnemyInfoList.First(a => !a.IsScouting);
-            enemy.IsScouting = true;
+            var enemy = state.EnemyInfoList.First();
             scout.EnemyName = enemy.EnemyName;
-            CPos targetLocation = enemy.PredictedEnemyLocation;
-
-            return scout.Actor.Trait<Mobile>().NearestMoveableCell(targetLocation);
+            // If the enemy isn't being scouted yet, return the predicted enemy location. Otherwise, get an unused corner.
+            CPos location = !enemy.IsScouting ? enemy.PredictedEnemyLocation : GetUnscoutedCorner(scout, state);
+            enemy.IsScouting = true;
+            return location;
         }
 
-        private void IssueActivityToMoveScout(ScoutActor scout)
+        private CPos GetUnscoutedCorner(ScoutActor scout, StrategicWorldState state)
         {
-            Target moveTarget = Target.FromCell(world, scout.TargetLocation);
-            Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
-            scout.Actor.CancelActivity();
-            scout.Actor.QueueActivity(move);
+            var corners = GetMapCorners();
 
-            scout.PreviousCheckedLocation = scout.Actor.Location;
-            scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
+            // Return first unused corner.
+            foreach (CPos corner in corners) {
+                if (currentScouts.All(s => s.TargetLocation != corner)) {
+                    return corner;
+                }
+            }
+            return OppositeCornerOfNearestCorner(state.SelfIntialBaseLocation);
         }
 
         private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
         {
-            var width = world.Map.MapSize.X;
-            var height = world.Map.MapSize.Y;
-
-            var topLeft = new CPos(0, 0);
-            var topRight = new CPos(width, 0);
-            var botLeft = new CPos(0, height);
-            var botRight = new CPos(width, height);
+            var corners = GetMapCorners();
 
             // Opposite corner will be farthest away.
-            CPos[] corners = new CPos[] { topLeft, topRight, botLeft, botRight };
             int largestDistIndex = 0;
             double largestDist = double.MinValue;
             for (int i = 0; i < corners.Count(); i ++) {
@@ -198,6 +191,30 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
 
             return corners[largestDistIndex];
+        }
+
+        private CPos[] GetMapCorners()
+        {
+            var width = world.Map.MapSize.X;
+            var height = world.Map.MapSize.Y;
+
+            var topLeft = new CPos(0, 0);
+            var topRight = new CPos(width, 0);
+            var botLeft = new CPos(0, height);
+            var botRight = new CPos(width, height);
+
+            return new CPos[] { topLeft, topRight, botLeft, botRight };
+        }
+
+        private void IssueActivityToMoveScout(ScoutActor scout)
+        {
+            Target moveTarget = Target.FromCell(world, scout.Actor.Trait<Mobile>().NearestMoveableCell(scout.TargetLocation));
+            Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
+            scout.Actor.CancelActivity();
+            scout.Actor.QueueActivity(move);
+
+            scout.PreviousCheckedLocation = scout.Actor.Location;
+            scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
         }
     }
 

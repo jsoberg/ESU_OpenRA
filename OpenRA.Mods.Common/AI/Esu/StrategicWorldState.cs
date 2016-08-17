@@ -14,8 +14,9 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         public readonly List<EnemyInfo> EnemyInfoList;
 
-        public World world;
-        public Player selfPlayer;
+        public World World;
+        public Player SelfPlayer;
+        public CPos SelfIntialBaseLocation;
         public bool IsInitialized { get; private set; }
 
         public StrategicWorldState()
@@ -25,8 +26,17 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public void Initalize(World world, Player selfPlayer)
         {
-            this.world = world;
-            this.selfPlayer = selfPlayer;
+            this.World = world;
+            this.SelfPlayer = selfPlayer;
+
+            // Cache our own location for now.
+            var selfYard = world.Actors.Where(a => a.Owner == selfPlayer &&
+                a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
+            if (selfYard == null) {
+                // Try again until we have a contruction yard.
+                return;
+            }
+            SelfIntialBaseLocation = selfYard.Location;
 
             var enemyPlayers = world.Players.Where(p => p != selfPlayer && !p.NonCombatant && p.IsBot);
             foreach (Player p in enemyPlayers) {
@@ -45,7 +55,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public void UpdateCurrentWorldState()
         {
-            VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(world, selfPlayer);
+            VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(World, SelfPlayer);
             foreach (EnemyInfo info in EnemyInfoList) {
                 TryFindEnemyConstructionYard(info, visibility);
             }
@@ -53,7 +63,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
         {
-            var enemyConstructionYard = world.Actors.FirstOrDefault(a => a.Owner.InternalName == info.EnemyName && a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD);
+            var enemyConstructionYard = World.Actors.FirstOrDefault(a => a.Owner.InternalName == info.EnemyName && a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD);
             if (enemyConstructionYard == null) {
                 return;
             }
