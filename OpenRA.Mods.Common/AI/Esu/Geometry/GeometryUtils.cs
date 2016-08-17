@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             return new CPos(x, y);
         }
 
-        public static CPos MoveTowards(CPos start, CPos end, int distance)
+        public static CPos MoveTowards(CPos start, CPos end, int distance, Map map)
         {
             int deltaX = start.X - end.X;
             int deltaY = start.Y - end.Y;
@@ -31,8 +31,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
 
             int changeX = (int) (distance * Math.Cos(angle));
             int changeY = (int) (distance * Math.Sin(angle));
-            
-            return new CPos(start.X + changeX, start.Y + changeY);
+
+            int towardX = SanitizedValue(start.X + changeX, 0, map.MapSize.X);
+            int towardY = SanitizedValue(start.Y + changeY, 0, map.MapSize.Y);
+            return new CPos(towardX, towardY);
+        }
+
+        private static int SanitizedValue(int value, int min, int max)
+        {
+            int sanitizedValue = Math.Min(value, max);
+            return Math.Max(sanitizedValue, min);
         }
     }
 }
