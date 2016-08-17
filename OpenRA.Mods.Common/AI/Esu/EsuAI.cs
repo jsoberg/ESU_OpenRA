@@ -137,6 +137,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines where to place defensive buildings (Rule DefensiveBuildingPlacement)")]
         public readonly int DefensiveBuildingPlacement = RuleConstants.DefensiveBuildingPlacementValues.DISTRIBUTED_TO_IMPORTANT_STRUCTURES;
 
+        [Desc("Determines how many scouts to produce (Rule NumberOfScoutsToProduce)")]
+        public readonly int NumberOfScoutsToProduce = 2;
+
         // ========================================
         // Static
         // ========================================
