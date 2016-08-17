@@ -164,7 +164,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private CPos GetUnscoutedCorner(ScoutActor scout, StrategicWorldState state)
         {
-            var corners = GetMapCorners();
+            var corners = GeometryUtils.GetMapCorners(world.Map);
 
             // Return first unused corner.
             foreach (CPos corner in corners) {
@@ -172,38 +172,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                     return corner;
                 }
             }
-            return OppositeCornerOfNearestCorner(state.SelfIntialBaseLocation);
-        }
-
-        private CPos OppositeCornerOfNearestCorner(CPos currentLoc)
-        {
-            var corners = GetMapCorners();
-
-            // Opposite corner will be farthest away.
-            int largestDistIndex = 0;
-            double largestDist = double.MinValue;
-            for (int i = 0; i < corners.Count(); i ++) {
-                double dist = GeometryUtils.EuclideanDistance(currentLoc, corners[i]);
-                if (dist > largestDist) {
-                    largestDistIndex = i;
-                    largestDist = dist;
-                }
-            }
-
-            return corners[largestDistIndex];
-        }
-
-        private CPos[] GetMapCorners()
-        {
-            var width = world.Map.MapSize.X;
-            var height = world.Map.MapSize.Y;
-
-            var topLeft = new CPos(0, 0);
-            var topRight = new CPos(width, 0);
-            var botLeft = new CPos(0, height);
-            var botRight = new CPos(width, height);
-
-            return new CPos[] { topLeft, topRight, botLeft, botRight };
+            return GeometryUtils.OppositeCornerOfNearestCorner(world.Map, state.SelfIntialBaseLocation);
         }
 
         private void IssueActivityToMoveScout(ScoutActor scout)

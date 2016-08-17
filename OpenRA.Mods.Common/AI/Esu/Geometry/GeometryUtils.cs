@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             return new CPos(x, y);
         }
 
-        public static CPos MoveTowards(CPos start, CPos end, int distance)
+        public static CPos MoveTowards(CPos start, CPos end, int distance, Map map)
         {
             int deltaX = start.X - end.X;
             int deltaY = start.Y - end.Y;
@@ -31,8 +31,49 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
 
             int changeX = (int) (distance * Math.Cos(angle));
             int changeY = (int) (distance * Math.Sin(angle));
-            
-            return new CPos(start.X + changeX, start.Y + changeY);
+
+            int towardX = SanitizedValue(start.X + changeX, 0, map.MapSize.X);
+            int towardY = SanitizedValue(start.Y + changeY, 0, map.MapSize.Y);
+            return new CPos(towardX, towardY);
+        }
+
+        private static int SanitizedValue(int value, int min, int max)
+        {
+            int sanitizedValue = Math.Min(value, max);
+            return Math.Max(sanitizedValue, min);
+        }
+
+        public static CPos OppositeCornerOfNearestCorner(Map map, CPos currentLoc)
+        {
+            var corners = GetMapCorners(map);
+
+            // Opposite corner will be farthest away.
+            int largestDistIndex = 0;
+            double largestDist = double.MinValue;
+            for (int i = 0; i < corners.Count(); i++)
+            {
+                double dist = GeometryUtils.EuclideanDistance(currentLoc, corners[i]);
+                if (dist > largestDist)
+                {
+                    largestDistIndex = i;
+                    largestDist = dist;
+                }
+            }
+
+            return corners[largestDistIndex];
+        }
+
+        public static CPos[] GetMapCorners(Map map)
+        {
+            var width = map.MapSize.X;
+            var height = map.MapSize.Y;
+
+            var topLeft = new CPos(0, 0);
+            var topRight = new CPos(width, 0);
+            var botLeft = new CPos(0, height);
+            var botRight = new CPos(width, height);
+
+            return new CPos[] { topLeft, topRight, botLeft, botRight };
         }
     }
 }

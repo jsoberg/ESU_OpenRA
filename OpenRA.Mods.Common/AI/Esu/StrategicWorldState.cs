@@ -96,5 +96,10 @@ namespace OpenRA.Mods.Common.AI.Esu
             // Default
             FoundEnemyLocation = CPos.Invalid;
         }
+        
+        public CPos GetBestAvailableEnemyLocation()
+        {
+            return (FoundEnemyLocation == CPos.Invalid) ? PredictedEnemyLocation : FoundEnemyLocation;
+        }
     }
 }

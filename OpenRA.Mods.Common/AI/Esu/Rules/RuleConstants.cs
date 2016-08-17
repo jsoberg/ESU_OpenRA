@@ -21,5 +21,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 EsuAIConstants.Buildings.ORE_REFINERY
             };
         }
+
+        public static class NormalBuildingPlacementValues
+        {
+            public const int FARTHEST_FROM_ENEMY_LOCATIONS = 0;
+            public const int RANDOM = 1;
+        }
     }
 }
