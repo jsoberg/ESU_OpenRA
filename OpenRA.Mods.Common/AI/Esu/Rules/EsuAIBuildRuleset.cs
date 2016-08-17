@@ -67,13 +67,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return;
             }
 
-            Rule1_BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
-            Rule2_BuildOreRefineryIfApplicable(self, state, orders);
-            Rule3_BuildOffensiveUnitProductionStructures(self, orders);
+            BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
+            BuildOreRefineryIfApplicable(self, state, orders);
+            BuildOffensiveUnitProductionStructures(self, orders);
         }
 
         [Desc("Tunable rule: Build power plant if below X power.")]
-        private void Rule1_BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
+        private void BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
         {
             if (!EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
@@ -88,7 +88,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         // TODO: Tunable portion incomplete.
-        private void Rule2_BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
+        private void BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             if (ShouldBuildRefinery(state)) {
                 orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.ORE_REFINERY, 1));
@@ -109,7 +109,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             return (ownedActors != null && ownedActors.Count() < 2);
         }
 
-        private void Rule3_BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
+        private void BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
         {
             // TODO: Right now we just build barracks, obviously this needs to do something more.
             var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
@@ -127,15 +127,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             // If a defensive building is already being built or we're waiting for the cooldown, wait.
             if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE)
-                || buildingOrderCooldown > 0)
+                || buildingOrderCooldown > 0) 
             {
                 return;
             }
 
-            Rule4_BuildDefensiveStructures(self, orders);
+            BuildDefensiveStructures(self, orders);
         }
 
-        private void Rule4_BuildDefensiveStructures(Actor self, Queue<Order> orders)
+        private void BuildDefensiveStructures(Actor self, Queue<Order> orders)
         {
             double percentageSpentOnDefense;
             try {

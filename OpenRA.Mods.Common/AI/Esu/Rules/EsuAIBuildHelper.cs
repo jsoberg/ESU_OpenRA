@@ -82,7 +82,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 case BuildingType.Building:
                     return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
                 case BuildingType.Defense:
-                    return Rule5_FindDefensiveBuildingPlacement(baseCenter, actorType);
+                    return FindDefensiveBuildingPlacement(baseCenter, actorType);
             }
 
             // Can't find a build location
@@ -188,7 +188,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         [Desc("Attempts to find a location to place a defensive structure, based on the DefensiveBuildingPlacement rule.")]
-        private CPos Rule5_FindDefensiveBuildingPlacement(CPos baseCenter, string actorType)
+        private CPos FindDefensiveBuildingPlacement(CPos baseCenter, string actorType)
         {
             switch (info.DefensiveBuildingPlacement) {
                 case RuleConstants.DefensiveBuildingPlacementValues.CLOSEST_TO_CONSTRUCTION_YARD:
