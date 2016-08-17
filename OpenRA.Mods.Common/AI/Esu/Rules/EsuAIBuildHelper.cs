@@ -32,7 +32,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         [Desc("Adds order to place building if any buildings are complete.")]
-        public void PlaceBuildingsIfComplete(Queue<Order> orders)
+        public void PlaceBuildingsIfComplete(StrategicWorldState state, Queue<Order> orders)
         {
             // We don't want to be trying to place the same building over and over again before the initial order actually goes through.
             placementCooldown--;
@@ -47,7 +47,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                     continue;
                 }
 
-                var location = FindBuildLocation(currentBuilding.Item);
+                var location = FindBuildLocation(state, currentBuilding.Item);
 
                 // TODO: handle null location found (cancel production?)
                 if (location != CPos.Invalid) {
@@ -70,7 +70,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         }
 
         [Desc("Returns an acceptable build location for the specified type.")]
-        public CPos FindBuildLocation(string actorType)
+        public CPos FindBuildLocation(StrategicWorldState state, string actorType)
         {
             var type = GetBuildingTypeForActorType(actorType);
             var baseCenter = GetRandomBaseCenter();
@@ -80,7 +80,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                     // Try and place the refinery near a resource field
                     return FindBuildableLocationNearResources();
                 case BuildingType.Building:
-                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+                    return FindNormalBuildingPlacement(state, baseCenter, actorType);
                 case BuildingType.Defense:
                     return FindDefensiveBuildingPlacement(baseCenter, actorType);
             }
@@ -209,6 +209,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             var chosenActor = importantOwnedActors.Random(Random);
 
             return FindFirstBuildableLocation(chosenActor.Location, 0, info.MaxBaseRadius, actorType);
+        }
+
+        [Desc("Attempts to find a location to place a defensive structure, based on the DefensiveBuildingPlacement rule.")]
+        private CPos FindNormalBuildingPlacement(StrategicWorldState state, CPos baseCenter, string actorType)
+        {
+            switch (info.NormalBuildingPlacement) {
+                case RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS:
+                    return FindBuildableLocationAwayFromEnemies(state, baseCenter, actorType);
+                case RuleConstants.NormalBuildingPlacementValues.RANDOM:
+                default:
+                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+            }
+        }
+
+        private CPos FindBuildableLocationAwayFromEnemies(StrategicWorldState state, CPos baseCenter, string actorType)
+        {
+            var bestEnemyLocation = state.EnemyInfoList.First().GetBestAvailableEnemyLocation();
+            var opposite = GeometryUtils.OppositeCornerOfNearestCorner(world.Map, bestEnemyLocation);
+            var moveFromBaseToOpposite = GeometryUtils.MoveTowards(state.SelfIntialBaseLocation, opposite, info.MaxBaseRadius, world.Map);
+            return FindFirstBuildableLocation(moveFromBaseToOpposite, 0, info.MaxBaseRadius, actorType);
         }
     }
 }

@@ -42,5 +42,38 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             int sanitizedValue = Math.Min(value, max);
             return Math.Max(sanitizedValue, min);
         }
+
+        public static CPos OppositeCornerOfNearestCorner(Map map, CPos currentLoc)
+        {
+            var corners = GetMapCorners(map);
+
+            // Opposite corner will be farthest away.
+            int largestDistIndex = 0;
+            double largestDist = double.MinValue;
+            for (int i = 0; i < corners.Count(); i++)
+            {
+                double dist = GeometryUtils.EuclideanDistance(currentLoc, corners[i]);
+                if (dist > largestDist)
+                {
+                    largestDistIndex = i;
+                    largestDist = dist;
+                }
+            }
+
+            return corners[largestDistIndex];
+        }
+
+        public static CPos[] GetMapCorners(Map map)
+        {
+            var width = map.MapSize.X;
+            var height = map.MapSize.Y;
+
+            var topLeft = new CPos(0, 0);
+            var topRight = new CPos(width, 0);
+            var botLeft = new CPos(0, height);
+            var botRight = new CPos(width, height);
+
+            return new CPos[] { topLeft, topRight, botLeft, botRight };
+        }
     }
 }

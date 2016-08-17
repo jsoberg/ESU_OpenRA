@@ -52,7 +52,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             ExecuteDefensiveBuildingRules(self, state, orders);
 
             // Place any completed buildings.
-            buildHelper.PlaceBuildingsIfComplete(orders);
+            buildHelper.PlaceBuildingsIfComplete(state, orders);
         }
 
         // ========================================
