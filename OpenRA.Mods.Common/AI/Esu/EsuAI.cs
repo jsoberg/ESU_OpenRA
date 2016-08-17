@@ -140,6 +140,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines how many scouts to produce (Rule NumberOfScoutsToProduce)")]
         public readonly int NumberOfScoutsToProduce = 2;
 
+        [Desc("Determines where to place normal buildings (Rule NormalBuildingPlacement)")]
+        public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
+
         // ========================================
         // Static
         // ========================================
