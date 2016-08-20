@@ -17,6 +17,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Amount of ticks to wait after issuing a build order before we start analyzing rules again.")]
         private const int BUILDING_ORDER_COOLDOWN = 5;
         private int buildingOrderCooldown = 0;
+        private int defensiveOrderCooldown = 0;
+
+        private bool wasBuildingOrderIssuedThisTick;
 
         public EsuAIBuildRuleset(World world, EsuAIInfo info) : base(world, info)
         {
@@ -30,6 +33,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
+            wasBuildingOrderIssuedThisTick = false;
+
             AddApplicableBuildRules(self, state, orders);
         }
 
@@ -41,6 +46,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private void AddApplicableBuildRules(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             buildingOrderCooldown--;
+            defensiveOrderCooldown--;
 
             // No producers in world; this could be while we are building the construction yard, or if all yards have been destroyed.
             // TODO: Do we need this check, or will the build checks take care of it for us?
@@ -75,24 +81,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         [Desc("Tunable rule: Build power plant if below X power.")]
         private void BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
         {
-            if (!EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
+            if (wasBuildingOrderIssuedThisTick && !EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
             }
 
             PowerManager pm = self.Trait<PowerManager>();
 
             if (pm.ExcessPower < info.MinimumExcessPower) {
-                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.POWER_PLANT, 1));
-                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+                StartProduction(self, orders, EsuAIConstants.Buildings.POWER_PLANT);
             }
         }
 
         // TODO: Tunable portion incomplete.
         private void BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            if (ShouldBuildRefinery(state)) {
-                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.ORE_REFINERY, 1));
-                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+            if (!wasBuildingOrderIssuedThisTick && ShouldBuildRefinery(state)) {
+                StartProduction(self, orders, EsuAIConstants.Buildings.ORE_REFINERY);
             }
         }
 
@@ -114,9 +118,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             // TODO: Right now we just build barracks, obviously this needs to do something more.
             var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
             if (ownedBarracks < 1) {
-                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), 1));
-                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+                StartProduction(self, orders, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
             }
+        }
+
+        private void StartProduction(Actor self, Queue<Order> orders, string buildingName)
+        {
+            orders.Enqueue(Order.StartProduction(self, buildingName, 1));
+            buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+            wasBuildingOrderIssuedThisTick = true;
         }
 
         // ========================================
@@ -127,7 +137,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             // If a defensive building is already being built or we're waiting for the cooldown, wait.
             if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE)
-                || buildingOrderCooldown > 0) 
+                || defensiveOrderCooldown > 0) 
             {
                 return;
             }
@@ -165,7 +175,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
                 // We can build now.
                 orders.Enqueue(Order.StartProduction(self, defenseiveBuilding, 1));
-                buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+                defensiveOrderCooldown = BUILDING_ORDER_COOLDOWN;
             }
         }
     }
