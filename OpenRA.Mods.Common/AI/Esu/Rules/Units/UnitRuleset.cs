@@ -38,6 +38,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             scoutHelper.AddScoutOrdersIfApplicable(self, state, orders);
+            // Let scout produce units before considering other units.
+            if (!scoutHelper.IsScoutBeingProduced()) {
+                unitHelper.AddUnitOrdersIfApplicable(self, state, orders);
+            }
         }
     }
 }

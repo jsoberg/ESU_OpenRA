@@ -12,12 +12,14 @@ namespace OpenRA.Mods.Common.AI.Esu
     /// </summary>
     public class StrategicWorldState
     {
+        public bool IsInitialized { get; private set; }
+
         public readonly List<EnemyInfo> EnemyInfoList;
 
-        public World World;
-        public Player SelfPlayer;
         public CPos SelfIntialBaseLocation;
-        public bool IsInitialized { get; private set; }
+
+        public World World;
+        public Player SelfPlayer
 
         public StrategicWorldState()
         {

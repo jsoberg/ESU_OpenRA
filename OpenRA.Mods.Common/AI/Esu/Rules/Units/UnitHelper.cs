@@ -24,5 +24,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             // Stub.
             return false;
         }
+
+        public void AddUnitOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            // Stub.
+        }
     }
 }
