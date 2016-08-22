@@ -35,12 +35,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             this.deadScouts = new List<ScoutActor>();
         }
 
-        public void UnitProduced(Actor self, Actor other)
+        public bool IsScoutBeingProduced()
+        {
+            return (scoutInProductionName != null);
+        }
+
+        // @return - returns true if the produced unit was claimed, false otherwise.
+        public bool UnitProduced(Actor self, Actor other)
         {
             if (other.Info.Name == scoutInProductionName) {
                 currentScouts.Add(new ScoutActor(other));
                 scoutInProductionName = null;
+                return true;
             }
+            return false;
         }
 
         public void AddScoutOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders) 

@@ -10,6 +10,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
     class EsuAIUnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction
     {
         private EsuAIScoutHelper scoutHelper;
+        private EsuAIUnitHelper unitHelper;
 
         public EsuAIUnitRuleset(World world, EsuAIInfo info) : base(world, info)
         {
@@ -23,8 +24,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
         {
-            if (producer.Owner == selfPlayer) {
-                scoutHelper.UnitProduced(self, produced);
+            if (producer.Owner != selfPlayer) {
+                return;
+            }
+
+            bool wasClaimed = scoutHelper.UnitProduced(self, produced);
+            // If scout helper doesn't claim unit, then the unit helper might.
+            if (!wasClaimed) {
+                unitHelper.UnitProduced(self, produced);
             }
         }
 
