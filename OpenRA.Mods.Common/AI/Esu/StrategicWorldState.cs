@@ -19,7 +19,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         public CPos SelfIntialBaseLocation;
 
         public World World;
-        public Player SelfPlayer
+		public Player SelfPlayer;
 
         public StrategicWorldState()
         {
