@@ -10,9 +10,9 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    public class EsuAIBuildRuleset : BaseEsuAIRuleset
+    public class BuildRuleset : BaseEsuAIRuleset
     {
-        private EsuAIBuildHelper buildHelper;
+        private BuildHelper buildHelper;
 
         [Desc("Amount of ticks to wait after issuing a build order before we start analyzing rules again.")]
         private const int BUILDING_ORDER_COOLDOWN = 5;
@@ -21,14 +21,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private bool wasBuildingOrderIssuedThisTick;
 
-        public EsuAIBuildRuleset(World world, EsuAIInfo info) : base(world, info)
+        public BuildRuleset(World world, EsuAIInfo info) : base(world, info)
         {
         }
 
         public override void Activate(Player selfPlayer)
         {
             base.Activate(selfPlayer);
-            this.buildHelper = new EsuAIBuildHelper(world, selfPlayer, info);
+            this.buildHelper = new BuildHelper(world, selfPlayer, info);
         }
 
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)

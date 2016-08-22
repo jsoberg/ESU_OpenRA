@@ -5,13 +5,13 @@ using System.Text;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    public class EsuAIUnitHelper
+    public class UnitHelper
     {
         private readonly World world;
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
-        public EsuAIUnitHelper(World world, Player selfPlayer, EsuAIInfo info)
+        public UnitHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.world = world;
             this.selfPlayer = selfPlayer;

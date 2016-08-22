@@ -140,12 +140,12 @@
     <Compile Include="AI\BaseBuilder.cs" />
     <Compile Include="AI\Esu\Rules\BaseEsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
-    <Compile Include="AI\Esu\Rules\EsuAIBuildHelper.cs" />
+    <Compile Include="AI\Esu\Rules\BuildHelper.cs" />
     <Compile Include="AI\Esu\EsuAIConstants.cs" />
-    <Compile Include="AI\Esu\Rules\EsuAIBuildRuleset.cs" />
-    <Compile Include="AI\Esu\Rules\EsuAIScoutHelper.cs" />
-    <Compile Include="AI\Esu\Rules\EsuAIUnitHelper.cs" />
-    <Compile Include="AI\Esu\Rules\EsuAIUnitRuleset.cs" />
+    <Compile Include="AI\Esu\Rules\BuildRuleset.cs" />
+    <Compile Include="AI\Esu\Rules\ScoutHelper.cs" />
+    <Compile Include="AI\Esu\Rules\UnitHelper.cs" />
+    <Compile Include="AI\Esu\Rules\UnitRuleset.cs" />
     <Compile Include="AI\Esu\EsuAIUtils.cs" />
     <Compile Include="AI\Esu\Geometry\GeometryUtils.cs" />
     <Compile Include="AI\Esu\Geometry\Rect.cs" />

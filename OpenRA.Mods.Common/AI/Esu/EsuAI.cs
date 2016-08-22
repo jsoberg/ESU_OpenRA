@@ -37,8 +37,8 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void addRulesets()
         {
-            rulesets.Add(new EsuAIBuildRuleset(world, info));
-            rulesets.Add(new EsuAIUnitRuleset(world, info));
+            rulesets.Add(new BuildRuleset(world, info));
+            rulesets.Add(new UnitRuleset(world, info));
         }
 
         IBotInfo IBot.Info

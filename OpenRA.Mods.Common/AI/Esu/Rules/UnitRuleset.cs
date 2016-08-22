@@ -7,19 +7,19 @@ using OpenRA.Mods.Common.Traits;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    class EsuAIUnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction
+    class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction
     {
-        private EsuAIScoutHelper scoutHelper;
-        private EsuAIUnitHelper unitHelper;
+        private ScoutHelper scoutHelper;
+        private UnitHelper unitHelper;
 
-        public EsuAIUnitRuleset(World world, EsuAIInfo info) : base(world, info)
+        public UnitRuleset(World world, EsuAIInfo info) : base(world, info)
         {
         }
 
         public override void Activate(Player selfPlayer)
         {
             base.Activate(selfPlayer);
-            this.scoutHelper = new EsuAIScoutHelper(world, selfPlayer, info);
+            this.scoutHelper = new ScoutHelper(world, selfPlayer, info);
         }
 
         void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)

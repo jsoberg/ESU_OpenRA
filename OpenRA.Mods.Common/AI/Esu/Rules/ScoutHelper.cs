@@ -11,7 +11,7 @@ using OpenRA.Support;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    class EsuAIScoutHelper
+    class ScoutHelper
     {
         private readonly MersenneTwister random;
 
@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private readonly List<ScoutActor> deadScouts;
         private string scoutInProductionName;
 
-        public EsuAIScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
+        public ScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.random = new MersenneTwister();
 
