@@ -20,6 +20,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             base.Activate(selfPlayer);
             this.scoutHelper = new ScoutHelper(world, selfPlayer, info);
+            this.unitHelper = new UnitHelper(world, selfPlayer, info);
         }
 
         void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)

@@ -76,12 +76,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
             BuildOreRefineryIfApplicable(self, state, orders);
             BuildOffensiveUnitProductionStructures(self, orders);
+            BuildQueuedBuildings(self, state, orders);
         }
 
         [Desc("Tunable rule: Build power plant if below X power.")]
         private void BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
         {
-            if (wasBuildingOrderIssuedThisTick && !EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
+            if (wasBuildingOrderIssuedThisTick || !EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
             }
 
@@ -119,6 +120,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
             if (ownedBarracks < 1) {
                 StartProduction(self, orders, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
+            }
+        }
+
+        private void BuildQueuedBuildings(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            if (wasBuildingOrderIssuedThisTick) {
+                return;
+            }
+
+            if (state.RequestedBuildingQueue.Count > 0) {
+                string front = state.RequestedBuildingQueue.Dequeue();
+                if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, front)) {
+                    StartProduction(self, orders, front);
+                }
             }
         }
 

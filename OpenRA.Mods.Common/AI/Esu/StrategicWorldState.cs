@@ -15,6 +15,8 @@ namespace OpenRA.Mods.Common.AI.Esu
         public bool IsInitialized { get; private set; }
 
         public readonly List<EnemyInfo> EnemyInfoList;
+        // This queue will be periodically polled from the build ruleset.
+        public readonly Queue<string> RequestedBuildingQueue;
 
         public CPos SelfIntialBaseLocation;
 
@@ -24,6 +26,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         public StrategicWorldState()
         {
             this.EnemyInfoList = new List<EnemyInfo>();
+            this.RequestedBuildingQueue = new Queue<string>();
         }
 
         public void Initalize(World world, Player selfPlayer)
