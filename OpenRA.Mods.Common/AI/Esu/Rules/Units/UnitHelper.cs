@@ -49,6 +49,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private void ProduceInfantry(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
+            if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY)) {
+                return;
+            }
+
             var infantry = GetInfantryToProduce();
 
             try {
@@ -67,6 +71,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private void ProduceVehicle(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
+            if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY)) {
+                return;
+            }
+
             var vehicle = GetVehicleToProduce();
 
             try {
