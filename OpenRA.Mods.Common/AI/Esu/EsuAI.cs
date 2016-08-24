@@ -14,6 +14,8 @@ namespace OpenRA.Mods.Common.AI.Esu
 {
     public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered, INotifyOtherProduction
     {
+        private const string PRODUCTION_ORDER = "StartProduction";
+
         private readonly EsuAIInfo info;
         private readonly World world;
         private readonly StrategicWorldState worldState;
@@ -100,7 +102,13 @@ namespace OpenRA.Mods.Common.AI.Esu
                 rs.Tick(self, worldState, orders);
             }
 
+            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
             foreach (Order order in orders) {
+                // We don't have the marked minimum resources to execute this order, so ignore it.
+                if (order.OrderString == PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
+                    continue;
+                }
+
                 world.IssueOrder(order);
             }
         }
@@ -142,6 +150,9 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines where to place normal buildings (Rule NormalBuildingPlacement)")]
         public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
+
+        [Desc("Determines amount of resources to have on hand before the next production is considered (Rule AmountOfResourcesToHaveBeforeNextProduction)")]
+        public readonly int AmountOfResourcesToHaveBeforeNextProduction = 400;
 
         // ========================================
         // Static
