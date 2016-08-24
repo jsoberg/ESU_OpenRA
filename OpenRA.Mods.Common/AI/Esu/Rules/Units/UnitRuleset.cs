@@ -7,7 +7,7 @@ using OpenRA.Mods.Common.Traits;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction
+    class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction, IOrderDeniedListener
     {
         private ScoutHelper scoutHelper;
         private UnitHelper unitHelper;
@@ -34,6 +34,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             if (!wasClaimed) {
                 unitHelper.UnitProduced(self, produced);
             }
+        }
+
+        void IOrderDeniedListener.OnOrderDenied(Order order)
+        {
+            unitHelper.OnOrderDenied(order);
         }
 
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)

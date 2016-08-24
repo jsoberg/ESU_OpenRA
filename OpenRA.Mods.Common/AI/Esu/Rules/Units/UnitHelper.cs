@@ -13,6 +13,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private const int UNIT_PRODUCTION_COOLDOWN = 5;
         private int unitProductionCooldown;
+        private bool wasUnitProductionIssuedThisTick;
 
         private readonly World world;
         private readonly Player selfPlayer;
@@ -30,6 +31,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             // Stub.
             return false;
+        }
+
+        public void OnOrderDenied(Order order)
+        {
+            // Stub.
         }
 
         public void AddUnitOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)

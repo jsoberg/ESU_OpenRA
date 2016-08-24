@@ -106,10 +106,10 @@ namespace OpenRA.Mods.Common.AI.Esu
             foreach (Order order in orders) {
                 // We don't have the marked minimum resources to execute this order, so ignore it.
                 if (order.OrderString == PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
-                    continue;
+                    OrderDenied(order);
+                } else {
+                    world.IssueOrder(order);
                 }
-
-                world.IssueOrder(order);
             }
         }
 
@@ -121,6 +121,15 @@ namespace OpenRA.Mods.Common.AI.Esu
                 world.IssueOrder(new Order("DeployTransform", mcv, true));
             } else {
                 throw new ArgumentNullException("Cannot find MCV");
+            }
+        }
+
+        private void OrderDenied(Order order)
+        {
+            foreach (BaseEsuAIRuleset rule in rulesets) {
+                if (rule is IOrderDeniedListener) {
+                    ((IOrderDeniedListener)rule).OnOrderDenied(order);
+                }
             }
         }
     }
@@ -169,5 +178,10 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return new EsuAI(this, init);
         }
+    }
+
+    public interface IOrderDeniedListener
+    {
+        void OnOrderDenied(Order order);
     }
 }
