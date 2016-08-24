@@ -3,11 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Support;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class UnitHelper
     {
+        private static MersenneTwister RANDOM = new MersenneTwister(); 
+
         private const int UNIT_PRODUCTION_COOLDOWN = 5;
         private int unitProductionCooldown;
 
@@ -36,9 +39,31 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return;
             }
 
-            ProduceVehicle(self, state, orders);
+            // TODO : debug code.
+            if (RANDOM.Next(2) == 1) {
+                ProduceInfantry(self, state, orders);
+            } else {
+                ProduceVehicle(self, state, orders);
+            }
         }
 
+        private void ProduceInfantry(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            var infantry = GetInfantryToProduce();
+
+            try {
+                ProduceUnit(self, state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
+            } catch (UnbuildableException) {
+                // We have no production queue for infantry yet, which means we need a barracks.
+                ScheduleBuildingProduction(EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), state, orders);
+            }
+        }
+
+        // TODO: This is mostly for debug purposes, we don't want to just build random infantry.
+        private string GetInfantryToProduce()
+        {
+            return EsuAIConstants.Infantry.AVAILABLE_WITH_BARRACKS.Random(RANDOM);
+        }
 
         private void ProduceVehicle(Actor self, StrategicWorldState state, Queue<Order> orders)
         {

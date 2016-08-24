@@ -14,12 +14,13 @@ namespace OpenRA.Mods.Common.AI.Esu
     public class UnitGroup
     {
         public readonly Purpose Purpose;
-        public readonly List<Actor> Units;
+
+        private readonly List<Actor> units;
 
         public UnitGroup(Purpose purpose)
         {
             this.Purpose = purpose;
-            this.Units = new List<Actor>();
+            this.units = new List<Actor>();
         }
     }
 }
