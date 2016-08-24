@@ -14,8 +14,6 @@ namespace OpenRA.Mods.Common.AI.Esu
 {
     public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered, INotifyOtherProduction
     {
-        private const string PRODUCTION_ORDER = "StartProduction";
-
         private readonly EsuAIInfo info;
         private readonly World world;
         private readonly StrategicWorldState worldState;
@@ -105,7 +103,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
             foreach (Order order in orders) {
                 // We don't have the marked minimum resources to execute this order, so ignore it.
-                if (order.OrderString == PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
+                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
                     OrderDenied(order);
                 } else {
                     world.IssueOrder(order);
@@ -127,8 +125,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         private void OrderDenied(Order order)
         {
             foreach (BaseEsuAIRuleset rule in rulesets) {
-                if (rule is IOrderDeniedListener) {
-                    ((IOrderDeniedListener)rule).OnOrderDenied(order);
+                var listener = rule as IOrderDeniedListener;
+                if (listener != null) {
+                    listener.OnOrderDenied(order);
                 }
             }
         }
@@ -162,6 +161,9 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines amount of resources to have on hand before the next production is considered (Rule AmountOfResourcesToHaveBeforeNextProduction)")]
         public readonly int AmountOfResourcesToHaveBeforeNextProduction = 400;
+
+        [Desc("Determines the percentage of units to keep for base defense (Rule PercentageOfUnitsKeptForDefense)")]
+        public readonly int PercentageOfUnitsKeptForDefense = 20;
 
         // ========================================
         // Static

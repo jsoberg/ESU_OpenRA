@@ -10,6 +10,11 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private static MersenneTwister RANDOM = new MersenneTwister(DateTime.Now.Millisecond);
 
+        public static class OrderTypes
+        {
+            public const string PRODUCTION_ORDER = "StartProduction";
+        }
+
         private const string ALLIES = "Allies";
         private const string SOVIET = "Soviet";
 
