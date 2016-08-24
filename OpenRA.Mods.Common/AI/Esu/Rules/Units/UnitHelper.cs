@@ -36,31 +36,47 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return;
             }
 
-            ProduceRandomVehicle(self, state, orders);
+            ProduceVehicle(self, state, orders);
+        }
+
+
+        private void ProduceVehicle(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            var vehicle = GetVehicleToProduce();
+
+            try {
+                ProduceUnit(self, state, orders, vehicle, EsuAIConstants.ProductionCategories.VEHICLE);
+            } catch (UnbuildableException) {
+                // We have no production queue for vehicles yet, which means we need a war factory.
+                ScheduleBuildingProduction(EsuAIConstants.Buildings.WAR_FACTORY, state, orders);
+            }
         }
 
         // TODO: This is mostly for debug purposes, we don't want to just build random vehicles.
-        private void ProduceRandomVehicle(Actor self, StrategicWorldState state, Queue<Order> orders)
+        private string GetVehicleToProduce()
         {
-            var vehicle = EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(selfPlayer);
+            return EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(selfPlayer);
+        }
 
-            var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE);
-            // TODO not first, decide where to go.
-            var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == vehicle);
+        private void ProduceUnit(Actor self, StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)
+        {
+            var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, productionCategory);
+
+            var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == unitName);
             if (buildable == null) {
-                ScheduleBuildingProduction(EsuAIConstants.Buildings.WAR_FACTORY, state, orders);
-                return;
+                throw new UnbuildableException("No queues to build " + unitName);
             }
 
             var prereqs = buildable.TraitInfo<BuildableInfo>().Prerequisites.Where(s => !s.StartsWith("~"));
             foreach (string req in prereqs) {
                 if (ScheduleBuildingProduction(req, state, orders)) {
+                    // We have scheduled construction of this building.
                     return;
                 }
             }
 
             // We can build now.
-            orders.Enqueue(Order.StartProduction(self, vehicle, 1));
+            orders.Enqueue(Order.StartProduction(self, unitName, 1));
             unitProductionCooldown = UNIT_PRODUCTION_COOLDOWN;
         }
 
@@ -68,13 +84,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private bool ScheduleBuildingProduction(string building, StrategicWorldState state, Queue<Order> orders)
         {
             if (!state.RequestedBuildingQueue.Contains(building)
-                    && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, building))
+                    && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, building)) 
             {
                 state.RequestedBuildingQueue.Enqueue(building);
                 unitProductionCooldown = UNIT_PRODUCTION_COOLDOWN;
                 return true;
             }
             return false;
+        }
+    }
+
+    public class UnbuildableException : SystemException
+    {
+        public UnbuildableException(String message) : base(message)
+        {
         }
     }
 }

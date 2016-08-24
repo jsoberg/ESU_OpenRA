@@ -96,6 +96,12 @@ namespace OpenRA.Mods.Common.AI.Esu
             public const string ROCKET_SOLDIER = "e3";
             public const string FLAMETHROWER = "e4";
             public const string ENGINEER = "e6";
+
+            public static string[] AVAILABLE_WITH_BARRACKS = {
+                RIFLE_INFANTRY,
+                GRENADIER, 
+                ROCKET_SOLDIER
+            };
         }
 
         public static class Vehicles
