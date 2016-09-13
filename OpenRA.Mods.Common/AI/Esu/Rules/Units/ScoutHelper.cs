@@ -8,6 +8,7 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Activities;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Support;
+using OpenRA.Mods.Common.AI.Esu.Activities;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
@@ -186,9 +187,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private void IssueActivityToMoveScout(ScoutActor scout)
         {
             Target moveTarget = Target.FromCell(world, scout.Actor.Trait<Mobile>().NearestMoveableCell(scout.TargetLocation));
-            Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
-            scout.Actor.CancelActivity();
-            scout.Actor.QueueActivity(move);
+            Activity move = new MoveToward(scout.Actor, moveTarget);
+            scout.Actor.QueueActivity(false, move);
 
             scout.PreviousCheckedLocation = scout.Actor.Location;
             scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
