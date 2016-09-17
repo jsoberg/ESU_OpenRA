@@ -133,6 +133,12 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             return (totalCost / totalEarned);
         }
+
+        public static double GetCurrentResourcesForPlayer(Player owner)
+        {
+            PlayerResources resources = owner.PlayerActor.Trait<PlayerResources>();
+            return (resources.Cash + resources.Resources); 
+        }
     }
 
     // ========================================

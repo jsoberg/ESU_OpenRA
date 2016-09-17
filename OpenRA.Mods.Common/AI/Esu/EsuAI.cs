@@ -37,8 +37,8 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void addRulesets()
         {
-            rulesets.Add(new EsuAIBuildRuleset(world, info));
-            rulesets.Add(new EsuAIUnitRuleset(world, info));
+            rulesets.Add(new BuildRuleset(world, info));
+            rulesets.Add(new UnitRuleset(world, info));
         }
 
         IBotInfo IBot.Info
@@ -100,8 +100,14 @@ namespace OpenRA.Mods.Common.AI.Esu
                 rs.Tick(self, worldState, orders);
             }
 
+            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
             foreach (Order order in orders) {
-                world.IssueOrder(order);
+                // We don't have the marked minimum resources to execute this order, so ignore it.
+                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
+                    OrderDenied(order);
+                } else {
+                    world.IssueOrder(order);
+                }
             }
         }
 
@@ -113,6 +119,16 @@ namespace OpenRA.Mods.Common.AI.Esu
                 world.IssueOrder(new Order("DeployTransform", mcv, true));
             } else {
                 throw new ArgumentNullException("Cannot find MCV");
+            }
+        }
+
+        private void OrderDenied(Order order)
+        {
+            foreach (BaseEsuAIRuleset rule in rulesets) {
+                var listener = rule as IOrderDeniedListener;
+                if (listener != null) {
+                    listener.OnOrderDenied(order);
+                }
             }
         }
     }
@@ -143,6 +159,12 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines where to place normal buildings (Rule NormalBuildingPlacement)")]
         public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
 
+        [Desc("Determines amount of resources to have on hand before the next production is considered (Rule AmountOfResourcesToHaveBeforeNextProduction)")]
+        public readonly int AmountOfResourcesToHaveBeforeNextProduction = 400;
+
+        [Desc("Determines the percentage of units to keep for base defense (Rule PercentageOfUnitsKeptForDefense)")]
+        public readonly int PercentageOfUnitsKeptForDefense = 20;
+
         // ========================================
         // Static
         // ========================================
@@ -158,5 +180,10 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return new EsuAI(this, init);
         }
+    }
+
+    public interface IOrderDeniedListener
+    {
+        void OnOrderDenied(Order order);
     }
 }
