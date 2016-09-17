@@ -143,14 +143,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 if (scout.TargetLocation == CPos.Invalid && scout.ProductionCooldown > 0) {
                     CPos newScoutLoc = ChooseEnemyLocationForScout(scout, state);
                     scout.TargetLocation = newScoutLoc;
-                    IssueActivityToMoveScout(scout);
+                    IssueActivityToMoveScout(scout, orders);
                 } else if (scout.MovementCooldown <= 0) {
 
                     if (scout.TargetLocation != CPos.Invalid && scout.PreviousCheckedLocation == scout.Actor.Location) {
                         // Scout hasn't moved in awhile. Adjust the target location try to get it going.
                         CPos currentTarget = scout.TargetLocation;
                         scout.TargetLocation = world.Map.AllCells.Where(c => scout.Actor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(random);
-                        IssueActivityToMoveScout(scout);
+                        IssueActivityToMoveScout(scout, orders);
                     } else {
                         // Scout has moved, so lets reset and check in on it next cooldown.
                         scout.PreviousCheckedLocation = scout.Actor.Location;
@@ -165,7 +165,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             var enemy = state.EnemyInfoList.First();
             scout.EnemyName = enemy.EnemyName;
             // If the enemy isn't being scouted yet, return the predicted enemy location. Otherwise, get an unused corner.
-            CPos location = !enemy.IsScouting ? enemy.PredictedEnemyLocation : GetUnscoutedCorner(scout, state);
+            CPos location = enemy.PredictedEnemyLocation;// !enemy.IsScouting ? enemy.PredictedEnemyLocation : GetUnscoutedCorner(scout, state);
             enemy.IsScouting = true;
             return location;
         }
@@ -183,12 +183,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             return GeometryUtils.OppositeCornerOfNearestCorner(world.Map, state.SelfIntialBaseLocation);
         }
 
-        private void IssueActivityToMoveScout(ScoutActor scout)
+        private void IssueActivityToMoveScout(ScoutActor scout, Queue<Order> orders)
         {
-            Target moveTarget = Target.FromCell(world, scout.Actor.Trait<Mobile>().NearestMoveableCell(scout.TargetLocation));
-            Activity move = scout.Actor.Trait<IMove>().MoveToTarget(scout.Actor, moveTarget);
-            scout.Actor.CancelActivity();
-            scout.Actor.QueueActivity(move);
+            CPos target = scout.Actor.Trait<Mobile>().NearestMoveableCell(scout.TargetLocation);
+            Order move = new Order("Move", scout.Actor, false) { TargetLocation = target};
+            orders.Enqueue(move);
 
             scout.PreviousCheckedLocation = scout.Actor.Location;
             scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
