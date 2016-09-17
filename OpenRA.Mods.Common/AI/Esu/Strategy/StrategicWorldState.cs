@@ -5,7 +5,7 @@ using System.Text;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu;
 
-namespace OpenRA.Mods.Common.AI.Esu
+namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     /// <summary>
     ///  This class is the strategic world state that is used by the EsuAi to make various decisions.

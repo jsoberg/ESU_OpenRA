@@ -6,6 +6,7 @@ using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Rules;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.

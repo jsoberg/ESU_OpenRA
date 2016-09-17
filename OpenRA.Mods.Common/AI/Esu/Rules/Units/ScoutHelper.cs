@@ -8,6 +8,7 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Activities;
 using OpenRA.Mods.Common.Activities;
 using OpenRA.Support;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {

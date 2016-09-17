@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
