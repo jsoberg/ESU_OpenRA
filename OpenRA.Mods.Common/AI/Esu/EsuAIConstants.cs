@@ -10,6 +10,11 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private static MersenneTwister RANDOM = new MersenneTwister(DateTime.Now.Millisecond);
 
+        public static class OrderTypes
+        {
+            public const string PRODUCTION_ORDER = "StartProduction";
+        }
+
         private const string ALLIES = "Allies";
         private const string SOVIET = "Soviet";
 
@@ -19,6 +24,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             public const string POWER_PLANT = "powr";
             public const string ADVANCED_POWER_PLANT = "apowr";
             public const string ORE_REFINERY = "proc";
+            public const string WAR_FACTORY = "weap";
 
             public static class Allies
             {
@@ -95,6 +101,62 @@ namespace OpenRA.Mods.Common.AI.Esu
             public const string ROCKET_SOLDIER = "e3";
             public const string FLAMETHROWER = "e4";
             public const string ENGINEER = "e6";
+
+            public static string[] AVAILABLE_WITH_BARRACKS = {
+                RIFLE_INFANTRY,
+                GRENADIER, 
+                ROCKET_SOLDIER
+            };
+        }
+
+        public static class Vehicles
+        {
+            public static class Soviet
+            {
+                public const string V2_ROCKET = "v2rl";
+                public const string MAMMOTH_TANK = "4tnk";
+                public const string APC = "apc";
+                public const string MOBILE_FLAK = "ftrk";
+                public const string MAD_TANK = "qtnk";
+
+                public static string[] VALUES = {
+                    V2_ROCKET,
+                    MAMMOTH_TANK,
+                    APC,
+                    MOBILE_FLAK,
+                    MAD_TANK
+                };
+            }
+
+            public static class Allies
+            {
+                public const string LIGHT_TANK = "1tnk";
+                public const string MEDIUM_TANK = "2tnk";
+                public const string HEAVY_TANK = "3tnk";
+                public const string ARTILLERY = "arty";
+                public const string RANGER = "jeep";
+
+                public static string[] VALUES = {
+                    LIGHT_TANK,
+                    MEDIUM_TANK,
+                    HEAVY_TANK,
+                    ARTILLERY,
+                    RANGER
+                };
+            }
+
+            public static string GetRandomVehicleForPlayer(Player player)
+            {
+                switch (player.Faction.Side)
+                {
+                    case ALLIES:
+                        return Allies.VALUES.Random(RANDOM);
+                    case SOVIET:
+                        return Soviet.VALUES.Random(RANDOM);
+                    default:
+                        throw new SystemException("Unknown faction side: " + player.Faction.Side);
+                }
+            }
         }
 
         public static class ProductionCategories
@@ -102,6 +164,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             public const string BUILDING = "Building";
             public const string INFANTRY = "Infantry";
             public const string DEFENSE = "Defense";
+            public const string VEHICLE = "Vehicle";
         }
     }
 }

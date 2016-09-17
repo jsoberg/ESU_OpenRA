@@ -11,7 +11,7 @@ using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    public class EsuAIBuildHelper
+    public class BuildHelper
     {
         // Cooldown in ticks to wait before attempting to place a building again.
         private const int MAX_PLACEMENT_COOLDOWN = 4;
@@ -24,7 +24,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private int placementCooldown;
 
-        public EsuAIBuildHelper(World world, Player selfPlayer, EsuAIInfo info)
+        public BuildHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.world = world;
             this.selfPlayer = selfPlayer;
