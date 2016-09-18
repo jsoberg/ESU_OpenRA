@@ -166,6 +166,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the percentage of units to keep for base defense (Rule PercentageOfUnitsKeptForDefense)")]
         public readonly int PercentageOfUnitsKeptForDefense = 20;
 
+        [Desc("Determines the recommendation algorithm to use when making scout recommendations (Rule ScoutRecommendationEnumAlgorithm)")]
+        public readonly int ScoutRecommendationEnumAlgorithm = RecommendationAlgorithm.Combinatorial;
+
         // ========================================
         // Static
         // ========================================

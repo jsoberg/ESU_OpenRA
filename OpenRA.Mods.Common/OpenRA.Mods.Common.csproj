@@ -151,6 +151,7 @@
     <Compile Include="AI\Esu\Geometry\Rect.cs" />
     <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />
     <Compile Include="AI\Esu\Rules\RuleConstants.cs" />
+    <Compile Include="AI\Esu\Strategy\ScoutReport.cs" />
     <Compile Include="AI\Esu\Strategy\StrategicWorldState.cs" />
     <Compile Include="AI\Esu\Rules\Units\UnitGroup.cs" />
     <Compile Include="AI\HackyAI.cs" />
