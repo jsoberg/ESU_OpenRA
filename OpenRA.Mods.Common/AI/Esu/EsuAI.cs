@@ -169,6 +169,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the recommendation algorithm to use when making scout recommendations (Rule ScoutRecommendationEnumAlgorithm)")]
         public readonly int ScoutRecommendationEnumAlgorithm = RecommendationAlgorithm.Combinatorial;
 
+        [Desc("Determines the multiplier used when calculating scout recommendations using the ScoutRecommendationEnumAlgorithm rule. (Rule ScoutRecommendationImportanceMultiplier)")]
+        public readonly int ScoutRecommendationImportanceMultiplier = 10;
+
         // ========================================
         // Static
         // ========================================

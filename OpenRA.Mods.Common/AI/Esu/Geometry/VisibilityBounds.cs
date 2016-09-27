@@ -16,12 +16,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
 
             VisibilityBounds bounds = new VisibilityBounds();
             foreach (Actor actor in ownedActors) {
-                WDist range = actor.Trait<RevealsShroud>().Range;
-                Rect visibleRect = new Rect(actor.CenterPosition, range.Length);
-                bounds.AddRect(visibleRect);
+                bounds.AddRect(GetCurrentVisibilityRectForActor(actor));
             }
 
             return bounds;
+        }
+
+        public static Rect GetCurrentVisibilityRectForActor(Actor actor)
+        {
+            WDist range = actor.Trait<RevealsShroud>().Range;
+            return new Rect(actor.CenterPosition, range.Length);
         }
 
         private readonly List<Rect> boundingRects;
