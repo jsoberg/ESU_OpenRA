@@ -39,6 +39,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
     public class ResponseRecommendation
     {
+        public const float COMBINATORIAL_FACTOR = .25f;
+
         public readonly int UnitResponseValue;
         public readonly int UrgencyValue;
 
@@ -52,14 +54,48 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             switch (builder.info.ScoutRecommendationEnumAlgorithm) {
                 case RecommendationAlgorithm.PowerPlants:
+                    return PowerPlants(builder);
                 case RecommendationAlgorithm.DefensiveBuildings:
+                    return DefensiveBuildings(builder);
                 case RecommendationAlgorithm.Units:
+                    return Units(builder);
                 case RecommendationAlgorithm.OreRefineries:
+                    return OreRefineries(builder);
                 case RecommendationAlgorithm.Combinatorial:
+                    return Combinatorial(builder);
                 default:
-                    // TODO compute
-                    return 0;
+                    throw new SystemException("Unknown recommendation algorithm " + builder.info.ScoutRecommendationEnumAlgorithm);
             };
+        }
+
+        // ========================================
+        // Report Algorithms
+        // ========================================
+
+        private int PowerPlants(Builder builder)
+        {
+            return (builder.numPowerPlants + (2 * builder.numPowerPlants)) * builder.info.ScoutRecommendationImportanceMultiplier;
+        }
+
+        private int DefensiveBuildings(Builder builder)
+        {
+            return builder.numDefensiveBuildings * builder.info.ScoutRecommendationImportanceMultiplier;
+        }
+
+        private int Units(Builder builder)
+        {
+            return builder.AllUnits() * builder.info.ScoutRecommendationImportanceMultiplier;
+        }
+
+        private int OreRefineries(Builder builder)
+        {
+            return builder.numOreRefineries * builder.info.ScoutRecommendationImportanceMultiplier;
+        }
+
+        private int Combinatorial(Builder builder)
+        {
+            return (int) ((PowerPlants(builder) * COMBINATORIAL_FACTOR) + (DefensiveBuildings(builder) * COMBINATORIAL_FACTOR) 
+                + (Units(builder) * COMBINATORIAL_FACTOR) + (OreRefineries(builder) * COMBINATORIAL_FACTOR) * builder.info.ScoutRecommendationImportanceMultiplier);
         }
 
         private int ComputeUrgency(Builder builder)
@@ -86,6 +122,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             public Builder(EsuAIInfo info)
             {
                 this.info = info;
+            }
+
+            public int AllUnits()
+            {
+                return (numAircraftUnits + numInfantryUnits + numVehicleUnits);
             }
 
             public Builder SetNumPowerPlants(int numPowerPlants, int numAdvancedPowerPlants)
