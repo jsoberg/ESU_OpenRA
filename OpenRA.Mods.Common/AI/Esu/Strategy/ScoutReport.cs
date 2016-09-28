@@ -28,7 +28,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         }
     }
 
-    public class RecommendationAlgorithm
+    public static class RecommendationAlgorithm
     {
         public const int PowerPlants = 0;
         public const int DefensiveBuildings = 1;
@@ -129,10 +129,28 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return (numAircraftUnits + numInfantryUnits + numVehicleUnits);
             }
 
+            public Builder AddPowerPlant()
+            {
+                this.numPowerPlants++;
+                return this;
+            }
+
+            public Builder AddAdvancedPowerPlant()
+            {
+                this.numAdvancedPowerPlants++;
+                return this;
+            }
+
             public Builder SetNumPowerPlants(int numPowerPlants, int numAdvancedPowerPlants)
             {
                 this.numPowerPlants = numPowerPlants;
                 this.numAdvancedPowerPlants = numAdvancedPowerPlants;
+                return this;
+            }
+
+            public Builder AddDefensiveBuilding()
+            {
+                this.numDefensiveBuildings++;
                 return this;
             }
 
@@ -142,11 +160,35 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return this;
             }
 
+            public Builder AddInfantry()
+            {
+                this.numInfantryUnits++;
+                return this;
+            }
+
+            public Builder AddVehicle()
+            {
+                this.numVehicleUnits++;
+                return this;
+            }
+
+            public Builder AddAircraft()
+            {
+                this.numAircraftUnits++;
+                return this;
+            }
+
             public Builder SetNumUnits(int numInfantryUnits, int numVehicleUnits, int numAircraftUnits)
             {
                 this.numInfantryUnits = numInfantryUnits;
                 this.numVehicleUnits = numVehicleUnits;
                 this.numAircraftUnits = numAircraftUnits;
+                return this;
+            }
+
+            public Builder AddOreRefinery()
+            {
+                this.numOreRefineries++;
                 return this;
             }
 
