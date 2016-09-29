@@ -172,6 +172,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the multiplier used when calculating scout recommendations using the ScoutRecommendationEnumAlgorithm rule. (Rule ScoutRecommendationImportanceMultiplier)")]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;
 
+        [Desc("Determines the urgency algorithm to use when computer urgency for scout reports (Rule ScoutRecommendationEnumAlgorithm)")]
+        public readonly int ScoutReportUrgencyAlgorithm = UrgencyAlgorithm.SameAsResponseRecommendation;
+
         // ========================================
         // Static
         // ========================================

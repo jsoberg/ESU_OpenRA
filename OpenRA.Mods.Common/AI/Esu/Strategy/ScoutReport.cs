@@ -37,9 +37,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public const int Combinatorial = 4;
     };
 
+    public static class UrgencyAlgorithm
+    {
+        public const int UnitsAndDefensiveStructures = 0;
+        public const int BuildingsPerUnitAndDefensiveStructure = 1;
+        public const int SameAsResponseRecommendation = 2;
+    };
+
     public class ResponseRecommendation
     {
-        public const float COMBINATORIAL_FACTOR = .25f;
+        private const float COMBINATORIAL_FACTOR = .25f;
 
         public readonly int UnitResponseValue;
         public readonly int UrgencyValue;
