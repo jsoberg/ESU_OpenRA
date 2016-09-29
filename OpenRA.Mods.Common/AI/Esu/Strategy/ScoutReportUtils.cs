@@ -78,6 +78,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                     return;
                 }
             }
+
+            // Everything else.
+            {
+                builder.AddGenericBuilding();
+            }
         }
 
         private static bool IsEnemyActorOfType(World world, Actor enemy, string type)

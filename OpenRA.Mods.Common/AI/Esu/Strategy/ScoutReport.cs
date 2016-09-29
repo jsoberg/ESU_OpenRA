@@ -54,7 +54,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public ResponseRecommendation(Builder builder)
         {
             this.UnitResponseValue = ComputeUnitResponseValue(builder);
-            this.UrgencyValue = ComputeUrgency(builder);
+            this.UrgencyValue = ComputeUrgency(builder, UnitResponseValue);
         }
 
         private int ComputeUnitResponseValue(Builder builder)
@@ -76,7 +76,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         }
 
         // ========================================
-        // Report Algorithms
+        // Response Algorithms
         // ========================================
 
         private int PowerPlants(Builder builder)
@@ -105,10 +105,36 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 + (Units(builder) * COMBINATORIAL_FACTOR) + (OreRefineries(builder) * COMBINATORIAL_FACTOR) * builder.info.ScoutRecommendationImportanceMultiplier);
         }
 
-        private int ComputeUrgency(Builder builder)
+        // ========================================
+        // Urgency Algorithms
+        // ========================================
+
+        private int ComputeUrgency(Builder builder, int responseRecommendation)
         {
-            // TODO compute
-            return 0;
+            switch (builder.info.ScoutReportUrgencyAlgorithm) {
+                case UrgencyAlgorithm.UnitsAndDefensiveStructures:
+                    return UnitsAndDefensiveStructures(builder);
+                case UrgencyAlgorithm.BuildingsPerUnitAndDefensiveStructure:
+                    return BuildingsPerUnitAndDefensiveStructure(builder);
+                case UrgencyAlgorithm.SameAsResponseRecommendation:
+                    return responseRecommendation;
+                default:
+                    throw new SystemException("Unknown urgency algorithm " + builder.info.ScoutReportUrgencyAlgorithm);
+            }
+        }
+
+        private int UnitsAndDefensiveStructures(Builder builder)
+        {
+            return (builder.AllUnits() + builder.numDefensiveBuildings);
+        }
+
+        private int BuildingsPerUnitAndDefensiveStructure(Builder builder)
+        {
+            int unitsAndDefensiveStructures = UnitsAndDefensiveStructures(builder);
+            unitsAndDefensiveStructures = (unitsAndDefensiveStructures >= 1) ? unitsAndDefensiveStructures : 1;
+
+            int buildings = ((builder.numPowerPlants + builder.numAdvancedPowerPlants) + builder.numOreRefineries + builder.numOtherBuildings);
+            return buildings / unitsAndDefensiveStructures;
         }
 
         public class Builder
@@ -125,6 +151,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             internal int numAircraftUnits;
 
             internal int numOreRefineries;
+
+            internal int numOtherBuildings;
 
             public Builder(EsuAIInfo info)
             {
@@ -204,6 +232,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 this.numOreRefineries = numOreRefineries;
                 return this;
             }
+
+            public Builder AddGenericBuilding()
+            {
+                this.numOtherBuildings++;
+                return this;
+            }
+
         }
     }
 }
