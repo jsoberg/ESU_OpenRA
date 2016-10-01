@@ -165,6 +165,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             public const string INFANTRY = "Infantry";
             public const string DEFENSE = "Defense";
             public const string VEHICLE = "Vehicle";
+            public const string AIRCRAFT = "Plane";
         }
     }
 }

@@ -7,6 +7,7 @@ using OpenRA.Traits;
 using OpenRA.Support;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
