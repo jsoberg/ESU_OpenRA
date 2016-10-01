@@ -53,6 +53,9 @@ namespace OpenRA
 
 		public static GlobalChat GlobalChat;
 
+        private const int DEFAULT_FITNESS_TICKS = 1000;
+        private static int FitnessLogTickIncrement = DEFAULT_FITNESS_TICKS;
+
 		public static OrderManager JoinServer(string host, int port, string password, bool recordReplay = true)
 		{
 			var connection = new NetworkConnection(host, port);
@@ -418,7 +421,8 @@ namespace OpenRA
         private static readonly string DEFAULT_AI_NAME = "Rush AI";
 
         private static void AutoStartGame(LaunchArguments args)
-        {
+        {  
+            FitnessLogTickIncrement = args.FitnessLogTickIncrement != null ? int.Parse(args.FitnessLogTickIncrement) : DEFAULT_FITNESS_TICKS;
             var myMap = GetSpecifiedLaunchMapOrRandom(args);
 
             // Create "local server" for game and join it.
@@ -503,7 +507,25 @@ namespace OpenRA
         // END JJS - Issue 9 - End game after pre-determined amount of ticks
         // ===========================================================================================================================
 
-		public static void LoadEditor(string mapUid)
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 30 - Intermittent tick log
+        // ===========================================================================================================================
+
+        private static bool WasFitnessLogIncrementSet = false;
+
+        private static void CheckTicksForPeriodicFitnessLog(World world)
+        {
+            if (world != null && !WasFitnessLogIncrementSet) {
+                world.SetFitnessLogTickIncrement(FitnessLogTickIncrement);
+                WasFitnessLogIncrementSet = true;
+            }
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 30 - Intermittent tick log
+        // ===========================================================================================================================
+
+        public static void LoadEditor(string mapUid)
 		{
 			StartGame(mapUid, WorldType.Editor);
 		}
@@ -660,6 +682,9 @@ namespace OpenRA
 
             // Check for max ticks.
             CheckMaxTicksReached(OrderManager.World);
+
+            // Check for fitness log increment.
+            CheckTicksForPeriodicFitnessLog(OrderManager.World);
 		}
 
 		public static bool TakeScreenshot = false;

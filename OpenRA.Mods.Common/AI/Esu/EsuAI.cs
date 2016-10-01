@@ -6,6 +6,7 @@ using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Rules;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
@@ -164,6 +165,15 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines the percentage of units to keep for base defense (Rule PercentageOfUnitsKeptForDefense)")]
         public readonly int PercentageOfUnitsKeptForDefense = 20;
+
+        [Desc("Determines the recommendation algorithm to use when making scout recommendations (Rule ScoutRecommendationEnumAlgorithm)")]
+        public readonly int ScoutRecommendationEnumAlgorithm = RecommendationAlgorithm.Combinatorial;
+
+        [Desc("Determines the multiplier used when calculating scout recommendations using the ScoutRecommendationEnumAlgorithm rule. (Rule ScoutRecommendationImportanceMultiplier)")]
+        public readonly int ScoutRecommendationImportanceMultiplier = 10;
+
+        [Desc("Determines the urgency algorithm to use when computer urgency for scout reports (Rule ScoutRecommendationEnumAlgorithm)")]
+        public readonly int ScoutReportUrgencyAlgorithm = UrgencyAlgorithm.SameAsResponseRecommendation;
 
         // ========================================
         // Static

@@ -174,7 +174,7 @@ World:
 	# ========================================
 	# CUSTOM WORLD TRAITS
 	# ========================================
-	SignalGameOver:
+	SignalFitnessLog:
 
 EditorWorld:
 	Inherits: ^BaseWorld

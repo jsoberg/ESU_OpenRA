@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
