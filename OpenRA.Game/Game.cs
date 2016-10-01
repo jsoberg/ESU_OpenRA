@@ -54,6 +54,9 @@ namespace OpenRA
 
 		public static GlobalChat GlobalChat;
 
+        private const int DEFAULT_FITNESS_TICKS = 1000;
+        private static int FitnessLogTickIncrement = DEFAULT_FITNESS_TICKS;
+
 		public static OrderManager JoinServer(string host, int port, string password, bool recordReplay = true)
 		{
 			var connection = new NetworkConnection(host, port);
@@ -438,7 +441,10 @@ namespace OpenRA
 
             // Check for max ticks.
             CheckMaxTicksReached(OrderManager.World);
-        }
+
+            // Check for fitness log increment.
+            CheckTicksForPeriodicFitnessLog(OrderManager.World);
+    }
 
         static void LogicOnlyInnerLogicTick(OrderManager orderManager)
         {
@@ -503,24 +509,6 @@ namespace OpenRA
 
         // ===========================================================================================================================
         // END No Graphics Implementation
-        // ===========================================================================================================================
-
-        // ===========================================================================================================================
-        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
-        // ===========================================================================================================================
-
-        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
-
-        private static void CheckMaxTicksReached(World world)
-        {
-            if (LocalTick >= MAX_TICKS_BEFORE_END_GAME) {
-                Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
-                world.EndGame();
-            }
-        }
-
-        // ===========================================================================================================================
-        // END JJS - Issue 9 - End game after pre-determined amount of ticks
         // ===========================================================================================================================
 
 		internal static void Initialize(Arguments args)
@@ -688,7 +676,8 @@ namespace OpenRA
         private static readonly string DEFAULT_AI_NAME = "Rush AI";
 
         private static void AutoStartGame(LaunchArguments args)
-        {
+        {  
+            FitnessLogTickIncrement = args.FitnessLogTickIncrement != null ? int.Parse(args.FitnessLogTickIncrement) : DEFAULT_FITNESS_TICKS;
             var myMap = GetSpecifiedLaunchMapOrRandom(args);
 
             // Create "local server" for game and join it.
@@ -754,7 +743,44 @@ namespace OpenRA
         // END Headless Auto-Start Game Methods
         // ==============================================================================================================
 
-		public static void LoadEditor(string mapUid)
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
+        private const int MAX_TICKS_BEFORE_END_GAME = 200000;
+
+        private static void CheckMaxTicksReached(World world)
+        {
+            if (LocalTick >= MAX_TICKS_BEFORE_END_GAME)
+            {
+                Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
+                world.EndGame();
+            }
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 9 - End game after pre-determined amount of ticks
+        // ===========================================================================================================================
+
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 30 - Intermittent tick log
+        // ===========================================================================================================================
+
+        private static bool WasFitnessLogIncrementSet = false;
+
+        private static void CheckTicksForPeriodicFitnessLog(World world)
+        {
+            if (world != null && !WasFitnessLogIncrementSet) {
+                world.SetFitnessLogTickIncrement(FitnessLogTickIncrement);
+                WasFitnessLogIncrementSet = true;
+            }
+        }
+
+        // ===========================================================================================================================
+        // END JJS - Issue 30 - Intermittent tick log
+        // ===========================================================================================================================
+
+        	public static void LoadEditor(string mapUid)
 		{
 			StartGame(mapUid, WorldType.Editor);
 		}

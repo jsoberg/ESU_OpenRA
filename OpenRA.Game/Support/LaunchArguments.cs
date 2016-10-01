@@ -44,7 +44,10 @@ namespace OpenRA
         [Desc("Spawn point index for the specified AI.")]
         public string AiSpawnPoint;
 
-		public LaunchArguments(Arguments args)
+        [Desc("Increment of ticks which we will log fitness information.")]
+        public string FitnessLogTickIncrement;
+
+        public LaunchArguments(Arguments args)
 		{
 			if (args == null)
 				return;

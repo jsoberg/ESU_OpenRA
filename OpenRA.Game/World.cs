@@ -48,7 +48,28 @@ namespace OpenRA
         // END JJS - Issue 9 - End game after pre-determined amount of ticks
         // ===========================================================================================================================
 
-		public Session LobbyInfo { get { return OrderManager.LobbyInfo; } }
+
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 30 - Intermittent tick log
+        // ===========================================================================================================================
+
+        private int FitnessLogTickIncrement = 1000;
+
+        public void SetFitnessLogTickIncrement(int increment)
+        {
+            this.FitnessLogTickIncrement = increment;
+        }
+
+        public int GetFitnessLogTickIncrement()
+        {
+            return FitnessLogTickIncrement;
+        }
+
+        // ===========================================================================================================================
+        // BEGIN JJS - Issue 30 - Intermittent tick log
+        // ===========================================================================================================================
+
+        public Session LobbyInfo { get { return OrderManager.LobbyInfo; } }
 
 		public readonly MersenneTwister SharedRandom;
 
@@ -463,7 +484,7 @@ namespace OpenRA
 			while (frameEndActions.Count != 0)
 				frameEndActions.Dequeue()(this);
 		}
-	}
+    }
 
 	public struct TraitPair<T> : IEquatable<TraitPair<T>>
 	{

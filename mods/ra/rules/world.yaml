@@ -181,13 +181,12 @@ World:
 	# ========================================
 	# CUSTOM WORLD TRAITS
 	# ========================================
-	SignalGameOver:
-	
+	SignalFitnessLog:
+
 	# ==============================
 	# Removed Graphics Traits
 	# ==============================
 	# ScreenShaker:
-
 EditorWorld:
 	Inherits: ^BaseWorld
 	EditorActorLayer:
