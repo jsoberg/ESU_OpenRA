@@ -44,7 +44,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             {
                 if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.DEFENSE))
                 {
-                    builder.AddDefensiveBuilding();
+                    string name = enemy.Info.Name;
+
+                    if (EsuAIConstants.Defense.IsAntiInfantry(name))
+                    {
+                        builder.AddAntiInfantryDefensiveBuilding();
+                    }
+
+                    if (EsuAIConstants.Defense.IsAntiVehicle(name))
+                    {
+                        builder.AddAntiVehicleDefensiveBuilding();
+                    }
+
+                    if (EsuAIConstants.Defense.IsAntiAir(name))
+                    {
+                        builder.AddAntiAirDefensiveBuilding();
+                    }
+
+                    builder.AddOtherDefensiveBuilding();
                     return;
                 }
             }

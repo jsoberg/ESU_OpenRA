@@ -75,7 +75,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         private int UnitsAndDefensiveStructures(Builder builder)
         {
-            return (builder.AllUnits() + builder.numDefensiveBuildings) * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (builder.AllUnits() + builder.AllDefensiveStructures()) * builder.info.ScoutRecommendationImportanceMultiplier;
         }
 
         public class Builder
@@ -85,7 +85,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             internal int numPowerPlants;
             internal int numAdvancedPowerPlants;
 
-            internal int numDefensiveBuildings;
+            internal int numAntiInfantryDefense;
+            internal int numAntiVehicleDefense;
+            internal int numAntiAirDefense;
+            internal int numOtherDefensiveBuildings;
 
             internal int numInfantryUnits;
             internal int numVehicleUnits;
@@ -103,6 +106,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             public int AllUnits()
             {
                 return (numAircraftUnits + numInfantryUnits + numVehicleUnits);
+            }
+
+            public int AllDefensiveStructures()
+            {
+                return (numAntiInfantryDefense + numAntiVehicleDefense + numAntiAirDefense + numOtherDefensiveBuildings);
             }
 
             public Builder AddPowerPlant()
@@ -124,15 +132,27 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return this;
             }
 
-            public Builder AddDefensiveBuilding()
+            public Builder AddAntiInfantryDefensiveBuilding()
             {
-                this.numDefensiveBuildings++;
+                this.numAntiInfantryDefense++;
                 return this;
             }
 
-            public Builder SetNumDefensiveBuildings(int numDefensiveBuildings)
+            public Builder AddAntiVehicleDefensiveBuilding()
             {
-                this.numDefensiveBuildings = numDefensiveBuildings;
+                this.numAntiVehicleDefense++;
+                return this;
+            }
+
+            public Builder AddAntiAirDefensiveBuilding()
+            {
+                this.numAntiAirDefense++;
+                return this;
+            }
+
+            public Builder AddOtherDefensiveBuilding()
+            {
+                this.numOtherDefensiveBuildings++;
                 return this;
             }
 

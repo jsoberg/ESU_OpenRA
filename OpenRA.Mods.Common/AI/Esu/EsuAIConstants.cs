@@ -80,6 +80,26 @@ namespace OpenRA.Mods.Common.AI.Esu
                 };
             }
 
+            public static bool IsAntiInfantry(string buildingName)
+            {
+                return (buildingName == Allies.PILL_BOX ||
+                    buildingName == Allies.CAMO_PILL_BOX ||
+                    buildingName == Soviet.FLAME_TOWER ||
+                    buildingName == Soviet.TESLA);
+            }
+
+            public static bool IsAntiVehicle(string buildingName)
+            {
+                // TODO: Description for TESLA states that it is used for anti-infantry OR anti-vehicle. Combined category, or leave with infantry?
+                return (buildingName == Allies.TURRET);
+            }
+
+            public static bool IsAntiAir(string buildingName)
+            {
+                return (buildingName == Allies.ANTI_AIR_GUN ||
+                     buildingName == Soviet.SAM_SITE);
+            }
+
             public static string GetRandomDefenseStructureForPlayer(Player player)
             {
                 switch (player.Faction.Side)
