@@ -15,11 +15,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public readonly ResponseRecommendation ResponseRecommendation;
 
         private readonly Dictionary<Actor, int> ActorToRecommendationMap;
-        public long LastRefreshTick;
+        public long LastRefreshTick { get; internal set; }
 
         public ScoutReport()
         {
 
+        }
+
+        public void UpdateForActor(Actor actor, World world, ResponseRecommendation recommendation)
+        {
+            int numRecommendations = 0;
+            if (ActorToRecommendationMap.ContainsKey(actor)) {
+                numRecommendations = ActorToRecommendationMap[actor];
+            }
+            numRecommendations++;
+            ActorToRecommendationMap[actor] = numRecommendations;
+
+            LastRefreshTick = world.GetCurrentLocalTickCount();
         }
     }
 
@@ -88,6 +100,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public static bool operator !=(ResponseRecommendation a, ResponseRecommendation b)
         {
             return !(a == b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (this == (ResponseRecommendation) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash += RiskValue * 23;
+            hash += RewardValue * 23;
+            return hash;
         }
 
         public class Builder
