@@ -15,22 +15,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public readonly ResponseRecommendation ResponseRecommendation;
 
         private readonly Dictionary<Actor, int> ActorToRecommendationMap;
-        private long LastRefreshTick;
+        public long LastRefreshTick;
 
         public ScoutReport()
         {
 
         }
-
-        public long GetLastRefreshTick()
-        {
-            return LastRefreshTick;
-        }
     }
 
     public class ResponseRecommendation
     {
-        public readonly Builder UnitInfoBuilder;
         public readonly int RewardValue;
         public readonly int RiskValue;
 
@@ -76,6 +70,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         private int UnitsAndDefensiveStructures(Builder builder)
         {
             return (builder.AllUnits() + builder.AllDefensiveStructures()) * builder.info.ScoutRecommendationImportanceMultiplier;
+        }
+
+        public static bool operator ==(ResponseRecommendation a, ResponseRecommendation b)
+        {
+            if (System.Object.ReferenceEquals(a, b)) {
+                return true;
+            }
+
+            if (((object)a == null) || ((object)b == null)) {
+                return false;
+            }
+
+            return a.RewardValue == b.RewardValue && a.RiskValue == b.RiskValue;
+        }
+
+        public static bool operator !=(ResponseRecommendation a, ResponseRecommendation b)
+        {
+            return !(a == b);
         }
 
         public class Builder
