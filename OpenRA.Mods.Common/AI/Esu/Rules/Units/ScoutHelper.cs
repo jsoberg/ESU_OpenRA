@@ -135,6 +135,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
         }
 
+        // ========================================
+        // Scout Movement
+        // ========================================
+
         private void IssueMovementOrdersForScouts(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             foreach (ScoutActor scout in currentScouts) {
@@ -192,6 +196,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
             scout.PreviousCheckedLocation = scout.Actor.Location;
             scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
+        }
+
+        // ========================================
+        // Scout Reporting
+        // ========================================
+
+        private void IssueScoutReports(StrategicWorldState state)
+        {
+            foreach (ScoutActor scout in currentScouts) {
+                ResponseRecommendation.Builder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(world, info, scout.Actor);
+                if (responseBuilder == null) {
+                    continue;
+                }
+
+                state.AddScoutReportInformation(scout.Actor, responseBuilder);
+            }
         }
     }
 

@@ -13,26 +13,38 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         ///  The recommended response reward and risk for this report.
         /// </summary>
         public readonly ResponseRecommendation ResponseRecommendation;
-
         private readonly Dictionary<Actor, int> ActorToRecommendationMap;
         public long LastRefreshTick { get; internal set; }
 
-        public ScoutReport()
+        public ScoutReport(ResponseRecommendation response, World world)
         {
+            this.ResponseRecommendation = response;
 
+            this.ActorToRecommendationMap = new Dictionary<Actor, int>();
+            this.LastRefreshTick = world.GetCurrentLocalTickCount();
         }
 
-        public void UpdateForActor(Actor actor, World world, ResponseRecommendation recommendation)
+        public void UpdateForActor(Actor actor, World world)
         {
-            int numRecommendations = 0;
             if (ActorToRecommendationMap.ContainsKey(actor)) {
-                numRecommendations = ActorToRecommendationMap[actor];
+                int numRecommendations = ActorToRecommendationMap[actor];
+                ActorToRecommendationMap[actor] = (numRecommendations + 1);
+            } else {
+                ActorToRecommendationMap.Add(actor, 1);
             }
-            numRecommendations++;
-            ActorToRecommendationMap[actor] = numRecommendations;
 
             LastRefreshTick = world.GetCurrentLocalTickCount();
         }
+
+        private class Comparator : IComparer<ScoutReport>
+        {
+            int IComparer<ScoutReport>.Compare(ScoutReport x, ScoutReport y)
+            {
+                return (int) (y.LastRefreshTick - x.LastRefreshTick);
+            }
+        }
+
+        public static readonly IComparer<ScoutReport> ScoutReportComparator = new Comparator();
     }
 
     public class ResponseRecommendation

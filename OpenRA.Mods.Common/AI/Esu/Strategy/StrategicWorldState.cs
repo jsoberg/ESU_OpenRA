@@ -15,6 +15,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public bool IsInitialized { get; private set; }
 
         public readonly List<EnemyInfo> EnemyInfoList;
+        public readonly List<ScoutReport> ScoutReportList;
         // This queue will be periodically polled from the build ruleset.
         public readonly Queue<string> RequestedBuildingQueue;
 
@@ -26,6 +27,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public StrategicWorldState()
         {
             this.EnemyInfoList = new List<EnemyInfo>();
+            this.ScoutReportList = new List<ScoutReport>();
             this.RequestedBuildingQueue = new Queue<string>();
         }
 
@@ -77,6 +79,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             if (info.FoundEnemyLocation != CPos.Invalid && visibility.ContainsPosition(enemyConstructionYard.CenterPosition)) {
                 info.FoundEnemyLocation = enemyConstructionYard.Location;
             }
+        }
+
+        public void AddScoutReportInformation(Actor scoutActor, ResponseRecommendation.Builder infoBuilder)
+        {
+            ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder);
+            foreach (ScoutReport report in ScoutReportList) {
+                if (report.ResponseRecommendation == recommendation) {
+                    report.UpdateForActor(scoutActor, World);
+                    return;
+                }
+            }
+
+            // This is a new recommendation.
+            ScoutReportList.Add(new ScoutReport(recommendation, World));
         }
     }
 
