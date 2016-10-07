@@ -14,14 +14,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         /// </summary>
         public readonly ResponseRecommendation ResponseRecommendation;
         private readonly Dictionary<Actor, int> ActorToRecommendationMap;
+        public WPos LastReportedPosition { get; internal set;  }
         public long LastRefreshTick { get; internal set; }
 
-        public ScoutReport(ResponseRecommendation response, World world)
+        public ScoutReport(ResponseRecommendation response, WPos currentPosition, World world)
         {
             this.ResponseRecommendation = response;
+            this.LastReportedPosition = currentPosition;
 
-            this.ActorToRecommendationMap = new Dictionary<Actor, int>();
             this.LastRefreshTick = world.GetCurrentLocalTickCount();
+            this.ActorToRecommendationMap = new Dictionary<Actor, int>();
         }
 
         public void UpdateForActor(Actor actor, World world)
@@ -33,6 +35,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 ActorToRecommendationMap.Add(actor, 1);
             }
 
+            LastReportedPosition = actor.CenterPosition;
             LastRefreshTick = world.GetCurrentLocalTickCount();
         }
 

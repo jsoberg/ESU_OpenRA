@@ -92,7 +92,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             }
 
             // This is a new recommendation.
-            ScoutReportList.Add(new ScoutReport(recommendation, World));
+            ScoutReportList.Add(new ScoutReport(recommendation, scoutActor.CenterPosition, World));
         }
     }
 
