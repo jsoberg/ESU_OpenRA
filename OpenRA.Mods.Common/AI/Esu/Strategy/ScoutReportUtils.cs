@@ -14,7 +14,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public static ResponseRecommendation.Builder BuildResponseInformationForActor(World world, EsuAIInfo info, Actor actor)
         {
             Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
-            var visibileEnemyItems = world.Actors.Where(a => a.Owner != actor.Owner && visibileRect.ContainsPosition(a.CenterPosition));
+            var visibileEnemyItems = world.Actors.Where(a => a.Owner != actor.Owner && a.OccupiesSpace != null && visibileRect.ContainsPosition(a.CenterPosition));
             if (visibileEnemyItems == null || visibileEnemyItems.Count() == 0) {
                 return null;
             }

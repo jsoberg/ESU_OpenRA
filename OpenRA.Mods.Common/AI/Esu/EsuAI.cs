@@ -169,6 +169,11 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;
 
+        public float GetScoutRecommendationImportanceMultiplier()
+        {
+            return (ScoutRecommendationImportanceMultiplier / 10);
+        }
+
         // ========================================
         // Static
         // ========================================

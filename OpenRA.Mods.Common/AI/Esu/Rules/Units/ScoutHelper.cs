@@ -122,6 +122,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
 
             IssueMovementOrdersForScouts(self, state, orders);
+            IssueScoutReports(state);
         }
 
         private void RemoveDeadScouts()

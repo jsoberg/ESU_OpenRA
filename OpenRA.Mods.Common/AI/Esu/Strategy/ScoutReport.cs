@@ -72,17 +72,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         private int PowerPlants(Builder builder)
         {
-            return (builder.numPowerPlants + (2 * builder.numPowerPlants)) * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (int) ((builder.numPowerPlants + (2 * builder.numAdvancedPowerPlants)) * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         private int OreRefineries(Builder builder)
         {
-            return builder.numOreRefineries * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (int)(builder.numOreRefineries * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         private int OtherBuildings(Builder builder)
         {
-            return builder.numOtherBuildings * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (int)(builder.numOtherBuildings * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         // ========================================
@@ -96,7 +96,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         private int UnitsAndDefensiveStructures(Builder builder)
         {
-            return (builder.AllUnits() + builder.AllDefensiveStructures()) * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (int) ((builder.AllUnits() + builder.AllDefensiveStructures()) * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         public static bool operator ==(ResponseRecommendation a, ResponseRecommendation b)
