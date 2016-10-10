@@ -15,10 +15,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public bool IsInitialized { get; private set; }
 
         public readonly List<EnemyInfo> EnemyInfoList;
-        public readonly List<ScoutReport> ScoutReportList;
         // This queue will be periodically polled from the build ruleset.
         public readonly Queue<string> RequestedBuildingQueue;
 
+        public ScoutReportLocationGrid ScoutReportGrid;
         public CPos SelfIntialBaseLocation;
 
         public World World;
@@ -27,7 +27,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public StrategicWorldState()
         {
             this.EnemyInfoList = new List<EnemyInfo>();
-            this.ScoutReportList = new List<ScoutReport>();
             this.RequestedBuildingQueue = new Queue<string>();
         }
 
@@ -35,6 +34,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
+
+            this.ScoutReportGrid = new ScoutReportLocationGrid(world);
 
             // Cache our own location for now.
             var selfYard = world.Actors.Where(a => a.Owner == selfPlayer &&
@@ -84,15 +85,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public void AddScoutReportInformation(Actor scoutActor, ResponseRecommendation.Builder infoBuilder)
         {
             ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder);
-            foreach (ScoutReport report in ScoutReportList) {
-                if (report.ResponseRecommendation == recommendation) {
-                    report.UpdateForActor(scoutActor, World);
-                    return;
-                }
-            }
+            ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
 
-            // This is a new recommendation.
-            ScoutReportList.Add(new ScoutReport(recommendation, scoutActor.CenterPosition, World));
+            ScoutReportGrid.AddScoutReportForActor(scoutActor, report);
         }
     }
 

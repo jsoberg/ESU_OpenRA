@@ -13,7 +13,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         ///  The recommended response reward and risk for this report.
         /// </summary>
         public readonly ResponseRecommendation ResponseRecommendation;
-        private readonly Dictionary<Actor, int> ActorToRecommendationMap;
         public WPos LastReportedPosition { get; internal set;  }
         public long LastRefreshTick { get; internal set; }
 
@@ -23,20 +22,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.LastReportedPosition = currentPosition;
 
             this.LastRefreshTick = world.GetCurrentLocalTickCount();
-            this.ActorToRecommendationMap = new Dictionary<Actor, int>();
-        }
-
-        public void UpdateForActor(Actor actor, World world)
-        {
-            if (ActorToRecommendationMap.ContainsKey(actor)) {
-                int numRecommendations = ActorToRecommendationMap[actor];
-                ActorToRecommendationMap[actor] = (numRecommendations + 1);
-            } else {
-                ActorToRecommendationMap.Add(actor, 1);
-            }
-
-            LastReportedPosition = actor.CenterPosition;
-            LastRefreshTick = world.GetCurrentLocalTickCount();
         }
 
         private class Comparator : IComparer<ScoutReport>

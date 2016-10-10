@@ -7,7 +7,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public class ScoutReportLocationGrid
     {
-        private const double WIDTH_PER_GRID_SQUARE = 10;
+        private const int WIDTH_PER_GRID_SQUARE = 10;
 
         private readonly List<ScoutReport>[][] ScoutReportGridMatrix;
 
@@ -18,14 +18,33 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         private List<ScoutReport>[][] BuildScoutReportGridMatrix(World world)
         {
-            int gridWidth = (int) Math.Round((double)world.Map.MapSize.X / WIDTH_PER_GRID_SQUARE);
-            int gridHeight = (int) Math.Round((double)world.Map.MapSize.Y / WIDTH_PER_GRID_SQUARE);
+            int gridWidth = GetRoundedIntDividedByWidth(world.Map.MapSize.X);
+            int gridHeight = GetRoundedIntDividedByWidth(world.Map.MapSize.Y);
 
             List<ScoutReport>[][] grid = new List<ScoutReport>[gridWidth][];
             for (int i = 0; i < gridWidth; i ++) {
                 grid[i] = new List<ScoutReport>[gridHeight];
             }
             return grid;
+        }
+
+        public void AddScoutReportForActor(Actor actor, ScoutReport report)
+        {
+            WPos scoutPosition = actor.CenterPosition;
+            int x = GetRoundedIntDividedByWidth(scoutPosition.X);
+            int y = GetRoundedIntDividedByWidth(scoutPosition.Y);
+
+            List<ScoutReport> reportsForLocation = ScoutReportGridMatrix[x][y];
+            if (reportsForLocation == null) {
+                reportsForLocation = new List<ScoutReport>();
+                ScoutReportGridMatrix[x][y] = reportsForLocation;
+            }
+            reportsForLocation.Add(report);
+        }
+
+        private int GetRoundedIntDividedByWidth(int pos)
+        {
+            return (int) Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
         }
     }
 }
