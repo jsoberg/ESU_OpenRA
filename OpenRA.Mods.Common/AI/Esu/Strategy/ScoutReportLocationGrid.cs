@@ -7,8 +7,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public class ScoutReportLocationGrid
     {
-        private const bool DEBUG_MODE = true;
-
         private const int WIDTH_PER_GRID_SQUARE = 10;
 
         private readonly List<ScoutReport>[][] ScoutReportGridMatrix;
@@ -41,10 +39,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 reportsForLocation = new List<ScoutReport>();
                 ScoutReportGridMatrix[x][y] = reportsForLocation;
             }
-            if (DEBUG_MODE) {
-                Console.WriteLine("Report; Risk: {0}, Reward: {1} | Map X: {2}, Map Y {3} | Grid X: {4}, Grid Y: {5}".F(
-                    report.ResponseRecommendation.RiskValue, report.ResponseRecommendation.RewardValue, scoutPosition.X, scoutPosition.Y, x, y));
-            }
+
+            Log.Write("scout_report", "Report; Risk: {0}, Reward: {1} | Map X: {2}, Map Y {3} | Grid X: {4}, Grid Y: {5}".F(
+                report.ResponseRecommendation.RiskValue, report.ResponseRecommendation.RewardValue, scoutPosition.X, scoutPosition.Y, x, y));
             reportsForLocation.Add(report);
         }
 

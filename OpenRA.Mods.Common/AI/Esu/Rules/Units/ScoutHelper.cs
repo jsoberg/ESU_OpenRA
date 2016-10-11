@@ -206,7 +206,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private void IssueScoutReports(StrategicWorldState state)
         {
             foreach (ScoutActor scout in currentScouts) {
-                ResponseRecommendation.Builder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(world, info, scout.Actor);
+                ResponseRecommendation.Builder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, scout.Actor);
                 if (responseBuilder == null) {
                     continue;
                 }

@@ -11,17 +11,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public static class ScoutReportUtils
     {
-        public static ResponseRecommendation.Builder BuildResponseInformationForActor(World world, EsuAIInfo info, Actor actor)
+        public static ResponseRecommendation.Builder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor)
         {
             Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
-            var visibileEnemyItems = world.Actors.Where(a => a.Owner != actor.Owner && a.OccupiesSpace != null && visibileRect.ContainsPosition(a.CenterPosition));
+
+            // Visible actors whose owners are in the enemy info list.
+            var visibileEnemyItems = state.World.Actors.Where(a => a.Owner != actor.Owner && state.EnemyInfoList.Any(e => e.EnemyName == a.Owner.InternalName) 
+                && a.OccupiesSpace != null && visibileRect.ContainsPosition(a.CenterPosition));
+
             if (visibileEnemyItems == null || visibileEnemyItems.Count() == 0) {
                 return null;
             }
 
             ResponseRecommendation.Builder builder = new ResponseRecommendation.Builder(info);
             foreach (Actor enemy in visibileEnemyItems) {
-                AddInformationForEnemyActor(world, builder, enemy);
+                AddInformationForEnemyActor(state.World, builder, enemy);
             }
             return builder;
         }
