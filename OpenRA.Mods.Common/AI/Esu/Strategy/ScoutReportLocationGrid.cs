@@ -60,9 +60,39 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             }
         }
 
+        public AggregateScoutReportData GetAggregateDataForCell(int X, int Y)
+        {
+            List<ScoutReport> cell = ScoutReportGridMatrix[X][Y];
+            int totalRisk = 0;
+            int totalReward = 0;
+            foreach (ScoutReport report in cell) {
+                totalRisk += report.ResponseRecommendation.RiskValue;
+                totalReward += report.ResponseRecommendation.RewardValue;
+            }
+
+            int avgRisk = totalRisk / cell.Count();
+            int avgReward = totalReward / cell.Count();
+            return new AggregateScoutReportData(cell.Count(), avgRisk, avgReward);
+        }
+
         private int GetRoundedIntDividedByWidth(int pos)
         {
             return (int) Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
+        }
+
+        public class AggregateScoutReportData
+        {
+            public readonly int NumReports;
+
+            public readonly int AverageRiskValue;
+            public readonly int AverageRewardValue;
+
+            public AggregateScoutReportData(int numReports, int averageRiskValue, int averageRewardValue)
+            {
+                this.NumReports = numReports;
+                this.AverageRiskValue = averageRiskValue;
+                this.AverageRewardValue = averageRewardValue;
+            }
         }
     }
 }
