@@ -13,22 +13,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         ///  The recommended response reward and risk for this report.
         /// </summary>
         public readonly ResponseRecommendation ResponseRecommendation;
-        public WPos LastReportedPosition { get; internal set;  }
-        public long LastRefreshTick { get; internal set; }
+        public WPos ReportedPosition { get; internal set;  }
+        public long TickReported { get; internal set; }
 
         public ScoutReport(ResponseRecommendation response, WPos currentPosition, World world)
         {
             this.ResponseRecommendation = response;
-            this.LastReportedPosition = currentPosition;
+            this.ReportedPosition = currentPosition;
 
-            this.LastRefreshTick = world.GetCurrentLocalTickCount();
+            this.TickReported = world.GetCurrentLocalTickCount();
         }
 
         private class Comparator : IComparer<ScoutReport>
         {
             int IComparer<ScoutReport>.Compare(ScoutReport x, ScoutReport y)
             {
-                return (int) (y.LastRefreshTick - x.LastRefreshTick);
+                return (int) (y.TickReported - x.TickReported);
             }
         }
 
@@ -40,10 +40,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public readonly int RewardValue;
         public readonly int RiskValue;
 
+        public readonly Builder InfoBuilder;
+
         public ResponseRecommendation(Builder builder)
         {
             this.RewardValue = ComputeRewardValue(builder);
             this.RiskValue = ComputeRiskValue(builder, RewardValue);
+
+            this.InfoBuilder = builder;
         }
 
         private int ComputeRewardValue(Builder builder)
