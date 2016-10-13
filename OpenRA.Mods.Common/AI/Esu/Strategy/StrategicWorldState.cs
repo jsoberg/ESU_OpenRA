@@ -18,6 +18,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         // This queue will be periodically polled from the build ruleset.
         public readonly Queue<string> RequestedBuildingQueue;
 
+        public ScoutReportLocationGrid ScoutReportGrid;
         public CPos SelfIntialBaseLocation;
 
         public World World;
@@ -33,6 +34,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
+
+            this.ScoutReportGrid = new ScoutReportLocationGrid(world);
 
             // Cache our own location for now.
             var selfYard = world.Actors.Where(a => a.Owner == selfPlayer &&
@@ -64,6 +67,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             foreach (EnemyInfo info in EnemyInfoList) {
                 TryFindEnemyConstructionYard(info, visibility);
             }
+
+            ScoutReportGrid.RemoveDeadReports(World);
         }
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
@@ -77,6 +82,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             if (info.FoundEnemyLocation != CPos.Invalid && visibility.ContainsPosition(enemyConstructionYard.CenterPosition)) {
                 info.FoundEnemyLocation = enemyConstructionYard.Location;
             }
+        }
+
+        public void AddScoutReportInformation(Actor scoutActor, ResponseRecommendation.Builder infoBuilder)
+        {
+            ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder);
+            ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
+
+            ScoutReportGrid.AddScoutReportForActor(scoutActor, report);
         }
     }
 

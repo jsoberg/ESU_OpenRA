@@ -166,14 +166,13 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the percentage of units to keep for base defense (Rule PercentageOfUnitsKeptForDefense)")]
         public readonly int PercentageOfUnitsKeptForDefense = 20;
 
-        [Desc("Determines the recommendation algorithm to use when making scout recommendations (Rule ScoutRecommendationEnumAlgorithm)")]
-        public readonly int ScoutRecommendationEnumAlgorithm = RecommendationAlgorithm.Combinatorial;
-
-        [Desc("Determines the multiplier used when calculating scout recommendations using the ScoutRecommendationEnumAlgorithm rule. (Rule ScoutRecommendationImportanceMultiplier)")]
+        [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;
 
-        [Desc("Determines the urgency algorithm to use when computer urgency for scout reports (Rule ScoutRecommendationEnumAlgorithm)")]
-        public readonly int ScoutReportUrgencyAlgorithm = UrgencyAlgorithm.SameAsResponseRecommendation;
+        public float GetScoutRecommendationImportanceMultiplier()
+        {
+            return (ScoutRecommendationImportanceMultiplier / 10);
+        }
 
         // ========================================
         // Static
