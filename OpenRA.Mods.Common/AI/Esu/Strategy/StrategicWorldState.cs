@@ -67,6 +67,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             foreach (EnemyInfo info in EnemyInfoList) {
                 TryFindEnemyConstructionYard(info, visibility);
             }
+
+            ScoutReportGrid.RemoveDeadReports(World);
         }
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)

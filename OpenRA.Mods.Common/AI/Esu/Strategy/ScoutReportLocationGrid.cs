@@ -60,6 +60,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             }
         }
 
+        public AggregateScoutReportData GetCurrentBestFitCell()
+        {
+            AggregateScoutReportData best = null;
+
+            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++) {
+                List<ScoutReport>[] row = ScoutReportGridMatrix[i];
+                for (int j = 0; j < row.Count(); j++) {
+                    AggregateScoutReportData current = GetAggregateDataForCell(i, j);
+                    if (best == null || (current.CompareTo(best) > 0)) {
+                        best = current;
+                    }
+                }
+            }
+
+            return best;
+        }
+
         public AggregateScoutReportData GetAggregateDataForCell(int X, int Y)
         {
             List<ScoutReport> cell = ScoutReportGridMatrix[X][Y];
@@ -72,7 +89,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             int avgRisk = totalRisk / cell.Count();
             int avgReward = totalReward / cell.Count();
-            return new AggregateScoutReportData(cell.Count(), avgRisk, avgReward);
+            CPos pos = new CPos(X * WIDTH_PER_GRID_SQUARE, Y * WIDTH_PER_GRID_SQUARE);
+            return new AggregateScoutReportData(cell.Count(), avgRisk, avgReward, pos);
         }
 
         private int GetRoundedIntDividedByWidth(int pos)
@@ -80,18 +98,28 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             return (int) Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
         }
 
-        public class AggregateScoutReportData
+        public class AggregateScoutReportData : IComparable<AggregateScoutReportData>
         {
             public readonly int NumReports;
 
             public readonly int AverageRiskValue;
             public readonly int AverageRewardValue;
 
-            public AggregateScoutReportData(int numReports, int averageRiskValue, int averageRewardValue)
+            public readonly CPos RelativePosition;
+
+            public AggregateScoutReportData(int numReports, int averageRiskValue, int averageRewardValue, CPos relativePosition)
             {
                 this.NumReports = numReports;
                 this.AverageRiskValue = averageRiskValue;
                 this.AverageRewardValue = averageRewardValue;
+                this.RelativePosition = relativePosition;
+            }
+
+            public int CompareTo(AggregateScoutReportData other)
+            {
+                float fit = (AverageRiskValue != 0) ? (AverageRewardValue / AverageRiskValue) : AverageRewardValue;
+                float otherFit = (other.AverageRiskValue != 0) ? (other.AverageRewardValue / other.AverageRiskValue) : other.AverageRewardValue;
+                return fit.CompareTo(otherFit);
             }
         }
     }
