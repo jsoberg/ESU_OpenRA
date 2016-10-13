@@ -10,131 +10,113 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
     public class ScoutReport
     {
         /// <summary>
-        ///  The recommended unit response and urgency for this report.
+        ///  The recommended response reward and risk for this report.
         /// </summary>
         public readonly ResponseRecommendation ResponseRecommendation;
+        public WPos ReportedPosition { get; internal set;  }
+        public long TickReported { get; internal set; }
 
-        private readonly Dictionary<Actor, int> ActorToRecommendationMap;
-        private long LastRefreshTick;
-
-        public ScoutReport()
+        public ScoutReport(ResponseRecommendation response, WPos currentPosition, World world)
         {
+            this.ResponseRecommendation = response;
+            this.ReportedPosition = currentPosition;
 
+            this.TickReported = world.GetCurrentLocalTickCount();
         }
 
-        public long GetLastRefreshTick()
+        private class Comparator : IComparer<ScoutReport>
         {
-            return LastRefreshTick;
+            int IComparer<ScoutReport>.Compare(ScoutReport x, ScoutReport y)
+            {
+                return (int) (y.TickReported - x.TickReported);
+            }
         }
+
+        public static readonly IComparer<ScoutReport> ScoutReportComparator = new Comparator();
     }
-
-    public static class RecommendationAlgorithm
-    {
-        public const int PowerPlants = 0;
-        public const int DefensiveBuildings = 1;
-        public const int Units = 2;
-        public const int OreRefineries = 3;
-        public const int Combinatorial = 4;
-    };
-
-    public static class UrgencyAlgorithm
-    {
-        public const int UnitsAndDefensiveStructures = 0;
-        public const int BuildingsPerUnitAndDefensiveStructure = 1;
-        public const int SameAsResponseRecommendation = 2;
-    };
 
     public class ResponseRecommendation
     {
-        private const float COMBINATORIAL_FACTOR = .25f;
+        public readonly int RewardValue;
+        public readonly int RiskValue;
 
-        public readonly int UnitResponseValue;
-        public readonly int UrgencyValue;
+        public readonly Builder InfoBuilder;
 
         public ResponseRecommendation(Builder builder)
         {
-            this.UnitResponseValue = ComputeUnitResponseValue(builder);
-            this.UrgencyValue = ComputeUrgency(builder, UnitResponseValue);
+            this.RewardValue = ComputeRewardValue(builder);
+            this.RiskValue = ComputeRiskValue(builder, RewardValue);
+
+            this.InfoBuilder = builder;
         }
 
-        private int ComputeUnitResponseValue(Builder builder)
+        private int ComputeRewardValue(Builder builder)
         {
-            switch (builder.info.ScoutRecommendationEnumAlgorithm) {
-                case RecommendationAlgorithm.PowerPlants:
-                    return PowerPlants(builder);
-                case RecommendationAlgorithm.DefensiveBuildings:
-                    return DefensiveBuildings(builder);
-                case RecommendationAlgorithm.Units:
-                    return Units(builder);
-                case RecommendationAlgorithm.OreRefineries:
-                    return OreRefineries(builder);
-                case RecommendationAlgorithm.Combinatorial:
-                    return Combinatorial(builder);
-                default:
-                    throw new SystemException("Unknown recommendation algorithm " + builder.info.ScoutRecommendationEnumAlgorithm);
-            };
+            return PowerPlants(builder) + OreRefineries(builder) + OtherBuildings(builder);
         }
 
         // ========================================
-        // Response Algorithms
+        // Reward Methods
         // ========================================
 
         private int PowerPlants(Builder builder)
         {
-            return (builder.numPowerPlants + (2 * builder.numPowerPlants)) * builder.info.ScoutRecommendationImportanceMultiplier;
-        }
-
-        private int DefensiveBuildings(Builder builder)
-        {
-            return builder.numDefensiveBuildings * builder.info.ScoutRecommendationImportanceMultiplier;
-        }
-
-        private int Units(Builder builder)
-        {
-            return builder.AllUnits() * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (int) ((builder.numPowerPlants + (2 * builder.numAdvancedPowerPlants)) * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         private int OreRefineries(Builder builder)
         {
-            return builder.numOreRefineries * builder.info.ScoutRecommendationImportanceMultiplier;
+            return (int)(builder.numOreRefineries * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
-        private int Combinatorial(Builder builder)
+        private int OtherBuildings(Builder builder)
         {
-            return (int) ((PowerPlants(builder) * COMBINATORIAL_FACTOR) + (DefensiveBuildings(builder) * COMBINATORIAL_FACTOR) 
-                + (Units(builder) * COMBINATORIAL_FACTOR) + (OreRefineries(builder) * COMBINATORIAL_FACTOR) * builder.info.ScoutRecommendationImportanceMultiplier);
+            return (int)(builder.numOtherBuildings * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         // ========================================
-        // Urgency Algorithms
+        // Risk Methods
         // ========================================
 
-        private int ComputeUrgency(Builder builder, int responseRecommendation)
+        private int ComputeRiskValue(Builder builder, int responseRecommendation)
         {
-            switch (builder.info.ScoutReportUrgencyAlgorithm) {
-                case UrgencyAlgorithm.UnitsAndDefensiveStructures:
-                    return UnitsAndDefensiveStructures(builder);
-                case UrgencyAlgorithm.BuildingsPerUnitAndDefensiveStructure:
-                    return BuildingsPerUnitAndDefensiveStructure(builder);
-                case UrgencyAlgorithm.SameAsResponseRecommendation:
-                    return responseRecommendation;
-                default:
-                    throw new SystemException("Unknown urgency algorithm " + builder.info.ScoutReportUrgencyAlgorithm);
-            }
+            return UnitsAndDefensiveStructures(builder);
         }
 
         private int UnitsAndDefensiveStructures(Builder builder)
         {
-            return (builder.AllUnits() + builder.numDefensiveBuildings);
+            return (int) ((builder.AllUnits() + builder.AllDefensiveStructures()) * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
-        private int BuildingsPerUnitAndDefensiveStructure(Builder builder)
+        public static bool operator ==(ResponseRecommendation a, ResponseRecommendation b)
         {
-            int unitsAndDefensiveStructures = UnitsAndDefensiveStructures(builder);
-            unitsAndDefensiveStructures = (unitsAndDefensiveStructures >= 1) ? unitsAndDefensiveStructures : 1;
+            if (System.Object.ReferenceEquals(a, b)) {
+                return true;
+            }
 
-            int buildings = ((builder.numPowerPlants + builder.numAdvancedPowerPlants) + builder.numOreRefineries + builder.numOtherBuildings);
-            return buildings / unitsAndDefensiveStructures;
+            if (((object)a == null) || ((object)b == null)) {
+                return false;
+            }
+
+            return a.RewardValue == b.RewardValue && a.RiskValue == b.RiskValue;
+        }
+
+        public static bool operator !=(ResponseRecommendation a, ResponseRecommendation b)
+        {
+            return !(a == b);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return (this == (ResponseRecommendation) obj);
+        }
+
+        public override int GetHashCode()
+        {
+            int hash = 17;
+            hash += RiskValue * 23;
+            hash += RewardValue * 23;
+            return hash;
         }
 
         public class Builder
@@ -144,7 +126,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             internal int numPowerPlants;
             internal int numAdvancedPowerPlants;
 
-            internal int numDefensiveBuildings;
+            internal int numAntiInfantryDefense;
+            internal int numAntiVehicleDefense;
+            internal int numAntiAirDefense;
+            internal int numOtherDefensiveBuildings;
 
             internal int numInfantryUnits;
             internal int numVehicleUnits;
@@ -162,6 +147,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             public int AllUnits()
             {
                 return (numAircraftUnits + numInfantryUnits + numVehicleUnits);
+            }
+
+            public int AllDefensiveStructures()
+            {
+                return (numAntiInfantryDefense + numAntiVehicleDefense + numAntiAirDefense + numOtherDefensiveBuildings);
             }
 
             public Builder AddPowerPlant()
@@ -183,15 +173,27 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return this;
             }
 
-            public Builder AddDefensiveBuilding()
+            public Builder AddAntiInfantryDefensiveBuilding()
             {
-                this.numDefensiveBuildings++;
+                this.numAntiInfantryDefense++;
                 return this;
             }
 
-            public Builder SetNumDefensiveBuildings(int numDefensiveBuildings)
+            public Builder AddAntiVehicleDefensiveBuilding()
             {
-                this.numDefensiveBuildings = numDefensiveBuildings;
+                this.numAntiVehicleDefense++;
+                return this;
+            }
+
+            public Builder AddAntiAirDefensiveBuilding()
+            {
+                this.numAntiAirDefense++;
+                return this;
+            }
+
+            public Builder AddOtherDefensiveBuilding()
+            {
+                this.numOtherDefensiveBuildings++;
                 return this;
             }
 
