@@ -156,7 +156,6 @@
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportLocationGrid.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportUtils.cs" />
     <Compile Include="AI\Esu\Strategy\StrategicWorldState.cs" />
-    <Compile Include="AI\Esu\Rules\Units\UnitGroup.cs" />
     <Compile Include="AI\HackyAI.cs" />
     <Compile Include="AI\Squad.cs" />
     <Compile Include="AI\StateMachine.cs" />

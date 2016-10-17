@@ -163,9 +163,6 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines amount of resources to have on hand before the next production is considered (Rule AmountOfResourcesToHaveBeforeNextProduction)")]
         public readonly int AmountOfResourcesToHaveBeforeNextProduction = 400;
 
-        [Desc("Determines the percentage of units to keep for base defense (Rule PercentageOfUnitsKeptForDefense)")]
-        public readonly int PercentageOfUnitsKeptForDefense = 20;
-
         [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;
 

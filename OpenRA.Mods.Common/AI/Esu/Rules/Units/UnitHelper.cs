@@ -19,62 +19,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
-        private readonly List<UnitGroup> unitGroups;
-
         public UnitHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;
-
-            this.unitGroups = new List<UnitGroup>();
-        }
-
-        private void addInitialUnitGroups()
-        {
-            // For now, we have just one offensive and one offensive group.
-            unitGroups.Add(new UnitGroup(Purpose.Offense));
-            unitGroups.Add(new UnitGroup(Purpose.Defense));
-        }
-
-        // @return - returns true if the produced unit was claimed, false otherwise.
-        public bool UnitProduced(Actor self, Actor other)
-        {
-            UnitGroup group = GetFirstGroupExpectingUnit(other.Info.Name);
-            if (group == null) {
-                return false;
-            }
- 
-            group.AddUnitToGroup(other);
-            return true;
-        }
-
-        private UnitGroup GetFirstGroupExpectingUnit(string unitName)
-        {
-            foreach (UnitGroup group in unitGroups) {
-                if (group.ExpectedUnit == unitName) {
-                    return group;
-                }
-            }
-            return null;
         }
 
         public void OnOrderDenied(Order order)
         {
-            if (order.OrderString != EsuAIConstants.OrderTypes.PRODUCTION_ORDER) {
-                return;
-            }
-
-            UnitGroup group = GetFirstGroupExpectingUnit(order.TargetString);
-            if (group != null) {
-                group.StopExpectingUnit();
-            }
+            /* Do Nothing. */
         }
 
         public void AddUnitOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            PruneUnitGroups();
-
             unitProductionCooldown --;
             if (unitProductionCooldown > 0) {
                 return;
@@ -85,13 +43,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 ProduceInfantry(self, state, orders);
             } else {
                 ProduceVehicle(self, state, orders);
-            }
-        }
-
-        private void PruneUnitGroups()
-        {
-            foreach (UnitGroup group in unitGroups) {
-                group.RemoveDeadUnits();                
             }
         }
 
@@ -159,48 +110,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             // We can build now.
             orders.Enqueue(Order.StartProduction(self, unitName, 1));
             unitProductionCooldown = UNIT_PRODUCTION_COOLDOWN;
-            PlaceUnitInGroup(unitName);
-        }
-
-        private void PlaceUnitInGroup(string unitName)
-        {
-            Purpose unitPurpose = Purpose.Offense;
-
-            double offensiveTotal = GetNumberOfUnitsForPurpose(Purpose.Offense);
-            double defensiveTotal = GetNumberOfUnitsForPurpose(Purpose.Defense);
-            // Check for divide by 0 error.
-            double defensivePercentage = (offensiveTotal != 0) ? (defensiveTotal / offensiveTotal) : defensiveTotal;
-            if (defensivePercentage < (info.PercentageOfUnitsKeptForDefense / 100.0)) {
-                unitPurpose = Purpose.Defense;
-            }
-
-            UnitGroup group = GetOrAddUnitGroupForPurpose(unitPurpose);
-            group.ExpectedUnit = unitName;
-        }
-
-        private int GetNumberOfUnitsForPurpose(Purpose purpose)
-        {
-            int total = 0;
-            foreach (UnitGroup group in unitGroups) {
-                if (group.Purpose == purpose) {
-                    total += group.UnitCount;
-                }
-            }
-            return total;
-        }
-
-        private UnitGroup GetOrAddUnitGroupForPurpose(Purpose purpose)
-        {
-            foreach (UnitGroup group in unitGroups) {
-                if (group.Purpose == purpose) {
-                    return group;
-                }
-            }
-
-            // Haven't yet found a group for this purpose, create and return a new one.
-            UnitGroup newGroup = new UnitGroup(purpose);
-            unitGroups.Add(newGroup);
-            return newGroup;
         }
 
         /** @return - true if the building production has been scheduled, false otherwise. */
