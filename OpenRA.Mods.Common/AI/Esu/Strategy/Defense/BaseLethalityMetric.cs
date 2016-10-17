@@ -42,9 +42,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
             foreach (Actor item in offensiveItems) {
                 // TODO find actual lethality metric to use (Maybe something in item.Trait<Armament>().Weapon?)
-                map.Add(item, 0);
+                map.Add(item, item.Trait<Health>().HP);
             }
-            return map
+            return map;
         }
     }
 }
