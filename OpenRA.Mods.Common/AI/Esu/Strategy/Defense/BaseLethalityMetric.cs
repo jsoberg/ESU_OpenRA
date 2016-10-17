@@ -48,7 +48,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
             return map;
         }
 
-        public DefenseCoverage ActorsNecessaryForDefense(double desiredDefensePercentage)
+        /// <summary>
+        ///  Provides defensive coverage of base, without taking into account actor placement.
+        /// </summary>
+        public DefenseCoverage CurrentDefenseCoverage_Simple(double desiredDefensePercentage)
         {
             List<Actor> necessaryActors = new List<Actor>();
             int currentLethalityNeeded = GetLethalityCoverageRequiredForVulnerableUnits(desiredDefensePercentage);
