@@ -30,11 +30,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return;
             }
 
-            bool wasClaimed = scoutHelper.UnitProduced(self, produced);
-            // If scout helper doesn't claim unit, then the unit helper might.
-            if (!wasClaimed) {
-                unitHelper.UnitProduced(self, produced);
-            }
+            scoutHelper.UnitProduced(self, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)
