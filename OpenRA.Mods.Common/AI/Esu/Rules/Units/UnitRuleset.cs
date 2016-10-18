@@ -11,7 +11,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
     class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction, IOrderDeniedListener
     {
         private ScoutHelper scoutHelper;
-        private UnitHelper unitHelper;
+        private UnitProductionHelper unitHelper;
 
         public UnitRuleset(World world, EsuAIInfo info) : base(world, info)
         {
@@ -21,7 +21,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             base.Activate(selfPlayer);
             this.scoutHelper = new ScoutHelper(world, selfPlayer, info);
-            this.unitHelper = new UnitHelper(world, selfPlayer, info);
+            this.unitHelper = new UnitProductionHelper(world, selfPlayer, info);
         }
 
         void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
@@ -30,11 +30,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
                 return;
             }
 
-            bool wasClaimed = scoutHelper.UnitProduced(self, produced);
-            // If scout helper doesn't claim unit, then the unit helper might.
-            if (!wasClaimed) {
-                unitHelper.UnitProduced(self, produced);
-            }
+            scoutHelper.UnitProduced(self, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)
