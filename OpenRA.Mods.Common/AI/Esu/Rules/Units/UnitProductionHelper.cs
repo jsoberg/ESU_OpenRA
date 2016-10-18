@@ -8,7 +8,7 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
-    public class UnitHelper
+    public class UnitProductionHelper
     {
         private static MersenneTwister RANDOM = new MersenneTwister(); 
 
@@ -19,7 +19,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
-        public UnitHelper(World world, Player selfPlayer, EsuAIInfo info)
+        public UnitProductionHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.world = world;
             this.selfPlayer = selfPlayer;
