@@ -38,7 +38,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private void AddAttackMoveOrders(Queue<Order> orders, List<Actor> attackActors, CPos targetPosition)
         {
             foreach (Actor actor in attackActors) {
-                var move = new Order("Move", actor, false) { TargetLocation = targetPosition };
+                var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
                 orders.Enqueue(move);
             }
         }
