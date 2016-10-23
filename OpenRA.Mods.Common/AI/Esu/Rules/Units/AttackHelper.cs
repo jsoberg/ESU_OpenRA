@@ -2,8 +2,11 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Mods.Common.Traits;
+using OpenRA.Support;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
+namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class AttackHelper
     {
@@ -16,6 +19,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;
+        }
+
+        public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+
         }
     }
 }
