@@ -25,5 +25,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
 
         }
+
+        private void AddCreateGroupOrder(Queue<Order> orders, List<Actor> actorsToGroup)
+        {
+            var createGroupOrder =  new Order("CreateGroup", selfPlayer.PlayerActor, false)
+            {
+                TargetString = actorsToGroup.Select(a => a.ActorID).JoinWith(",")
+            };
+            orders.Enqueue(createGroupOrder);
+        }
+
+        private void AddAttackMoveOrders(Queue<Order> orders, List<Actor> attackActors, CPos targetPosition)
+        {
+            foreach (Actor actor in attackActors) {
+                var move = new Order("Move", actor, false) { TargetLocation = targetPosition };
+                orders.Enqueue(move);
+            }
+        }
     }
 }
