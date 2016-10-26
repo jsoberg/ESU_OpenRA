@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Rules;
+using static OpenRA.Mods.Common.AI.Esu.Rules.AttackHelper;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
 {
@@ -53,11 +54,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
         /// <summary>
         ///  Provides defensive coverage of base, without taking into account actor placement.
         /// </summary>
-        public DefenseCoverage CurrentDefenseCoverage_Simple(double desiredDefensePercentage)
+        public DefenseCoverage CurrentDefenseCoverage_Simple(double desiredDefensePercentage, List<AttackInAction> currentAttacks)
         {
             List<Actor> necessaryActors = new List<Actor>();
             int currentLethalityNeeded = GetLethalityCoverageRequiredForVulnerableUnits(desiredDefensePercentage);
             Dictionary<Actor, int> offenseClone = new Dictionary<Actor, int>(OffensiveActorToLethalityMap);
+            // Remove any actors currently in an attack.
+            foreach (AttackInAction attack in currentAttacks) {
+                foreach (Actor attackActor in attack.AttackTroops) {
+                    offenseClone.Remove(attackActor);
+                }
+            }
 
             while (currentLethalityNeeded > 0 && offenseClone.Count > 0)
             {
