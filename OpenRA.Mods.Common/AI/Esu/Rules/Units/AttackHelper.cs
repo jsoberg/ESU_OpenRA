@@ -12,7 +12,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class AttackHelper
     {
-        private const double DEFENSIVE_COVERAGE = .8;
+        private const double DEFENSIVE_COVERAGE = .2;
         private const int TICKS_TO_CHECK = 10;
 
         private readonly World world;
@@ -26,6 +26,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;
+
+            this.CurrentAttacks = new List<AttackInAction>();
         }
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
