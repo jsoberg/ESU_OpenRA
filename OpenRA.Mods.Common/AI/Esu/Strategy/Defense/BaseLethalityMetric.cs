@@ -26,7 +26,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
 
         private Dictionary<Actor, int> BuildVulnerableActorMapForPlayer(World world, Player selfPlayer)
         {
-            var vulnerableItems = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && (a.Trait<Armament>() == null && a.Trait<AttackGarrisoned>() == null));
+            var vulnerableItems = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead 
+                && (!a.Info.HasTraitInfo<ArmamentInfo>() && !a.Info.HasTraitInfo<AttackGarrisonedInfo>()) && a.TraitOrDefault<Health>() != null);
 
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
             foreach (Actor item in vulnerableItems) {
@@ -38,7 +39,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
 
         private Dictionary<Actor, int> BuildOffensiveActorMapForPlayer(World world, Player selfPlayer)
         {
-            var offensiveItems = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && (a.TraitOrDefault<Armament>() != null || a.TraitOrDefault<AttackGarrisoned>() != null));
+            var offensiveItems = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead 
+                && (a.Info.HasTraitInfo<ArmamentInfo>() || a.Info.HasTraitInfo<AttackGarrisonedInfo>()) && a.TraitOrDefault<Health>() != null);
 
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
             foreach (Actor item in offensiveItems) {

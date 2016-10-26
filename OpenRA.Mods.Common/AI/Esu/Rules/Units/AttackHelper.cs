@@ -12,6 +12,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 {
     public class AttackHelper
     {
+        private const double DEFENSIVE_COVERAGE = .8;
+        private const int TICKS_TO_CHECK = 10;
+
         private readonly World world;
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
@@ -27,27 +30,31 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            CheckStrategicStateForAttack(state, orders);
+            if (world.GetCurrentLocalTickCount() % TICKS_TO_CHECK == 0) {
+                CheckStrategicStateForAttack(state, orders);
+            }
         }
 
         private void CheckStrategicStateForAttack(StrategicWorldState state, Queue<Order> orders)
         {
             ScoutReportLocationGrid reportGrid = state.ScoutReportGrid;
             AggregateScoutReportData bestCell = reportGrid.GetCurrentBestFitCell();
-
             if (bestCell == null) {
                 // We have no cell to possibly attack, continue.
                 return;
             }
 
-            // TODO Debug code for getting lethality metric
             var metric = new BaseLethalityMetric(world, selfPlayer);
-            var defensiveActors = metric.CurrentDefenseCoverage_Simple(.20);
+            // TODO include current attack actors
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE);
+            // We have enough lethality to defend.
+            if (defensiveCoverage.AdditionalLethalityNeededToDefend < 0) {
+                IssueAttackWithDefensiveActors(defensiveCoverage.ActorsNecessaryForDefense, state, orders, bestCell.RelativePosition);
+            }
         }
 
         private void IssueAttackWithDefensiveActors(IEnumerable<Actor> defensiveActors, StrategicWorldState state, Queue<Order> orders, CPos targetPosition)
         {
-            // TODO
             IEnumerable<Actor> attackActors = ActorsCurrentlyAvailableForAttack(defensiveActors);
             AddCreateGroupOrder(orders, attackActors);
             AddAttackMoveOrders(orders, attackActors, targetPosition);
