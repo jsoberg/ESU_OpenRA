@@ -12,6 +12,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
     {
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
+        private AttackHelper attackHelper;
 
         public UnitRuleset(World world, EsuAIInfo info) : base(world, info)
         {
@@ -22,6 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             base.Activate(selfPlayer);
             this.scoutHelper = new ScoutHelper(world, selfPlayer, info);
             this.unitHelper = new UnitProductionHelper(world, selfPlayer, info);
+            this.attackHelper = new AttackHelper(world, selfPlayer, info);
         }
 
         void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
@@ -45,6 +47,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             if (!scoutHelper.IsScoutBeingProduced()) {
                 unitHelper.AddUnitOrdersIfApplicable(self, state, orders);
             }
+            // Always allow the attack helper to add orders.
+            attackHelper.AddAttackOrdersIfApplicable(self, state, orders);
         }
     }
 }
