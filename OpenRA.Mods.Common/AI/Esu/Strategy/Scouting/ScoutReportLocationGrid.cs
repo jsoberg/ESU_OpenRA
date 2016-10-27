@@ -11,7 +11,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         private const int WIDTH_PER_GRID_SQUARE = 10;
 
         // How many ticks before scout report times out and is thrown away.
-        private const int TICK_TIMEOUT = 1000;
+        private const int TICK_TIMEOUT = 3000;
 
         private readonly List<ScoutReport>[][] ScoutReportGridMatrix;
 
@@ -55,7 +55,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 List<ScoutReport>[] row = ScoutReportGridMatrix[i];
                 for (int j = 0; j < row.Count(); j ++) {
                     List<ScoutReport> report = row[j];
-                    report.RemoveAll(sr => (sr.TickReported + TICK_TIMEOUT) <= world.GetCurrentLocalTickCount());
+                    if (report != null) {
+                        report.RemoveAll(sr => (sr.TickReported + TICK_TIMEOUT) <= world.GetCurrentLocalTickCount());
+                    }
                 }
             }
         }
@@ -68,7 +70,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 List<ScoutReport>[] row = ScoutReportGridMatrix[i];
                 for (int j = 0; j < row.Count(); j++) {
                     AggregateScoutReportData current = GetAggregateDataForCell(i, j);
-                    if (best == null || (current.CompareTo(best) > 0)) {
+                    if (best == null || (current != null && (current.CompareTo(best) > 0))) {
                         best = current;
                     }
                 }
@@ -80,6 +82,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public AggregateScoutReportData GetAggregateDataForCell(int X, int Y)
         {
             List<ScoutReport> cell = ScoutReportGridMatrix[X][Y];
+            if (cell == null) {
+                return null;
+            }
+
             int totalRisk = 0;
             int totalReward = 0;
             foreach (ScoutReport report in cell) {
@@ -87,6 +93,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 totalReward += report.ResponseRecommendation.RewardValue;
             }
 
+            if (cell.Count() == 0) {
+                return null;
+            }
             int avgRisk = totalRisk / cell.Count();
             int avgReward = totalReward / cell.Count();
             CPos pos = new CPos(X * WIDTH_PER_GRID_SQUARE, Y * WIDTH_PER_GRID_SQUARE);
