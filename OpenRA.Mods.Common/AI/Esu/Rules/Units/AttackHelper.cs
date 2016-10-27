@@ -48,7 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
             var metric = new BaseLethalityMetric(world, selfPlayer);
             // TODO include current attack actors
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE);
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, CurrentAttacks);
             // We have enough lethality to defend.
             if (defensiveCoverage.AdditionalLethalityNeededToDefend < 0) {
                 IssueAttackWithDefensiveActors(defensiveCoverage.ActorsNecessaryForDefense, state, orders, bestCell.RelativePosition);
@@ -80,8 +80,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private void AddCreateGroupOrder(Queue<Order> orders, IEnumerable<Actor> actorsToGroup)
         {
-            var createGroupOrder =  new Order("CreateGroup", selfPlayer.PlayerActor, false)
-            {
+            var createGroupOrder =  new Order("CreateGroup", selfPlayer.PlayerActor, false) {
                 TargetString = actorsToGroup.Select(a => a.ActorID).JoinWith(",")
             };
             orders.Enqueue(createGroupOrder);
