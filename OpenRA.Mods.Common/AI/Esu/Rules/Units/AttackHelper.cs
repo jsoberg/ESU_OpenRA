@@ -58,24 +58,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         private void IssueAttackWithDefensiveActors(IEnumerable<Actor> defensiveActors, StrategicWorldState state, Queue<Order> orders, CPos targetPosition)
         {
             IEnumerable<Actor> attackActors = ActorsCurrentlyAvailableForAttack(defensiveActors);
-            AddCreateGroupOrder(orders, attackActors);
+            //AddCreateGroupOrder(orders, attackActors);
             AddAttackMoveOrders(orders, attackActors, targetPosition);
+            CurrentAttacks.Add(new AttackInAction(targetPosition, attackActors));
         }
 
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(IEnumerable<Actor> defensiveActors)
         {
-            return world.ActorsHavingTrait<Armament>().Where(a => a.Owner == selfPlayer && !a.IsDead 
-                && defensiveActors.Contains(a) && !IsActorCurrentlyInvolvedInAttack(a));
+            IEnumerable<Actor> actors = world.ActorsHavingTrait<Armament>().Where(a => a.Owner == selfPlayer && !a.IsDead 
+                && !defensiveActors.Contains(a));
+
+            return actors.Except(AllActorsInAttack());
         }
 
-        private bool IsActorCurrentlyInvolvedInAttack(Actor a)
+        private IEnumerable<Actor> AllActorsInAttack()
         {
-            foreach (AttackInAction currentAttack in CurrentAttacks) {
-                if (currentAttack.AttackTroops.Contains(a)) {
-                    return true;
-                }
+            List<Actor> actors = new List<Actor>();
+            foreach (AttackInAction attack in CurrentAttacks) {
+                actors.Concat(actors);
             }
-            return false;
+            return actors;
         }
 
         private void AddCreateGroupOrder(Queue<Order> orders, IEnumerable<Actor> actorsToGroup)
