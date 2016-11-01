@@ -8,7 +8,7 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Defense;
 using static OpenRA.Mods.Common.AI.Esu.Strategy.ScoutReportLocationGrid;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class AttackHelper
     {
@@ -47,7 +47,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
 
             var metric = new BaseLethalityMetric(world, selfPlayer);
-            // TODO include current attack actors
             var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, CurrentAttacks);
             // We have enough lethality to defend.
             if (defensiveCoverage.AdditionalLethalityNeededToDefend < 0) {

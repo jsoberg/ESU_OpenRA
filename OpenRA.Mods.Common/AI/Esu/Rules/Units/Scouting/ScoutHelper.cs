@@ -10,7 +10,7 @@ using OpenRA.Mods.Common.Activities;
 using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     class ScoutHelper
     {

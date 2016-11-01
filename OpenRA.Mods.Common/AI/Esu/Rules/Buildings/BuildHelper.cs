@@ -10,7 +10,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 {
     public class BuildHelper
     {
