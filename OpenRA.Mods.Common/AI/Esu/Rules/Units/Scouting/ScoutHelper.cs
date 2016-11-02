@@ -75,7 +75,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private bool ShouldBuildNewScout(StrategicWorldState state)
         {
-            if (scoutInProductionName != null || currentScouts.Count >= info.NumberOfScoutsToProduce || state.EnemyInfoList.All(a => a.FoundEnemyLocation != CPos.Invalid)) {
+            if (scoutInProductionName != null || currentScouts.Count >= info.NumberOfScoutsToProduce) {
                 return false;
             }
 

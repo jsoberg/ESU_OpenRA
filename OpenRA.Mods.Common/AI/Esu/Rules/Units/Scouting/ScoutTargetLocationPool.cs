@@ -40,14 +40,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             AddMapCorners(state.World);
         }
 
-        private CPos GetNextAvailableTargetLocation(StrategicWorldState state, Actor scoutActor)
-        {
-            if (AvailablePositions.Count > 0) {
-                return AvailablePositions.Dequeue();
-            }
-            return state.World.Map.AllCells.Where(c => scoutActor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(Random);
-        }
-
         private void AddPredictedEnemyLocations(StrategicWorldState state)
         {
             foreach (EnemyInfo enemy in state.EnemyInfoList) {
@@ -64,6 +56,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             foreach (CPos corner in corners) {
                 AvailablePositions.Enqueue(corner);
             }
+        }
+
+        private CPos GetNextAvailableTargetLocation(StrategicWorldState state, Actor scoutActor)
+        {
+            if (AvailablePositions.Count > 0) {
+                return AvailablePositions.Dequeue();
+            }
+            return GetFoundEnemyLocationOrRandom(state, scoutActor);
+        }
+
+        private CPos GetFoundEnemyLocationOrRandom(StrategicWorldState state, Actor scoutActor)
+        {
+            foreach (EnemyInfo enemy in state.EnemyInfoList) {
+                if (enemy.FoundEnemyLocation != CPos.Invalid) {
+                    return enemy.FoundEnemyLocation;
+                }
+            }
+            return state.World.Map.AllCells.Where(c => scoutActor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(Random);
         }
     }
 }
