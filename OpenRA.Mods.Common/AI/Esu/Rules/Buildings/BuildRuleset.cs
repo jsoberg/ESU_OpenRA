@@ -105,7 +105,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private bool ShouldBuildRefinery(StrategicWorldState state)
         {
             // If ShouldProduceScoutBeforeRefinery is true and we don't yet have any scouts, we don't want to build a refinery yet.
-            if (info.ShouldProduceScoutBeforeRefinery != 0 && !state.EnemyInfoList.Any(a => a.IsScouting)) {
+            if (info.ShouldProduceScoutBeforeRefinery != 0 && NumOwnedBarracks() < 1) {
                 return false;
             }
 
@@ -118,10 +118,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private void BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
         {
             // TODO: Right now we just build barracks, obviously this needs to do something more.
-            var ownedBarracks = EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
-            if (ownedBarracks < 1) {
+            if (NumOwnedBarracks() < 1) {
                 StartProduction(self, orders, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
             }
+        }
+
+        private int NumOwnedBarracks()
+        {
+            return EsuAIUtils.BuildingCountForPlayerOfType(world, selfPlayer, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
         }
 
         private void BuildQueuedBuildings(Actor self, StrategicWorldState state, Queue<Order> orders)

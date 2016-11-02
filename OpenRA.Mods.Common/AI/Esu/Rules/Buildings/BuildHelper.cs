@@ -226,7 +226,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
         private CPos FindBuildableLocationAwayFromEnemies(StrategicWorldState state, CPos baseCenter, string actorType)
         {
-            var bestEnemyLocation = state.EnemyInfoList.First().GetBestAvailableEnemyLocation();
+            var bestEnemyLocation = state.EnemyInfoList.First().GetBestAvailableEnemyLocation(state, selfPlayer);
             var opposite = GeometryUtils.OppositeCornerOfNearestCorner(world.Map, bestEnemyLocation);
             var moveFromBaseToOpposite = GeometryUtils.MoveTowards(state.SelfIntialBaseLocation, opposite, info.MaxBaseRadius, world.Map);
             return FindFirstBuildableLocation(moveFromBaseToOpposite, 0, info.MaxBaseRadius, actorType);

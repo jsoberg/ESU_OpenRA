@@ -22,6 +22,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private readonly List<ScoutActor> currentScouts;
         private readonly List<ScoutActor> deadScouts;
+        private readonly ScoutTargetLocationPool targetPool;
         private string scoutInProductionName;
 
         public ScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
@@ -34,6 +35,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             this.currentScouts = new List<ScoutActor>();
             this.deadScouts = new List<ScoutActor>();
+            this.targetPool = new ScoutTargetLocationPool(selfPlayer);
         }
 
         public bool IsScoutBeingProduced()
@@ -146,19 +148,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 scout.ProductionCooldown--;
                 scout.MovementCooldown--;
 
-                if (!scout.HasAnyTarget() && scout.ProductionCooldown > 0) {
-                    AddEnemyLocationsForScout(scout, state);
-                    IssueActivityToMoveScout(scout, orders);
+                if (!scout.HasTarget() && scout.ProductionCooldown > 0) {
+                    IssueActivityToMoveScout(scout, state, orders);
                 } else if (scout.MovementCooldown <= 0) {
 
                     if (scout.PreviousCheckedLocation == scout.Actor.Location) {
-                        // Scout hasn't moved in awhile. Adjust the target location try to get it going.
-                        CPos nextTarget = scout.NextTarget();
-                        if (nextTarget == CPos.Invalid) {
-                            nextTarget = world.Map.AllCells.Where(c => scout.Actor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(random);
-                        }
-                        
-                        IssueActivityToMoveScout(scout, orders);
+                        IssueActivityToMoveScout(scout, state, orders);
                     } else {
                         // Scout has moved, so lets reset and check in on it next cooldown.
                         scout.PreviousCheckedLocation = scout.Actor.Location;
@@ -168,33 +163,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        private void AddEnemyLocationsForScout(ScoutActor scout, StrategicWorldState state)
+        private void IssueActivityToMoveScout(ScoutActor scout, StrategicWorldState state, Queue<Order> orders)
         {
-            var enemy = state.EnemyInfoList.First();
-            scout.EnemyName = enemy.EnemyName;
-            // TODO If the enemy isn't being scouted yet, return the predicted enemy location. Otherwise, get an unused corner.
-            CPos predictedLoc = enemy.PredictedEnemyLocation;// !enemy.IsScouting ? enemy.PredictedEnemyLocation : GetUnscoutedCorner(scout, state);
-            scout.AddTargetLocation(predictedLoc);
-
-            enemy.IsScouting = true;
-        }
-
-        private CPos GetUnscoutedCorner(ScoutActor scout, StrategicWorldState state)
-        {
-            var corners = GeometryUtils.GetMapCorners(world.Map);
-
-            // Return first unused corner.
-            foreach (CPos corner in corners) {
-                if (currentScouts.All(s => s.HasTarget(corner))) {
-                    return corner;
-                }
-            }
-            return GeometryUtils.OppositeCornerOfNearestCorner(world.Map, state.SelfIntialBaseLocation);
-        }
-
-        private void IssueActivityToMoveScout(ScoutActor scout, Queue<Order> orders)
-        {
-            CPos target = scout.Actor.Trait<Mobile>().NearestMoveableCell(scout.NextTarget());
+            scout.CurrentTargetLocation = targetPool.GetAvailableTargetLocation(state, scout.Actor);
+            CPos target = scout.Actor.Trait<Mobile>().NearestMoveableCell(scout.CurrentTargetLocation);
             Order move = new Order("Move", scout.Actor, false) { TargetLocation = target};
             orders.Enqueue(move);
 
@@ -224,40 +196,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         public const int MOVEMENT_COOLDOWN_TICKS = 100;
 
         public readonly Actor Actor;
-
-        public string EnemyName { get; internal set; }
         public int ProductionCooldown = 4;
 
+        public CPos CurrentTargetLocation { get; set; }
         public CPos PreviousCheckedLocation { get; set; }
         public int MovementCooldown = 0;
-
-        private readonly Queue<CPos> TargetLocationQueue;
 
         public ScoutActor(Actor actor)
         {
             this.Actor = actor;
-            this.TargetLocationQueue = new Queue<CPos>();
+            this.CurrentTargetLocation = CPos.Invalid;
             this.PreviousCheckedLocation = CPos.Invalid;
         }
 
-        public bool HasAnyTarget()
+        public bool HasTarget()
         {
-            return TargetLocationQueue.Count > 0;
-        }
-
-        public bool HasTarget(CPos targetLoc)
-        {
-            return TargetLocationQueue.Contains(targetLoc);
-        }
-
-        public CPos NextTarget()
-        {
-            return TargetLocationQueue.Count > 0 ? TargetLocationQueue.Dequeue() : CPos.Invalid;
-        }
-
-        public void AddTargetLocation(CPos newTarget)
-        {
-            TargetLocationQueue.Enqueue(newTarget);
+            return (CurrentTargetLocation != CPos.Invalid);
         }
     }
 }
