@@ -50,8 +50,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, CurrentAttacks);
             // We have enough lethality to defend.
             if (defensiveCoverage.AdditionalLethalityNeededToDefend < 0) {
-                IssueAttackWithDefensiveActors(defensiveCoverage.ActorsNecessaryForDefense, state, orders, bestCell.RelativePosition);
+                IssueAttackIfViable(defensiveCoverage.ActorsNecessaryForDefense, state, orders, bestCell);
             }
+        }
+
+        private void IssueAttackIfViable(IEnumerable<Actor> defensiveActors, StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
+        {
+            IssueAttackWithDefensiveActors(defensiveActors, state, orders, bestCell.RelativePosition);
         }
 
         private void IssueAttackWithDefensiveActors(IEnumerable<Actor> defensiveActors, StrategicWorldState state, Queue<Order> orders, CPos targetPosition)
