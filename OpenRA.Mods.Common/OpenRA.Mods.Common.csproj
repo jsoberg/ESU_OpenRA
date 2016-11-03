@@ -143,8 +143,10 @@
     <Compile Include="AI\Esu\Rules\Buildings\BuildHelper.cs" />
     <Compile Include="AI\Esu\EsuAIConstants.cs" />
     <Compile Include="AI\Esu\Rules\Buildings\BuildRuleset.cs" />
-    <Compile Include="AI\Esu\Rules\Units\AttackHelper.cs" />
-    <Compile Include="AI\Esu\Rules\Units\ScoutHelper.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Attacking\AttackHelper.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Attacking\AttackLogicUtils.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutHelper.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutTargetLocationPool.cs" />
     <Compile Include="AI\Esu\Rules\Units\UnitProductionHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\UnitRuleset.cs" />
     <Compile Include="AI\Esu\EsuAIUtils.cs" />
