@@ -6,7 +6,7 @@ using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction, IOrderDeniedListener
     {

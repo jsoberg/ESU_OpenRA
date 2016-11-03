@@ -8,7 +8,7 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Defense;
 using static OpenRA.Mods.Common.AI.Esu.Strategy.ScoutReportLocationGrid;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class AttackHelper
     {
@@ -47,35 +47,41 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
             }
 
             var metric = new BaseLethalityMetric(world, selfPlayer);
-            // TODO include current attack actors
             var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, CurrentAttacks);
             // We have enough lethality to defend.
             if (defensiveCoverage.AdditionalLethalityNeededToDefend < 0) {
-                IssueAttackWithDefensiveActors(defensiveCoverage.ActorsNecessaryForDefense, state, orders, bestCell.RelativePosition);
+                IssueAttackIfViable(defensiveCoverage.ActorsNecessaryForDefense, state, orders, bestCell);
             }
+        }
+
+        private void IssueAttackIfViable(IEnumerable<Actor> defensiveActors, StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
+        {
+            IssueAttackWithDefensiveActors(defensiveActors, state, orders, bestCell.RelativePosition);
         }
 
         private void IssueAttackWithDefensiveActors(IEnumerable<Actor> defensiveActors, StrategicWorldState state, Queue<Order> orders, CPos targetPosition)
         {
             IEnumerable<Actor> attackActors = ActorsCurrentlyAvailableForAttack(defensiveActors);
-            AddCreateGroupOrder(orders, attackActors);
+            //AddCreateGroupOrder(orders, attackActors);
             AddAttackMoveOrders(orders, attackActors, targetPosition);
+            CurrentAttacks.Add(new AttackInAction(targetPosition, attackActors));
         }
 
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(IEnumerable<Actor> defensiveActors)
         {
-            return world.ActorsHavingTrait<Armament>().Where(a => a.Owner == selfPlayer && !a.IsDead 
-                && defensiveActors.Contains(a) && !IsActorCurrentlyInvolvedInAttack(a));
+            IEnumerable<Actor> actors = world.ActorsHavingTrait<Armament>().Where(a => a.Owner == selfPlayer && !a.IsDead 
+                && !defensiveActors.Contains(a));
+
+            return actors.Except(AllActorsInAttack());
         }
 
-        private bool IsActorCurrentlyInvolvedInAttack(Actor a)
+        private IEnumerable<Actor> AllActorsInAttack()
         {
-            foreach (AttackInAction currentAttack in CurrentAttacks) {
-                if (currentAttack.AttackTroops.Contains(a)) {
-                    return true;
-                }
+            List<Actor> actors = new List<Actor>();
+            foreach (AttackInAction attack in CurrentAttacks) {
+                actors.Concat(actors);
             }
-            return false;
+            return actors;
         }
 
         private void AddCreateGroupOrder(Queue<Order> orders, IEnumerable<Actor> actorsToGroup)

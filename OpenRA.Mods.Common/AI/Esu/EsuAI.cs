@@ -6,6 +6,8 @@ using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Rules;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units;
+using OpenRA.Mods.Common.AI.Esu.Rules.Buildings;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 /// <summary>
