@@ -99,25 +99,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
     public class EnemyInfo
     {
         public readonly string EnemyName;
-        public readonly CPos PredictedEnemyLocation;
-
-        public bool IsScouting { get; set; }
         public CPos FoundEnemyLocation { get; set; }
 
         public EnemyInfo(string name, World world, Player selfPlayer)
         {
             this.EnemyName = name;
-            // TODO: This is "2-player centric", in that it's predicting the same location for every enemy player. 
-            // This works fine for one enemy, but once we begin facing more than that we'll need a better method.
-            this.PredictedEnemyLocation = EsuAIUtils.OppositeBaseLocationOfPlayer(world, selfPlayer);
 
             // Default
             FoundEnemyLocation = CPos.Invalid;
         }
         
-        public CPos GetBestAvailableEnemyLocation()
+        public CPos GetBestAvailableEnemyLocation(StrategicWorldState state, Player selfPlayer)
         {
-            return (FoundEnemyLocation == CPos.Invalid) ? PredictedEnemyLocation : FoundEnemyLocation;
+            return (FoundEnemyLocation == CPos.Invalid) ? GetPredictedEnemyLocation(state, selfPlayer) : FoundEnemyLocation;
+        }
+
+        public CPos GetPredictedEnemyLocation(StrategicWorldState state, Player selfPlayer)
+        {
+            // TODO: This is "2-player centric", in that it's predicting the same location for every enemy player. 
+            // This works fine for one enemy, but once we begin facing more than that we'll need a better method.
+            return EsuAIUtils.OppositeBaseLocationOfPlayer(state.World, selfPlayer);
         }
     }
 }

@@ -10,7 +10,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 {
     public class BuildHelper
     {
@@ -226,7 +226,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
 
         private CPos FindBuildableLocationAwayFromEnemies(StrategicWorldState state, CPos baseCenter, string actorType)
         {
-            var bestEnemyLocation = state.EnemyInfoList.First().GetBestAvailableEnemyLocation();
+            var bestEnemyLocation = state.EnemyInfoList.First().GetBestAvailableEnemyLocation(state, selfPlayer);
             var opposite = GeometryUtils.OppositeCornerOfNearestCorner(world.Map, bestEnemyLocation);
             var moveFromBaseToOpposite = GeometryUtils.MoveTowards(state.SelfIntialBaseLocation, opposite, info.MaxBaseRadius, world.Map);
             return FindFirstBuildableLocation(moveFromBaseToOpposite, 0, info.MaxBaseRadius, actorType);

@@ -6,7 +6,7 @@ using OpenRA.Mods.Common.Traits;
 using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 
-namespace OpenRA.Mods.Common.AI.Esu.Rules
+namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class UnitProductionHelper
     {
