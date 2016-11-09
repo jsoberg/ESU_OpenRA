@@ -12,14 +12,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
         private static SQLiteConnection DatabaseConnection;
 
-        public static SQLiteConnection GetDatabaseConnection()
+        static SQLiteConnection GetDatabaseConnection()
         {
             if (DatabaseConnection == null) {
                 string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
-                SQLiteConnection.CreateFile(fileLocation);
+                CreateFileIfNotExists(fileLocation);
+
                 DatabaseConnection = new SQLiteConnection(fileLocation);
             }
             return DatabaseConnection;
+        }
+
+        private static void CreateFileIfNotExists(string fileLocation)
+        {
+            if (!System.IO.File.Exists(fileLocation))
+            {
+                SQLiteConnection.CreateFile(fileLocation);
+            }
         }
     }
 }
