@@ -6,16 +6,18 @@ using System.Data.SQLite;
 
 namespace OpenRA.Mods.Common.AI.Esu.Database
 {
-    static class SQLiteConnectionUtils
+    public static class SQLiteConnectionUtils
     {
         private const string DatabaseFileName = "EsuAIInformation.sqlite";
 
         private static SQLiteConnection DatabaseConnection;
 
-        static SQLiteConnection GetDatabaseConnection()
+        public static SQLiteConnection GetDatabaseConnection()
         {
             if (DatabaseConnection == null) {
-                DatabaseConnection =  new SQLiteConnection(DatabaseFileName);
+                string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
+                SQLiteConnection.CreateFile(fileLocation);
+                DatabaseConnection = new SQLiteConnection(fileLocation);
             }
             return DatabaseConnection;
         }

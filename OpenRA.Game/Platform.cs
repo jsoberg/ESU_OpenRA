@@ -66,7 +66,7 @@ namespace OpenRA
 		public static string SupportDir { get { return supportDir.Value; } }
 		static Lazy<string> supportDir = Exts.Lazy(GetSupportDir);
 
-		static string GetSupportDir()
+		public static string GetSupportDir()
 		{
 			// Use a local directory in the game root if it exists
 			if (Directory.Exists("Support"))
