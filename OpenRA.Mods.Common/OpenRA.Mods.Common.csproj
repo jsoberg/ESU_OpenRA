@@ -162,6 +162,7 @@
     <Compile Include="AI\Esu\Rules\RuleConstants.cs" />
     <Compile Include="AI\Esu\Strategy\Defense\BaseLethalityMetric.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\AggregateScoutReportData.cs" />
+    <Compile Include="AI\Esu\Strategy\Scouting\BestScoutReportData.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReport.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportLocationGrid.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportUtils.cs" />
