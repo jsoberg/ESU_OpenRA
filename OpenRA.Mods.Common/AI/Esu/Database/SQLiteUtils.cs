@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using System.Data.SQLite;
 
 namespace OpenRA.Mods.Common.AI.Esu.Database
 {
@@ -48,6 +47,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             sql += ")";
 
             return sql;
+        }
+
+        public static int GetCountForTable(SQLiteConnection openConnection, string tableName)
+        {
+            string sql = "SELECT COUNT(*) FROM " + tableName;
+            SQLiteCommand countCommand = new SQLiteCommand(sql, openConnection);
+            return (int) countCommand.ExecuteScalar();
         }
     }
 
