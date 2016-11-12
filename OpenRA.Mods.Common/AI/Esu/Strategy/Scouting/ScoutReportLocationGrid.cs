@@ -7,6 +7,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
     public class ScoutReportLocationGrid
     {
+        // Number of ticks to wait between scout report data updates.
+        private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
+
         // Size of a given cell in the report grid.
         private const int WIDTH_PER_GRID_SQUARE = 10;
 
@@ -53,7 +56,56 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             reportsForLocation.Add(report);
         }
 
-        public void RemoveDeadReports(World world)
+        public void PerformUpdates(World world)
+        {
+            // Only log current scout report data every specified number of ticks.
+            if ((world.GetCurrentLocalTickCount() % TICKS_UNTIL_REPORT_DATABASE_UPDATE) == 0) {
+                LogCurrentScoutReportDataToDatabase();
+            }
+            RemoveDeadReports(world);
+        }
+
+        private void LogCurrentScoutReportDataToDatabase()
+        {
+            BestScoutReportData data = GetCurrentScoutReportData();
+            if (data == null) {
+                return;
+            }
+
+            ScoutReportDataTable.InsertScoutReportData(data);
+        }
+
+        private BestScoutReportData GetCurrentScoutReportData()
+        {
+            bool hasData = false;
+            BestScoutReportData.Builder builder = new BestScoutReportData.Builder();
+
+            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
+            {
+                List<ScoutReport>[] row = ScoutReportGridMatrix[i];
+                for (int j = 0; j < row.Count(); j++)
+                {
+                    List<ScoutReport> reports = row[j];
+                    if (reports != null && reports.Count > 0) {
+                        hasData = true;
+                        AddDataToBuilder(builder, reports);
+                    }
+                }
+            }
+
+            return hasData ? builder.Build() : null;
+        }
+
+        private void AddDataToBuilder(BestScoutReportData.Builder builder, List<ScoutReport> reports)
+        {
+            foreach (ScoutReport report in reports)
+            {
+                builder.addRiskValue(report.ResponseRecommendation.RiskValue)
+                    .addRewardValue(report.ResponseRecommendation.RewardValue);
+            }
+        }
+
+        private void RemoveDeadReports(World world)
         {
             for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
             {

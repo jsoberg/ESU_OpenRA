@@ -65,7 +65,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 TryFindEnemyConstructionYard(info, visibility);
             }
 
-            ScoutReportGrid.RemoveDeadReports(World);
+            ScoutReportGrid.PerformUpdates(World);
         }
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)

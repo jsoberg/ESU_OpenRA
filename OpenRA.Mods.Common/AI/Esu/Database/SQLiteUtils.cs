@@ -7,17 +7,43 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 {
     public static class SQLiteUtils
     {
-        public static string GetCreateTableIfNotExistsSQLCommand(string tableName, Column[] columns)
+        public static string GetCreateTableIfNotExistsSQLCommandString(string tableName, Column[] columns)
         {
             string sql = "CREATE TABLE IF NOT EXISTS " + tableName + " ( ";
-            bool deleteFinalComma = false;
-            foreach (Column col in columns)
-            {
-                sql += col.ColumnName + " " + col.ColumnType + ", ";
-                deleteFinalComma = true;
+            int i = 0;
+            foreach (Column col in columns) {
+                i++;
+                sql += col.ColumnName + " " + col.ColumnType;
+                if (i < columns.Count()) {
+                    sql += ", ";
+                }
             }
-            if (deleteFinalComma) {
-                sql = sql.Substring(0, sql.Length - 2);
+            sql += ")";
+
+            return sql;
+        }
+
+        public static string GetInsertSQLCommandString(string tableName, ColumnWithValue[] columnsAndValues)
+        {
+            string sql = "INSERT INTO " + tableName + " (";
+
+            int i = 0;
+            foreach (ColumnWithValue col in columnsAndValues) {
+                i++;
+                sql += col.Column.ColumnName;
+                if (i < columnsAndValues.Count()) {
+                    sql += ", ";
+                }
+            }
+            sql += ") values (";
+
+            i = 0;
+            foreach (ColumnWithValue col in columnsAndValues) {
+                i++;
+                sql += col.Value.ToString();
+                if (i < columnsAndValues.Count()) {
+                    sql += ", ";
+                }
             }
             sql += ")";
 
@@ -27,13 +53,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
     public class Column
     {
-        public string ColumnName;
-        public string ColumnType;
+        public readonly string ColumnName;
+        public readonly string ColumnType;
 
         public Column(string colName, string colType)
         {
             this.ColumnName = colName;
             this.ColumnType = colType;
+        }
+    }
+
+    public class ColumnWithValue
+    {
+        public readonly Column Column;
+        public readonly Object Value;
+
+        public ColumnWithValue(Column column, Object value)
+        {
+            this.Column = column;
+            this.Value = value;
         }
     }
 }

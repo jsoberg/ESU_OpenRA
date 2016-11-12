@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Data.SQLite;
+﻿using System.Data.SQLite;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Database
 {
@@ -30,7 +27,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
             connection.Open();
             try {
-                string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommand(ScoutReportDataTableName, Columns);
+                string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(ScoutReportDataTableName, Columns);
                 SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
                 createTableCommand.ExecuteNonQuery();
             } finally {
@@ -38,6 +35,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             }
         }
 
+        public void InsertScoutReportData(BestScoutReportData data)
+        {
+            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
+            connection.Open();
+            try {
+                ColumnWithValue[] colsWithValues = {
+                    new ColumnWithValue(LowestRisk, data.LowestRisk),
+                    new ColumnWithValue(HighestRisk, data.HighestRisk),
+                    new ColumnWithValue(LowestReward, data.LowestReward),
+                    new ColumnWithValue(HighestReward, data.HighestReward)
 
+                };
+
+                string insert = SQLiteUtils.GetInsertSQLCommandString(ScoutReportDataTableName, colsWithValues);
+                SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
+                insertCommand.ExecuteNonQuery();
+            } finally {
+                connection.Close();
+            }
+        }
     }
 }
