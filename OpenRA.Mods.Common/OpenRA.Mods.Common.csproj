@@ -141,7 +141,9 @@
     <Compile Include="ActorExts.cs" />
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
+    <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
     <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
+    <Compile Include="AI\Esu\Database\SQLiteUtils.cs" />
     <Compile Include="AI\Esu\Rules\BaseEsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
     <Compile Include="AI\Esu\Rules\Buildings\BuildHelper.cs" />
