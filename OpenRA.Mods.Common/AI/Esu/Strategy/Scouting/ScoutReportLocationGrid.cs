@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using OpenRA.Mods.Common.AI.Esu.Database;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
@@ -14,10 +14,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         private const int TICK_TIMEOUT = 3000;
 
         private readonly List<ScoutReport>[][] ScoutReportGridMatrix;
+        private readonly ScoutReportDataTable ScoutReportDataTable;
 
         public ScoutReportLocationGrid(World world)
         {
-            ScoutReportGridMatrix = BuildScoutReportGridMatrix(world);
+            this.ScoutReportGridMatrix = BuildScoutReportGridMatrix(world);
+            this.ScoutReportDataTable = new ScoutReportDataTable();
         }
 
         private List<ScoutReport>[][] BuildScoutReportGridMatrix(World world)

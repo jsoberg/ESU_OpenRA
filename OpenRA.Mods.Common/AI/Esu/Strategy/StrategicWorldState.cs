@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
-using OpenRA.Mods.Common.AI.Esu;
-using OpenRA.Mods.Common.AI.Esu.Database;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
@@ -19,10 +15,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         // This queue will be periodically polled from the build ruleset.
         public readonly Queue<string> RequestedBuildingQueue;
 
-        private readonly ScoutReportDataTable ScoutReportDataTable;
-
         public ScoutReportLocationGrid ScoutReportGrid;
-
         public CPos SelfIntialBaseLocation;
         public World World;
 		public Player SelfPlayer;
@@ -31,7 +24,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             this.EnemyInfoList = new List<EnemyInfo>();
             this.RequestedBuildingQueue = new Queue<string>();
-            this.ScoutReportDataTable = new ScoutReportDataTable();
         }
 
         public void Initalize(World world, Player selfPlayer)
