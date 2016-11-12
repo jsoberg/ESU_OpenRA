@@ -6,7 +6,7 @@ using OpenRA.Mods.Common.Traits;
 using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Defense;
-using static OpenRA.Mods.Common.AI.Esu.Strategy.ScoutReportLocationGrid;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
