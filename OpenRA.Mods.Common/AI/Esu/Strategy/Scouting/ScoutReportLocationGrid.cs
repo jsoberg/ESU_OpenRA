@@ -166,5 +166,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         {
             return (int)Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
         }
+
+        public BestScoutReportData GetBestScoutReportDataFromDatabase()
+        {
+            return ScoutReportDataTable.QueryForBestScoutReportData();
+        }
     }
 }

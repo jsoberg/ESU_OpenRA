@@ -61,8 +61,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
             connection.Open();
             try {
-                int count = SQLiteUtils.GetCountForTable(connection, ScoutReportDataTableName);
-                if (count == 0) {
+                long count = SQLiteUtils.GetCountForTable(connection, ScoutReportDataTableName);
+                if (count <= 0) {
                     return null;
                 }
 

@@ -49,11 +49,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             return sql;
         }
 
-        public static int GetCountForTable(SQLiteConnection openConnection, string tableName)
+        public static long GetCountForTable(SQLiteConnection openConnection, string tableName)
         {
             string sql = "SELECT COUNT(*) FROM " + tableName;
             SQLiteCommand countCommand = new SQLiteCommand(sql, openConnection);
-            return (int) countCommand.ExecuteScalar();
+            return (long) countCommand.ExecuteScalar();
         }
     }
 
