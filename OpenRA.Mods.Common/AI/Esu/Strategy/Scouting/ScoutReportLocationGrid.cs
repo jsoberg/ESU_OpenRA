@@ -1,12 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using OpenRA.Mods.Common.AI.Esu.Database;
 
-namespace OpenRA.Mods.Common.AI.Esu.Strategy
+namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
     public class ScoutReportLocationGrid
     {
+        // Number of ticks to wait between scout report data updates.
+        private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
+
         // Size of a given cell in the report grid.
         private const int WIDTH_PER_GRID_SQUARE = 10;
 
@@ -14,10 +17,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         private const int TICK_TIMEOUT = 3000;
 
         private readonly List<ScoutReport>[][] ScoutReportGridMatrix;
+        private readonly ScoutReportDataTable ScoutReportDataTable;
 
         public ScoutReportLocationGrid(World world)
         {
-            ScoutReportGridMatrix = BuildScoutReportGridMatrix(world);
+            this.ScoutReportGridMatrix = BuildScoutReportGridMatrix(world);
+            this.ScoutReportDataTable = new ScoutReportDataTable();
         }
 
         private List<ScoutReport>[][] BuildScoutReportGridMatrix(World world)
@@ -26,7 +31,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             int gridHeight = GetRoundedIntDividedByWidth(world.Map.MapSize.Y);
 
             List<ScoutReport>[][] grid = new List<ScoutReport>[gridWidth][];
-            for (int i = 0; i < gridWidth; i ++) {
+            for (int i = 0; i < gridWidth; i++)
+            {
                 grid[i] = new List<ScoutReport>[gridHeight];
             }
             return grid;
@@ -39,7 +45,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             int y = GetRoundedIntDividedByWidth(scoutPosition.Y);
 
             List<ScoutReport> reportsForLocation = ScoutReportGridMatrix[x][y];
-            if (reportsForLocation == null) {
+            if (reportsForLocation == null)
+            {
                 reportsForLocation = new List<ScoutReport>();
                 ScoutReportGridMatrix[x][y] = reportsForLocation;
             }
@@ -49,13 +56,65 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             reportsForLocation.Add(report);
         }
 
-        public void RemoveDeadReports(World world)
+        public void PerformUpdates(World world)
         {
-            for (int i = 0; i < ScoutReportGridMatrix.Count(); i ++) {
+            // Only log current scout report data every specified number of ticks.
+            if ((world.GetCurrentLocalTickCount() % TICKS_UNTIL_REPORT_DATABASE_UPDATE) == 0) {
+                LogCurrentScoutReportDataToDatabase();
+            }
+            RemoveDeadReports(world);
+        }
+
+        private void LogCurrentScoutReportDataToDatabase()
+        {
+            BestScoutReportData data = GetCurrentScoutReportData();
+            if (data == null) {
+                return;
+            }
+
+            ScoutReportDataTable.InsertScoutReportData(data);
+        }
+
+        private BestScoutReportData GetCurrentScoutReportData()
+        {
+            bool hasData = false;
+            BestScoutReportData.Builder builder = new BestScoutReportData.Builder();
+
+            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
+            {
                 List<ScoutReport>[] row = ScoutReportGridMatrix[i];
-                for (int j = 0; j < row.Count(); j ++) {
+                for (int j = 0; j < row.Count(); j++)
+                {
+                    List<ScoutReport> reports = row[j];
+                    if (reports != null && reports.Count > 0) {
+                        hasData = true;
+                        AddDataToBuilder(builder, reports);
+                    }
+                }
+            }
+
+            return hasData ? builder.Build() : null;
+        }
+
+        private void AddDataToBuilder(BestScoutReportData.Builder builder, List<ScoutReport> reports)
+        {
+            foreach (ScoutReport report in reports)
+            {
+                builder.addRiskValue(report.ResponseRecommendation.RiskValue)
+                    .addRewardValue(report.ResponseRecommendation.RewardValue);
+            }
+        }
+
+        private void RemoveDeadReports(World world)
+        {
+            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
+            {
+                List<ScoutReport>[] row = ScoutReportGridMatrix[i];
+                for (int j = 0; j < row.Count(); j++)
+                {
                     List<ScoutReport> report = row[j];
-                    if (report != null) {
+                    if (report != null)
+                    {
                         report.RemoveAll(sr => (sr.TickReported + TICK_TIMEOUT) <= world.GetCurrentLocalTickCount());
                     }
                 }
@@ -66,11 +125,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             AggregateScoutReportData best = null;
 
-            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++) {
+            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
+            {
                 List<ScoutReport>[] row = ScoutReportGridMatrix[i];
-                for (int j = 0; j < row.Count(); j++) {
+                for (int j = 0; j < row.Count(); j++)
+                {
                     AggregateScoutReportData current = GetAggregateDataForCell(i, j);
-                    if (best == null || (current != null && (current.CompareTo(best) > 0))) {
+                    if (best == null || (current != null && (current.CompareTo(best) > 0)))
+                    {
                         best = current;
                     }
                 }
@@ -82,54 +144,32 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public AggregateScoutReportData GetAggregateDataForCell(int X, int Y)
         {
             List<ScoutReport> cell = ScoutReportGridMatrix[X][Y];
-            if (cell == null) {
+            if (cell == null || cell.Count() == 0)
+            {
                 return null;
             }
 
-            int totalRisk = 0;
-            int totalReward = 0;
-            foreach (ScoutReport report in cell) {
-                totalRisk += report.ResponseRecommendation.RiskValue;
-                totalReward += report.ResponseRecommendation.RewardValue;
-            }
-
-            if (cell.Count() == 0) {
-                return null;
-            }
-            int avgRisk = totalRisk / cell.Count();
-            int avgReward = totalReward / cell.Count();
             CPos pos = new CPos(X * WIDTH_PER_GRID_SQUARE, Y * WIDTH_PER_GRID_SQUARE);
-            return new AggregateScoutReportData(cell.Count(), avgRisk, avgReward, pos);
+            AggregateScoutReportData.Builder builder = new AggregateScoutReportData.Builder()
+                .withNumReports(cell.Count())
+                .withRelativePosition(pos);
+
+            foreach (ScoutReport report in cell)
+            {
+                builder.addRiskValue(report.ResponseRecommendation.RiskValue)
+                    .addRewardValue(report.ResponseRecommendation.RewardValue);
+            }
+            return builder.Build();
         }
 
         private int GetRoundedIntDividedByWidth(int pos)
         {
-            return (int) Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
+            return (int)Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
         }
 
-        public class AggregateScoutReportData : IComparable<AggregateScoutReportData>
+        public BestScoutReportData GetBestScoutReportDataFromDatabase()
         {
-            public readonly int NumReports;
-
-            public readonly int AverageRiskValue;
-            public readonly int AverageRewardValue;
-
-            public readonly CPos RelativePosition;
-
-            public AggregateScoutReportData(int numReports, int averageRiskValue, int averageRewardValue, CPos relativePosition)
-            {
-                this.NumReports = numReports;
-                this.AverageRiskValue = averageRiskValue;
-                this.AverageRewardValue = averageRewardValue;
-                this.RelativePosition = relativePosition;
-            }
-
-            public int CompareTo(AggregateScoutReportData other)
-            {
-                float fit = (AverageRiskValue != 0) ? (AverageRewardValue / AverageRiskValue) : AverageRewardValue;
-                float otherFit = (other.AverageRiskValue != 0) ? (other.AverageRewardValue / other.AverageRiskValue) : other.AverageRewardValue;
-                return fit.CompareTo(otherFit);
-            }
+            return ScoutReportDataTable.QueryForBestScoutReportData();
         }
     }
 }

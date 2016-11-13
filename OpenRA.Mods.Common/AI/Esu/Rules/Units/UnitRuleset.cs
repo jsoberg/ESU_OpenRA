@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+﻿using System.Collections.Generic;
 using OpenRA.Traits;
-using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {

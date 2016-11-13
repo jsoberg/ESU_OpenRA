@@ -112,7 +112,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             // Else, if we can and haven't yet met the minimum, then we should issue the build.
             var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
                 && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
-            return (ownedActors != null && ownedActors.Count() < 2);
+            return (ownedActors != null && ownedActors.Count() < 3);
         }
 
         private void BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)

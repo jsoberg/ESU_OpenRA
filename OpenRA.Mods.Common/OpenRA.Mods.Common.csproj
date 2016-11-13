@@ -55,6 +55,9 @@
     </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Data.SQLite">
+      <HintPath>..\EsuReferences\System.Data.SQLite.dll</HintPath>
+    </Reference>
     <Reference Include="System.Drawing" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="System.Data" />
@@ -138,13 +141,16 @@
     <Compile Include="ActorExts.cs" />
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
+    <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
+    <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
+    <Compile Include="AI\Esu\Database\SQLiteUtils.cs" />
     <Compile Include="AI\Esu\Rules\BaseEsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
     <Compile Include="AI\Esu\Rules\Buildings\BuildHelper.cs" />
     <Compile Include="AI\Esu\EsuAIConstants.cs" />
     <Compile Include="AI\Esu\Rules\Buildings\BuildRuleset.cs" />
     <Compile Include="AI\Esu\Rules\Units\Attacking\AttackHelper.cs" />
-    <Compile Include="AI\Esu\Rules\Units\Attacking\AttackLogicUtils.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Attacking\AttackStrengthPredictor.cs" />
     <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutTargetLocationPool.cs" />
     <Compile Include="AI\Esu\Rules\Units\UnitProductionHelper.cs" />
@@ -155,6 +161,8 @@
     <Compile Include="AI\Esu\Geometry\VisibilityBounds.cs" />
     <Compile Include="AI\Esu\Rules\RuleConstants.cs" />
     <Compile Include="AI\Esu\Strategy\Defense\BaseLethalityMetric.cs" />
+    <Compile Include="AI\Esu\Strategy\Scouting\AggregateScoutReportData.cs" />
+    <Compile Include="AI\Esu\Strategy\Scouting\BestScoutReportData.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReport.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportLocationGrid.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportUtils.cs" />
