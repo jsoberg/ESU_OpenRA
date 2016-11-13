@@ -14,8 +14,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     class ScoutHelper
     {
-        private readonly MersenneTwister random;
-
         private readonly World world;
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
@@ -27,8 +25,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         public ScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
-            this.random = new MersenneTwister();
-
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;

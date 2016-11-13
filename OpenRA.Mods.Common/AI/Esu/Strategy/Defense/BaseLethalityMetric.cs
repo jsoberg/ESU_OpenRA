@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Rules;
-using static OpenRA.Mods.Common.AI.Esu.Rules.Units.AttackHelper;
+using static OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking.AttackHelper;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
 {
