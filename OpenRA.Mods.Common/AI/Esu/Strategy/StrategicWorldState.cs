@@ -1,9 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
-using OpenRA.Mods.Common.AI.Esu;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
@@ -20,7 +18,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         public ScoutReportLocationGrid ScoutReportGrid;
         public CPos SelfIntialBaseLocation;
-
         public World World;
 		public Player SelfPlayer;
 
@@ -68,7 +65,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 TryFindEnemyConstructionYard(info, visibility);
             }
 
-            ScoutReportGrid.RemoveDeadReports(World);
+            ScoutReportGrid.PerformUpdates(World);
         }
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
