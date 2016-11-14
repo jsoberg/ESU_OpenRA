@@ -45,6 +45,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 return this;
             }
 
+            public Builder addResponseRecommendation(ResponseRecommendation recommendation)
+            {
+                addRiskValue(recommendation.RiskValue);
+                addRewardValue(recommendation.RewardValue);
+                addInfoBuilder(recommendation.InfoBuilder);
+                return this;
+            }
+
             public Builder addRiskValue(int riskValue)
             {
                 TotalRiskValue += riskValue;
@@ -54,6 +62,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             public Builder addRewardValue(int rewardValue)
             {
                 TotalRewardValue += rewardValue;
+                return this;
+            }
+
+            public Builder addInfoBuilder(ScoutReportInfoBuilder builder)
+            {
+                // TODO compile information based on this builder.
                 return this;
             }
 

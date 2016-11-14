@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.Common.AI.Esu;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public static class ScoutReportUtils
     {
-        public static ResponseRecommendation.Builder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor)
+        public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor)
         {
             Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
 
@@ -23,14 +20,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return null;
             }
 
-            ResponseRecommendation.Builder builder = new ResponseRecommendation.Builder(info);
+            ScoutReportInfoBuilder builder = new ScoutReportInfoBuilder(info);
             foreach (Actor enemy in visibileEnemyItems) {
                 AddInformationForEnemyActor(state.World, builder, enemy);
             }
             return builder;
         }
 
-        private static void AddInformationForEnemyActor(World world, ResponseRecommendation.Builder builder, Actor enemy)
+        private static void AddInformationForEnemyActor(World world, ScoutReportInfoBuilder builder, Actor enemy)
         {
             // Power plants.
             {

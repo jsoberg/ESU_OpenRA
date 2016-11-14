@@ -156,8 +156,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
             foreach (ScoutReport report in cell)
             {
-                builder.addRiskValue(report.ResponseRecommendation.RiskValue)
-                    .addRewardValue(report.ResponseRecommendation.RewardValue);
+                builder.addResponseRecommendation(report.ResponseRecommendation);
             }
             return builder.Build();
         }
