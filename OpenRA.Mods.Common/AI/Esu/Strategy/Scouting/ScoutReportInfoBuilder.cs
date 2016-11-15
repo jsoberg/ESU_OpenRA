@@ -9,21 +9,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
     {
         public readonly EsuAIInfo info;
 
-        public int numPowerPlants;
-        public int numAdvancedPowerPlants;
+        public int NumPowerPlants;
+        public int NumAdvancedPowerPlants;
 
-        public int numAntiInfantryDefense;
-        public int numAntiVehicleDefense;
-        public int numAntiAirDefense;
-        public int numOtherDefensiveBuildings;
+        public int NumAntiInfantryDefense;
+        public int NumAntiVehicleDefense;
+        public int NumAntiAirDefense;
+        public int NumOtherDefensiveBuildings;
 
-        public int numInfantryUnits;
-        public int numVehicleUnits;
-        public int numAircraftUnits;
+        public int NumInfantryUnits;
+        public int NumVehicleUnits;
+        public int NumAircraftUnits;
 
-        public int numOreRefineries;
+        public int NumOreRefineries;
 
-        public int numOtherBuildings;
+        public int NumOtherBuildings;
 
         public ScoutReportInfoBuilder(EsuAIInfo info)
         {
@@ -32,98 +32,98 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         public int AllUnits()
         {
-            return (numAircraftUnits + numInfantryUnits + numVehicleUnits);
+            return (NumAircraftUnits + NumInfantryUnits + NumVehicleUnits);
         }
 
         public int AllDefensiveStructures()
         {
-            return (numAntiInfantryDefense + numAntiVehicleDefense + numAntiAirDefense + numOtherDefensiveBuildings);
+            return (NumAntiInfantryDefense + NumAntiVehicleDefense + NumAntiAirDefense + NumOtherDefensiveBuildings);
         }
 
         public ScoutReportInfoBuilder AddPowerPlant()
         {
-            this.numPowerPlants++;
+            this.NumPowerPlants++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddAdvancedPowerPlant()
         {
-            this.numAdvancedPowerPlants++;
+            this.NumAdvancedPowerPlants++;
             return this;
         }
 
         public ScoutReportInfoBuilder SetNumPowerPlants(int numPowerPlants, int numAdvancedPowerPlants)
         {
-            this.numPowerPlants = numPowerPlants;
-            this.numAdvancedPowerPlants = numAdvancedPowerPlants;
+            this.NumPowerPlants = numPowerPlants;
+            this.NumAdvancedPowerPlants = numAdvancedPowerPlants;
             return this;
         }
 
         public ScoutReportInfoBuilder AddAntiInfantryDefensiveBuilding()
         {
-            this.numAntiInfantryDefense++;
+            this.NumAntiInfantryDefense++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddAntiVehicleDefensiveBuilding()
         {
-            this.numAntiVehicleDefense++;
+            this.NumAntiVehicleDefense++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddAntiAirDefensiveBuilding()
         {
-            this.numAntiAirDefense++;
+            this.NumAntiAirDefense++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddOtherDefensiveBuilding()
         {
-            this.numOtherDefensiveBuildings++;
+            this.NumOtherDefensiveBuildings++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddInfantry()
         {
-            this.numInfantryUnits++;
+            this.NumInfantryUnits++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddVehicle()
         {
-            this.numVehicleUnits++;
+            this.NumVehicleUnits++;
             return this;
         }
 
         public ScoutReportInfoBuilder AddAircraft()
         {
-            this.numAircraftUnits++;
+            this.NumAircraftUnits++;
             return this;
         }
 
         public ScoutReportInfoBuilder SetNumUnits(int numInfantryUnits, int numVehicleUnits, int numAircraftUnits)
         {
-            this.numInfantryUnits = numInfantryUnits;
-            this.numVehicleUnits = numVehicleUnits;
-            this.numAircraftUnits = numAircraftUnits;
+            this.NumInfantryUnits = numInfantryUnits;
+            this.NumVehicleUnits = numVehicleUnits;
+            this.NumAircraftUnits = numAircraftUnits;
             return this;
         }
 
         public ScoutReportInfoBuilder AddOreRefinery()
         {
-            this.numOreRefineries++;
+            this.NumOreRefineries++;
             return this;
         }
 
         public ScoutReportInfoBuilder SetNumOreRefineries(int numOreRefineries)
         {
-            this.numOreRefineries = numOreRefineries;
+            this.NumOreRefineries = numOreRefineries;
             return this;
         }
 
         public ScoutReportInfoBuilder AddGenericBuilding()
         {
-            this.numOtherBuildings++;
+            this.NumOtherBuildings++;
             return this;
         }
 
