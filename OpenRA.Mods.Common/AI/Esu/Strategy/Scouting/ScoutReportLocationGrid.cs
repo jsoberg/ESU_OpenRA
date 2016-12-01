@@ -16,24 +16,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         // How many ticks before scout report times out and is thrown away.
         private const int TICK_TIMEOUT = 3000;
 
+        private readonly int GridWidth;
+        private readonly int GridHeight;
         private readonly List<ScoutReport>[][] ScoutReportGridMatrix;
         private readonly ScoutReportDataTable ScoutReportDataTable;
 
         public ScoutReportLocationGrid(World world)
         {
-            this.ScoutReportGridMatrix = BuildScoutReportGridMatrix(world);
+            this.GridWidth = GetRoundedIntDividedByCellSize(world.Map.MapSize.X);
+            this.GridHeight = GetRoundedIntDividedByCellSize(world.Map.MapSize.Y);
+
+            this.ScoutReportGridMatrix = BuildScoutReportGridMatrix();
             this.ScoutReportDataTable = new ScoutReportDataTable();
         }
 
-        private List<ScoutReport>[][] BuildScoutReportGridMatrix(World world)
+        private List<ScoutReport>[][] BuildScoutReportGridMatrix()
         {
-            int gridWidth = GetRoundedIntDividedByWidth(world.Map.MapSize.X);
-            int gridHeight = GetRoundedIntDividedByWidth(world.Map.MapSize.Y);
-
-            List<ScoutReport>[][] grid = new List<ScoutReport>[gridWidth][];
-            for (int i = 0; i < gridWidth; i++)
+            List<ScoutReport>[][] grid = new List<ScoutReport>[GridWidth][];
+            for (int i = 0; i < GridWidth; i++)
             {
-                grid[i] = new List<ScoutReport>[gridHeight];
+                grid[i] = new List<ScoutReport>[GridHeight];
             }
             return grid;
         }
@@ -41,8 +43,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         public void AddScoutReportForActor(Actor actor, ScoutReport report)
         {
             CPos scoutPosition = actor.Location;
-            int x = GetRoundedIntDividedByWidth(scoutPosition.X);
-            int y = GetRoundedIntDividedByWidth(scoutPosition.Y);
+            ScoutReportGridMatrix.Count();
+
+            int x = GetRoundedIntDividedByCellSize(scoutPosition.X);
+            x = Normalize(x, GridWidth);
+            int y = GetRoundedIntDividedByCellSize(scoutPosition.Y);
+            y = Normalize(y, GridHeight);
 
             List<ScoutReport> reportsForLocation = ScoutReportGridMatrix[x][y];
             if (reportsForLocation == null)
@@ -161,9 +167,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return builder.Build();
         }
 
-        private int GetRoundedIntDividedByWidth(int pos)
+        private int GetRoundedIntDividedByCellSize(int pos)
         {
-            return (int)Math.Round((double)pos / (double)WIDTH_PER_GRID_SQUARE);
+            return (int) Math.Round((double) pos / (double) WIDTH_PER_GRID_SQUARE);
+        }
+
+        // Make sure value is inbetween 0 and max
+        private int Normalize(int value, int max)
+        {
+            value = Math.Min(value, max);
+            return Math.Max(value, 0);
         }
 
         public BestScoutReportData GetBestScoutReportDataFromDatabase()
