@@ -179,6 +179,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Radius in cells around the center of the base to expand.")]
         public readonly int MaxBaseRadius = 20;
 
+        [Desc("Minimum number of refineries to build in the beginning of the game.")]
+        public readonly int MinNumRefineries = 3;
+
         string IBotInfo.Name
         {
             get { return AI_NAME; }
