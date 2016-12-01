@@ -139,6 +139,27 @@ namespace OpenRA.Mods.Common.AI.Esu
             PlayerResources resources = owner.PlayerActor.Trait<PlayerResources>();
             return (resources.Cash + resources.Resources); 
         }
+
+        // ========================================
+        // Actor Tasks
+        // ========================================
+
+        public static bool IsActorOfType(World world, Actor actor, string type)
+        {
+            IEnumerable<ProductionQueue> queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, actor.Owner, type);
+            foreach (ProductionQueue queue in queues)
+            {
+                var producables = queue.AllItems();
+                foreach (ActorInfo producable in producables)
+                {
+                    if (actor.Info.Name == producable.Name)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
     }
 
     // ========================================

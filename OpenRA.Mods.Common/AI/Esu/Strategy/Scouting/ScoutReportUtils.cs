@@ -46,7 +46,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             // Defensive structures.
             {
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.DEFENSE))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.DEFENSE))
                 {
                     string name = enemy.Info.Name;
 
@@ -72,19 +72,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             // Units.
             {
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.INFANTRY))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.INFANTRY))
                 {
                     builder.AddInfantry();
                     return;
                 }
 
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE))
                 {
                     builder.AddVehicle();
                     return;
                 }
 
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.AIRCRAFT))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.AIRCRAFT))
                 {
                     builder.AddAircraft();
                     return;
@@ -104,23 +104,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             {
                 builder.AddGenericBuilding();
             }
-        }
-
-        private static bool IsEnemyActorOfType(World world, Actor enemy, string type)
-        {
-            IEnumerable<ProductionQueue> queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, enemy.Owner, type);
-            foreach (ProductionQueue queue in queues)
-            {
-                var producables = queue.AllItems();
-                foreach (ActorInfo producable in producables)
-                {
-                    if (enemy.Info.Name == producable.Name)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

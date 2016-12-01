@@ -5,11 +5,15 @@ using System.Text;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class UnitProductionHelper
     {
+        private const double DefaultInfantryPercentage = .85;
+        private const double DefaultVehiclePercentage = .15;
+
         private static MersenneTwister RANDOM = new MersenneTwister(); 
 
         private const int UNIT_PRODUCTION_COOLDOWN = 10;
@@ -38,12 +42,48 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 return;
             }
 
-            // TODO : debug code.
-            if (RANDOM.Next(2) == 1) {
+            ChooseAndProduceUnit(self, state, orders);
+        }
+
+        private void ChooseAndProduceUnit(Actor self, StrategicWorldState state, Queue<Order> orders)
+        {
+            // TODO We don't necessarily want the best fit cell.
+            AggregateScoutReportData data = state.ScoutReportGrid.GetCurrentBestFitCell();
+            if (data == null) {
+                // TODO We want to build air.
+                ProduceUnitForDistribution(self, state, orders, DefaultInfantryPercentage, DefaultVehiclePercentage, 0d);
+            }
+
+            // TODO : debug code (we want to base this off of the aggregate info).
+            ProduceUnitForDistribution(self, state, orders, DefaultInfantryPercentage, DefaultVehiclePercentage, 0d);
+        }
+
+        private void ProduceUnitForDistribution(Actor self, StrategicWorldState state, Queue<Order> orders, double infantryPercent, double vehiclePercent, double airPercent)
+        {
+            // TODO: Check here for vehicle and air.
+            double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.INFANTRY);
+            if (currentInfantryPercentage < infantryPercent)
+            {
                 ProduceInfantry(self, state, orders);
-            } else {
+            }
+            else
+            {
                 ProduceVehicle(self, state, orders);
             }
+        }
+
+        private double PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(string type)
+        {
+            var actors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && EsuAIUtils.IsActorOfType(world, a, type));
+            // TODO yech... find a better way to get this.
+            // All offensive actors.
+            var allActors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.BUILDING)
+                && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.DEFENSE));
+
+            if (allActors.Count() == 0) {
+                return 0;
+            }
+            return ((double) actors.Count() / (double) allActors.Count());
         }
 
         private void ProduceInfantry(Actor self, StrategicWorldState state, Queue<Order> orders)
