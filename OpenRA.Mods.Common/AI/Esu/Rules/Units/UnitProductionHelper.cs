@@ -12,7 +12,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
     {
         private static MersenneTwister RANDOM = new MersenneTwister(); 
 
-        private const int UNIT_PRODUCTION_COOLDOWN = 5;
+        private const int UNIT_PRODUCTION_COOLDOWN = 10;
         private int unitProductionCooldown;
 
         private readonly World world;
