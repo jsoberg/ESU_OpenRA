@@ -127,6 +127,14 @@ namespace OpenRA.Mods.Common.AI.Esu
                 GRENADIER, 
                 ROCKET_SOLDIER
             };
+
+            public static string[] VALUES = {
+                RIFLE_INFANTRY,
+                GRENADIER,
+                ROCKET_SOLDIER,
+                FLAMETHROWER,
+                ENGINEER
+            };
         }
 
         public static class Vehicles
@@ -164,6 +172,19 @@ namespace OpenRA.Mods.Common.AI.Esu
                     RANGER
                 };
             }
+
+            public static string[] VALUES = {
+                Soviet.V2_ROCKET,
+                Soviet.MAMMOTH_TANK,
+                Soviet.APC,
+                Soviet.MOBILE_FLAK,
+                Soviet.MAD_TANK,
+                Allies.LIGHT_TANK,
+                Allies.MEDIUM_TANK,
+                Allies.HEAVY_TANK,
+                Allies.ARTILLERY,
+                Allies.RANGER
+            };
 
             public static string GetRandomVehicleForPlayer(Player player)
             {

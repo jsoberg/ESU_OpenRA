@@ -151,7 +151,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         public readonly int ShouldProduceScoutBeforeRefinery = 1;
 
         [Desc("Determines precentage of resources to spend on defensive buildings (Rule PercentageOfResourcesToSpendOnDefensiveBuildings)")]
-        public readonly double PercentageOfResourcesToSpendOnDefensiveBuildings = 20;
+        public readonly double PercentageOfResourcesToSpendOnDefensiveBuildings = 5;
 
         [Desc("Determines where to place defensive buildings (Rule DefensiveBuildingPlacement)")]
         public readonly int DefensiveBuildingPlacement = RuleConstants.DefensiveBuildingPlacementValues.DISTRIBUTED_TO_IMPORTANT_STRUCTURES;
@@ -178,6 +178,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         // ========================================
         [Desc("Radius in cells around the center of the base to expand.")]
         public readonly int MaxBaseRadius = 20;
+
+        [Desc("Minimum number of refineries to build in the beginning of the game.")]
+        public readonly int MinNumRefineries = 3;
 
         string IBotInfo.Name
         {

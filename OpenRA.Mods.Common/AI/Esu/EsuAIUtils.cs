@@ -63,7 +63,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public static bool DoesItemCurrentlyExistOrIsBeingProducedForPlayer(World world, Player owner, string item)
         {
-            bool currentlyExists = world.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead && a.IsInWorld);
+            bool currentlyExists = world.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead);
             return (currentlyExists) ? currentlyExists : IsItemCurrentlyInProduction(world, owner, item);
         }
 
@@ -138,6 +138,27 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             PlayerResources resources = owner.PlayerActor.Trait<PlayerResources>();
             return (resources.Cash + resources.Resources); 
+        }
+
+        // ========================================
+        // Actor Tasks
+        // ========================================
+
+        public static bool IsActorOfType(World world, Actor actor, string type)
+        {
+            IEnumerable<ProductionQueue> queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, actor.Owner, type);
+            foreach (ProductionQueue queue in queues)
+            {
+                var producables = queue.AllItems();
+                foreach (ActorInfo producable in producables)
+                {
+                    if (actor.Info.Name == producable.Name)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
         }
     }
 

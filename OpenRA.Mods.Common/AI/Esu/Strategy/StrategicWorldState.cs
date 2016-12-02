@@ -81,7 +81,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             }
         }
 
-        public void AddScoutReportInformation(Actor scoutActor, ResponseRecommendation.Builder infoBuilder)
+        public void AddScoutReportInformation(Actor scoutActor, ScoutReportInfoBuilder infoBuilder)
         {
             ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder);
             ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
