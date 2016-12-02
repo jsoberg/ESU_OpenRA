@@ -1,17 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.Common.AI.Esu;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public static class ScoutReportUtils
     {
-        public static ResponseRecommendation.Builder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor)
+        public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor)
         {
             Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
 
@@ -23,14 +20,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return null;
             }
 
-            ResponseRecommendation.Builder builder = new ResponseRecommendation.Builder(info);
+            ScoutReportInfoBuilder builder = new ScoutReportInfoBuilder(info);
             foreach (Actor enemy in visibileEnemyItems) {
                 AddInformationForEnemyActor(state.World, builder, enemy);
             }
             return builder;
         }
 
-        private static void AddInformationForEnemyActor(World world, ResponseRecommendation.Builder builder, Actor enemy)
+        private static void AddInformationForEnemyActor(World world, ScoutReportInfoBuilder builder, Actor enemy)
         {
             // Power plants.
             {
@@ -49,7 +46,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             // Defensive structures.
             {
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.DEFENSE))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.DEFENSE))
                 {
                     string name = enemy.Info.Name;
 
@@ -75,19 +72,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             // Units.
             {
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.INFANTRY))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.INFANTRY))
                 {
                     builder.AddInfantry();
                     return;
                 }
 
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE))
                 {
                     builder.AddVehicle();
                     return;
                 }
 
-                if (IsEnemyActorOfType(world, enemy, EsuAIConstants.ProductionCategories.AIRCRAFT))
+                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.AIRCRAFT))
                 {
                     builder.AddAircraft();
                     return;
@@ -107,23 +104,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             {
                 builder.AddGenericBuilding();
             }
-        }
-
-        private static bool IsEnemyActorOfType(World world, Actor enemy, string type)
-        {
-            IEnumerable<ProductionQueue> queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, enemy.Owner, type);
-            foreach (ProductionQueue queue in queues)
-            {
-                var producables = queue.AllItems();
-                foreach (ActorInfo producable in producables)
-                {
-                    if (enemy.Info.Name == producable.Name)
-                    {
-                        return true;
-                    }
-                }
-            }
-            return false;
         }
     }
 }

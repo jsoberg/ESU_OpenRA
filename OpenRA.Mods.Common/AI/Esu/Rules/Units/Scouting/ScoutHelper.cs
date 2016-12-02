@@ -1,14 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
-using System.Text;
-using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
-using OpenRA.Mods.Common.AI.Esu.Geometry;
-using OpenRA.Activities;
-using OpenRA.Mods.Common.Activities;
-using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
@@ -177,7 +171,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private void IssueScoutReports(StrategicWorldState state)
         {
             foreach (ScoutActor scout in currentScouts) {
-                ResponseRecommendation.Builder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, scout.Actor);
+                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, scout.Actor);
                 if (responseBuilder == null) {
                     continue;
                 }
