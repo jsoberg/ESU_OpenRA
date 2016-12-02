@@ -16,7 +16,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private BuildHelper buildHelper;
 
         [Desc("Amount of ticks to wait after issuing a build order before we start analyzing rules again.")]
-        private const int BUILDING_ORDER_COOLDOWN = 5;
+        private const int BUILDING_ORDER_COOLDOWN = 10;
+
         private int buildingOrderCooldown = 0;
         private int defensiveOrderCooldown = 0;
 
@@ -74,21 +75,36 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 return;
             }
 
-            BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
-            BuildOreRefineryIfApplicable(self, state, orders);
-            BuildOffensiveUnitProductionStructures(self, orders);
-            BuildQueuedBuildings(self, state, orders);
+            // Issue build orders in order of importance.
+            try {
+                // Most important: Power Plants
+                BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
+                AssertProductionOrderNotIssuedThisTick();
+
+                // Second most important: Ore Refineries
+                BuildOreRefineryIfApplicable(self, state, orders);
+                AssertProductionOrderNotIssuedThisTick();
+
+                // Third most important: Offensive Unit Structures.
+                BuildOffensiveUnitProductionStructures(self, orders);
+                AssertProductionOrderNotIssuedThisTick();
+
+                // Least important: any queued builds.
+                BuildQueuedBuildings(self, state, orders);
+            } catch (ProductionOrderIssuedException) {
+                // Do nothing, we just want to continue here.
+            }
+            
         }
 
         [Desc("Tunable rule: Build power plant if below X power.")]
         private void BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
         {
-            if (wasBuildingOrderIssuedThisTick || !EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
+            if (!EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
             }
 
             PowerManager pm = self.Trait<PowerManager>();
-
             if (pm.ExcessPower < info.MinimumExcessPower) {
                 StartProduction(self, orders, EsuAIConstants.Buildings.POWER_PLANT);
             }
@@ -97,7 +113,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         // TODO: Tunable portion incomplete.
         private void BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            if (!wasBuildingOrderIssuedThisTick && ShouldBuildRefinery(state)) {
+            if (ShouldBuildRefinery(state)) {
                 StartProduction(self, orders, EsuAIConstants.Buildings.ORE_REFINERY);
             }
         }
@@ -112,7 +128,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             // Else, if we can and haven't yet met the minimum, then we should issue the build.
             var ownedActors = world.Actors.Where(a => a.Owner == selfPlayer && a.IsInWorld
                 && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
-            return (ownedActors != null && ownedActors.Count() < 3);
+            return (ownedActors != null && ownedActors.Count() < info.MinNumRefineries);
         }
 
         private void BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
@@ -130,10 +146,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
         private void BuildQueuedBuildings(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            if (wasBuildingOrderIssuedThisTick) {
-                return;
-            }
-
             if (state.RequestedBuildingQueue.Count > 0) {
                 string front = state.RequestedBuildingQueue.Dequeue();
                 if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, front)) {
@@ -149,6 +161,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             wasBuildingOrderIssuedThisTick = true;
         }
 
+        // Throws a ProductionOrderIssuedException if a production order was issued this tick.
+        private void AssertProductionOrderNotIssuedThisTick()
+        {
+            if (wasBuildingOrderIssuedThisTick) {
+                throw new ProductionOrderIssuedException();
+            }
+        }
+
+        private class ProductionOrderIssuedException : Exception { }
+
         // ========================================
         // Defensive Buildings
         // ========================================
@@ -162,10 +184,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 return;
             }
 
-            BuildDefensiveStructures(self, orders);
+            BuildDefensiveStructures(self, state, orders);
         }
 
-        private void BuildDefensiveStructures(Actor self, Queue<Order> orders)
+        private void BuildDefensiveStructures(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             double percentageSpentOnDefense;
             try {
@@ -186,9 +208,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
                 foreach (string req in prereqs) {
                     if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, req)) {
-                        // We need to build the prerequisite building first.
-                        orders.Enqueue(Order.StartProduction(self, req, 1));
-                        buildingOrderCooldown = BUILDING_ORDER_COOLDOWN;
+                        // We need to build the prerequisite building first, so queue it up.
+                        state.RequestedBuildingQueue.Enqueue(req);
                         return;
                     }
                 }
