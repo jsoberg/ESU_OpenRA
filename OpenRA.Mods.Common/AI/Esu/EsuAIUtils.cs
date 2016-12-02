@@ -63,7 +63,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public static bool DoesItemCurrentlyExistOrIsBeingProducedForPlayer(World world, Player owner, string item)
         {
-            bool currentlyExists = world.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead && a.IsInWorld);
+            bool currentlyExists = world.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead);
             return (currentlyExists) ? currentlyExists : IsItemCurrentlyInProduction(world, owner, item);
         }
 
