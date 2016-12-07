@@ -46,9 +46,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             ScoutReportGridMatrix.Count();
 
             int x = GetRoundedIntDividedByCellSize(scoutPosition.X);
-            x = Normalize(x, GridWidth);
+            x = Normalize(x, GridWidth - 1);
             int y = GetRoundedIntDividedByCellSize(scoutPosition.Y);
-            y = Normalize(y, GridHeight);
+            y = Normalize(y, GridHeight - 1);
 
             List<ScoutReport> reportsForLocation = ScoutReportGridMatrix[x][y];
             if (reportsForLocation == null)

@@ -170,13 +170,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void IssueScoutReports(StrategicWorldState state)
         {
-            foreach (ScoutActor scout in currentScouts) {
-                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, scout.Actor);
+            var actorsWhoCanReport = world.ActorsHavingTrait<RevealsShroud>().Where(a => a.Owner == selfPlayer && a.IsInWorld && !a.IsDead);
+            foreach (Actor actor in actorsWhoCanReport) {
+                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, actor);
                 if (responseBuilder == null) {
                     continue;
                 }
 
-                state.AddScoutReportInformation(scout.Actor, responseBuilder);
+                state.AddScoutReportInformation(actor, responseBuilder);
             }
         }
     }
