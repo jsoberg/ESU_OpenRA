@@ -77,7 +77,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             var actors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && EsuAIUtils.IsActorOfType(world, a, type));
             // TODO yech... find a better way to get this.
             // All offensive actors.
-            var allActors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.BUILDING)
+            var allActors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && a.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.BUILDING)
                 && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.DEFENSE));
 
             if (allActors.Count() == 0) {
