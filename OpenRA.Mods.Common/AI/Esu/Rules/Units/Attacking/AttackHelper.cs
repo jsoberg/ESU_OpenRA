@@ -16,15 +16,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private readonly Player SelfPlayer;
         private readonly EsuAIInfo Info;
 
-        private readonly List<IssuedAttack> CurrentAttacks;
+        private readonly ActiveAttackController AttackController;
 
         public AttackHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
             this.Info = info;
-
-            this.CurrentAttacks = new List<IssuedAttack>();
+            this.AttackController = new ActiveAttackController();
         }
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
@@ -49,7 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private void IssueAttackIfViable(StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
         {
             var metric = new BaseLethalityMetric(World, SelfPlayer);
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, CurrentAttacks);
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, AttackController.GetActiveAttacks());
 
             IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(defensiveCoverage.ActorsNecessaryForDefense);
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
@@ -70,7 +69,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private IEnumerable<Actor> AllActorsInAttack()
         {
             List<Actor> actors = new List<Actor>();
-            foreach (IssuedAttack attack in CurrentAttacks) {
+            List<IssuedAttack> currentAttacks = AttackController.GetActiveAttacks();
+            foreach (IssuedAttack attack in currentAttacks) {
                 actors.Concat(actors);
             }
             return actors;
@@ -79,7 +79,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private void IssueAttackOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
         {
             AddAttackMoveOrders(orders, attackActors, targetPosition);
-            CurrentAttacks.Add(new IssuedAttack(targetPosition, attackActors));
+            AttackController.AddNewActiveAttack(targetPosition, attackActors);
         }
 
         private void AddAttackMoveOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
