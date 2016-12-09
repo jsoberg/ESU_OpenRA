@@ -7,21 +7,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttackController
     {
-        private readonly List<IssuedAttack> CurrentAttacks;
+        private readonly List<ActiveAttack> CurrentAttacks;
 
         public ActiveAttackController()
         {
-            this.CurrentAttacks = new List<IssuedAttack>();
+            this.CurrentAttacks = new List<ActiveAttack>();
         }
 
-        public List<IssuedAttack> GetActiveAttacks()
+        public List<ActiveAttack> GetActiveAttacks()
         {
             return CurrentAttacks;
         }
 
         public void AddNewActiveAttack(CPos targetPosition, IEnumerable<Actor> attackTroops)
         {
-            CurrentAttacks.Add(new IssuedAttack(targetPosition, attackTroops));
+            CurrentAttacks.Add(new ActiveAttack(targetPosition, attackTroops));
         }
     }
 }

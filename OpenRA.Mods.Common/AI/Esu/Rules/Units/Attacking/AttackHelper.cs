@@ -69,8 +69,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private IEnumerable<Actor> AllActorsInAttack()
         {
             List<Actor> actors = new List<Actor>();
-            List<IssuedAttack> currentAttacks = AttackController.GetActiveAttacks();
-            foreach (IssuedAttack attack in currentAttacks) {
+            List<ActiveAttack> currentAttacks = AttackController.GetActiveAttacks();
+            foreach (ActiveAttack attack in currentAttacks) {
                 actors.Concat(actors);
             }
             return actors;

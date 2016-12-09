@@ -54,13 +54,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
         /// <summary>
         ///  Provides defensive coverage of base, without taking into account actor placement.
         /// </summary>
-        public DefenseCoverage CurrentDefenseCoverage_Simple(double desiredDefensePercentage, List<IssuedAttack> currentAttacks)
+        public DefenseCoverage CurrentDefenseCoverage_Simple(double desiredDefensePercentage, List<ActiveAttack> currentAttacks)
         {
             List<Actor> necessaryActors = new List<Actor>();
             int currentLethalityNeeded = GetLethalityCoverageRequiredForVulnerableUnits(desiredDefensePercentage);
             Dictionary<Actor, int> offenseClone = new Dictionary<Actor, int>(OffensiveActorToLethalityMap);
             // Remove any actors currently in an attack.
-            foreach (IssuedAttack attack in currentAttacks) {
+            foreach (ActiveAttack attack in currentAttacks) {
                 foreach (Actor attackActor in attack.AttackTroops) {
                     offenseClone.Remove(attackActor);
                 }

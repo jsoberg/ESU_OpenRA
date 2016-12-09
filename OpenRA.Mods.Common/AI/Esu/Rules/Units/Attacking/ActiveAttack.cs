@@ -5,12 +5,12 @@ using System.Text;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
-    public class IssuedAttack
+    public class ActiveAttack
     {
         public CPos TargetPosition;
         public IEnumerable<Actor> AttackTroops;
 
-        public IssuedAttack(CPos targetPosition, IEnumerable<Actor> attackTroops)
+        public ActiveAttack(CPos targetPosition, IEnumerable<Actor> attackTroops)
         {
             this.TargetPosition = targetPosition;
             this.AttackTroops = attackTroops;
