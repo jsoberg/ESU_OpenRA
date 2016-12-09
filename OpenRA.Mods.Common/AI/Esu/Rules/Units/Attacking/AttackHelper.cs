@@ -16,7 +16,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private readonly Player SelfPlayer;
         private readonly EsuAIInfo Info;
 
-        private readonly List<AttackInAction> CurrentAttacks;
+        private readonly List<IssuedAttack> CurrentAttacks;
 
         public AttackHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
@@ -24,7 +24,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             this.SelfPlayer = selfPlayer;
             this.Info = info;
 
-            this.CurrentAttacks = new List<AttackInAction>();
+            this.CurrentAttacks = new List<IssuedAttack>();
         }
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
@@ -70,7 +70,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private IEnumerable<Actor> AllActorsInAttack()
         {
             List<Actor> actors = new List<Actor>();
-            foreach (AttackInAction attack in CurrentAttacks) {
+            foreach (IssuedAttack attack in CurrentAttacks) {
                 actors.Concat(actors);
             }
             return actors;
@@ -79,7 +79,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private void IssueAttackOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
         {
             AddAttackMoveOrders(orders, attackActors, targetPosition);
-            CurrentAttacks.Add(new AttackInAction(targetPosition, attackActors));
+            CurrentAttacks.Add(new IssuedAttack(targetPosition, attackActors));
         }
 
         private void AddAttackMoveOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
@@ -87,18 +87,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             foreach (Actor actor in attackActors) {
                 var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
                 orders.Enqueue(move);
-            }
-        }
-
-        public class AttackInAction
-        {
-            public CPos TargetPosition;
-            public IEnumerable<Actor> AttackTroops;
-
-            public AttackInAction(CPos targetPosition, IEnumerable<Actor> attackTroops)
-            {
-                this.TargetPosition = targetPosition;
-                this.AttackTroops = attackTroops;
             }
         }
     }
