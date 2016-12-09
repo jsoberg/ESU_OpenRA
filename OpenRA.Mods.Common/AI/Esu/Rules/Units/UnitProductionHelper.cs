@@ -50,7 +50,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             // TODO We don't necessarily want the best fit cell.
             AggregateScoutReportData data = state.ScoutReportGrid.GetCurrentBestFitCell();
             if (data == null) {
-                // TODO We want to build air.
                 ProduceUnitForDistribution(self, state, orders, DefaultInfantryPercentage, DefaultVehiclePercentage, 0d);
             }
 
