@@ -6,24 +6,21 @@ using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
-    public class DamageNotifier : ITick, INotifyDamage
+    public class DamageNotifier
     {
-        void ITick.Tick(Actor self)
+        private static readonly List<INotifyDamage> DamageNotificationListeners = new List<INotifyDamage>();
+
+        public static void AddDamageNotificationListener(INotifyDamage listener)
         {
-            // TODO Stub
+            DamageNotificationListeners.Add(listener);
         }
 
-        void INotifyDamage.Damaged(Actor self, AttackInfo e)
+        public static void Damaged(Actor self, AttackInfo e)
         {
-            // TODO Stub
-        }
-    }
-
-    public sealed class DamageNotifierInfo : ITraitInfo
-    {
-        public object Create(ActorInitializer init)
-        {
-            return new DamageNotifier();
+            foreach (INotifyDamage listener in DamageNotificationListeners)
+            {
+                listener.Damaged(self, e);
+            }
         }
     }
 }

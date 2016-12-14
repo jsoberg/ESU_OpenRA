@@ -2,17 +2,20 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
+using OpenRA.Traits;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
-    public class ActiveAttackController
+    public class ActiveAttackController : INotifyDamage
     {
         private readonly List<ActiveAttack> CurrentAttacks;
 
         public ActiveAttackController()
         {
             this.CurrentAttacks = new List<ActiveAttack>();
+
+            // Add to callback list to get damage callbacks.
+            DamageNotifier.AddDamageNotificationListener(this);
         }
 
         public IEnumerable<ActiveAttack> GetActiveAttacks()
@@ -33,6 +36,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
                 orders.Enqueue(move);
             }
+        }
+
+        void INotifyDamage.Damaged(Actor self, AttackInfo e)
+        {
+            // TODO Stub
         }
 
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)

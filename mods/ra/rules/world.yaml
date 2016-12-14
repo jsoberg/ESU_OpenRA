@@ -175,7 +175,6 @@ World:
 	# CUSTOM WORLD TRAITS
 	# ========================================
 	SignalFitnessLog:
-	DamageNotifier:
 
 EditorWorld:
 	Inherits: ^BaseWorld

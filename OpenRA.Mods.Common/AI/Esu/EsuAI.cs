@@ -9,6 +9,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 using OpenRA.Mods.Common.AI.Esu.Rules.Buildings;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
@@ -61,7 +62,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
-
+            DamageNotifier.Damaged(self, e);
         }
 
         void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)
