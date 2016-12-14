@@ -28,6 +28,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
+            AttackController.Tick(self, state, orders);
+
             if (World.GetCurrentLocalTickCount() % TICKS_TO_CHECK == 0) {
                 CheckStrategicStateForAttack(state, orders);
             }
@@ -69,7 +71,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private IEnumerable<Actor> AllActorsInAttack()
         {
             List<Actor> actors = new List<Actor>();
-            List<ActiveAttack> currentAttacks = AttackController.GetActiveAttacks();
+            IEnumerable<ActiveAttack> currentAttacks = AttackController.GetActiveAttacks();
             foreach (ActiveAttack attack in currentAttacks) {
                 actors.Concat(actors);
             }
