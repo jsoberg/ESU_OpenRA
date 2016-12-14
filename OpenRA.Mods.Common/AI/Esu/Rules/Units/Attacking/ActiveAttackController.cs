@@ -20,9 +20,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return CurrentAttacks;
         }
 
-        public void AddNewActiveAttack(CPos targetPosition, IEnumerable<Actor> attackTroops)
+        public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackTroops)
         {
             CurrentAttacks.Add(new ActiveAttack(targetPosition, attackTroops));
+            AddAttackMoveOrders(orders, targetPosition, attackTroops);
+        }
+
+        private void AddAttackMoveOrders(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackActors)
+        {
+            foreach (Actor actor in attackActors)
+            {
+                var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
+                orders.Enqueue(move);
+            }
         }
 
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)

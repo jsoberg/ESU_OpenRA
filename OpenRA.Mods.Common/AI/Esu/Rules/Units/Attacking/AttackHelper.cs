@@ -56,7 +56,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
             // TODO add more logic here
             if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) == PredictedAttackStrength.Medium) {
-                IssueAttackOrders(orders, possibleAttackActors, bestCell.RelativePosition);
+                AttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, possibleAttackActors);
             }
         }
 
@@ -76,20 +76,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 actors.Concat(actors);
             }
             return actors;
-        }
-
-        private void IssueAttackOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
-        {
-            AddAttackMoveOrders(orders, attackActors, targetPosition);
-            AttackController.AddNewActiveAttack(targetPosition, attackActors);
-        }
-
-        private void AddAttackMoveOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
-        {
-            foreach (Actor actor in attackActors) {
-                var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
-                orders.Enqueue(move);
-            }
         }
     }
 }
