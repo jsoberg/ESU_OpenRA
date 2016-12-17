@@ -63,11 +63,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         /** @return true if all troops in this attack are dead, false otherwise. */
         private bool TrimAttack(ActiveAttack attack)
         {
-            foreach (Actor actor in attack.AttackTroops)
+            for (int i = attack.AttackTroops.Count - 1; i >= 0; i --)
             { 
-                if (actor.IsDead)
+                if (attack.AttackTroops[i].IsDead)
                 {
-                    attack.AttackTroops.Remove(actor);
+                    attack.AttackTroops.RemoveAt(i);
                 }
             }
 
