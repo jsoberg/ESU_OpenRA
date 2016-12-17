@@ -40,7 +40,27 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
-            // TODO Stub
+            foreach (ActiveAttack attack in CurrentAttacks)
+            {
+                if (HandleDamage(attack, self, e))
+                {
+                    return;
+                }
+            }
+        }
+
+        /** @return true if this attack handled the damage, false otherwise. */
+        private bool HandleDamage(ActiveAttack attack, Actor self, AttackInfo e)
+        {
+            foreach (Actor troop in attack.AttackTroops)
+            {
+                if (self == troop) {
+                    CPos attackLocation = e.Attacker.Location;
+                    attack.AttackerLocationList.Add(attackLocation);
+                    return true;
+                }
+            }
+            return false;
         }
 
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
