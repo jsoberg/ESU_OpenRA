@@ -10,8 +10,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     {
         private readonly List<ActiveAttack> CurrentAttacks;
 
-        public ActiveAttackController()
+        private readonly World World;
+
+        public ActiveAttackController(World world)
         {
+            this.World = world;
             this.CurrentAttacks = new List<ActiveAttack>();
 
             // Add to callback list to get damage callbacks.
@@ -55,8 +58,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             foreach (Actor troop in attack.AttackTroops)
             {
                 if (self == troop) {
-                    CPos attackLocation = e.Attacker.Location;
-                    attack.AttackerLocationList.Add(attackLocation);
+                    attack.AttackedFrom(e.Attacker, World);
                     return true;
                 }
             }

@@ -23,7 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             this.World = world;
             this.SelfPlayer = selfPlayer;
             this.Info = info;
-            this.AttackController = new ActiveAttackController();
+            this.AttackController = new ActiveAttackController(world);
         }
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
