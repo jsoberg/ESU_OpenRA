@@ -31,17 +31,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackTroops)
         {
-            CurrentAttacks.Add(new ActiveAttack(targetPosition, attackTroops));
-            AddAttackMoveOrders(orders, targetPosition, attackTroops);
-        }
-
-        private void AddAttackMoveOrders(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackActors)
-        {
-            foreach (Actor actor in attackActors)
-            {
-                var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
-                orders.Enqueue(move);
-            }
+            ActiveAttack attack = new ActiveAttack(targetPosition, attackTroops);
+            CurrentAttacks.Add(attack);
+            attack.AddAttackMoveOrders(orders, targetPosition, attackTroops);
         }
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
@@ -95,7 +87,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 if (attack.HasReachedTargetPosition(state.World) 
                     && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
                 {
-
+                    attack.IssueNextAttack(state, orders);
                 }
             }
         }

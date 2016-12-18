@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
@@ -52,6 +52,27 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 }
             }
             return false;
+        }
+
+        public void IssueNextAttack(StrategicWorldState state, Queue<Order> orders)
+        {
+            CPos nextMove = GeometryUtils.Center(AttackerLocationList);
+            if (nextMove == CPos.Invalid) {
+                // TODO try to get a location from scout reports or somewhere else.
+                return;
+            }
+
+            TargetPositionReachedTickCount = 0;
+            AddAttackMoveOrders(orders, nextMove, AttackTroops);
+        }
+
+        public void AddAttackMoveOrders(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackActors)
+        {
+            foreach (Actor actor in attackActors)
+            {
+                var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
+                orders.Enqueue(move);
+            }
         }
     }
 }
