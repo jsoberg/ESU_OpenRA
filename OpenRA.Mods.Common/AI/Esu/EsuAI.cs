@@ -16,7 +16,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 /// </summary>
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered, INotifyOtherProduction
+    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyAppliedDamage, INotifyDiscovered, INotifyOtherProduction
     {
         private readonly EsuAIInfo info;
         private readonly World world;
@@ -63,6 +63,11 @@ namespace OpenRA.Mods.Common.AI.Esu
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
             DamageNotifier.Damaged(self, e);
+        }
+
+        void INotifyAppliedDamage.AppliedDamage(Actor self, Actor damaged, AttackInfo e)
+        {
+            DamageNotifier.Damaged(damaged, e);
         }
 
         void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)

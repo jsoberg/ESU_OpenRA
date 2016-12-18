@@ -8,6 +8,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttackController : INotifyDamage
     {
+        /** Number of ticks to wait before moving attack. */
+        private static int TICKS_UNTIL_ATTACK_MOVE = 1000;
+
         private readonly List<ActiveAttack> CurrentAttacks;
 
         private readonly World World;
@@ -60,6 +63,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 if (self == troop) {
                     attack.AttackedFrom(e.Attacker, World);
                     return true;
+                } else if (self == e.Attacker) {
+                    attack.AttackedTo(e.Attacker, self, World);
+                    return true;
                 }
             }
             return false;
@@ -72,12 +78,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         private void RemoveDeadTroopsFromAttacks()
         {
-            foreach (ActiveAttack attack in CurrentAttacks)
+            for (int i = CurrentAttacks.Count - 1; i >= 0; i--)
             {
-                bool IsAttackOver = TrimAttack(attack);
+                bool IsAttackOver = TrimAttack(CurrentAttacks[i]);
                 if (IsAttackOver)
                 {
-                    CurrentAttacks.Remove(attack);
+                    CurrentAttacks.RemoveAt(i);
+                }
+            }
+        }
+
+        private void MaintainActiveAttacks(StrategicWorldState state, Queue<Order> orders)
+        {
+            foreach (ActiveAttack attack in CurrentAttacks)
+            {
+                if (attack.HasReachedTargetPosition(state.World) 
+                    && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
+                {
+
                 }
             }
         }

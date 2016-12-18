@@ -15,11 +15,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             DamageNotificationListeners.Add(listener);
         }
 
-        public static void Damaged(Actor self, AttackInfo e)
+        public static void Damaged(Actor attacked, AttackInfo e)
         {
             foreach (INotifyDamage listener in DamageNotificationListeners)
             {
-                listener.Damaged(self, e);
+                listener.Damaged(attacked, e);
             }
         }
     }
