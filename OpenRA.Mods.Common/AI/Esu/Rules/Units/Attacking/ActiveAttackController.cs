@@ -66,6 +66,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             RemoveDeadTroopsFromAttacks();
+            MaintainActiveAttacks(state, orders);
         }
 
         private void RemoveDeadTroopsFromAttacks()
@@ -76,18 +77,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 if (IsAttackOver)
                 {
                     CurrentAttacks.RemoveAt(i);
-                }
-            }
-        }
-
-        private void MaintainActiveAttacks(StrategicWorldState state, Queue<Order> orders)
-        {
-            foreach (ActiveAttack attack in CurrentAttacks)
-            {
-                if (attack.HasReachedTargetPosition(state.World) 
-                    && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
-                {
-                    attack.IssueNextAttack(state, orders);
                 }
             }
         }
@@ -104,6 +93,18 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             }
 
             return (attack.AttackTroops.Count() == 0);
+        }
+
+        private void MaintainActiveAttacks(StrategicWorldState state, Queue<Order> orders)
+        {
+            foreach (ActiveAttack attack in CurrentAttacks)
+            {
+                if (attack.HasReachedTargetPosition(state.World)
+                    && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
+                {
+                    attack.IssueNextAttack(state, orders);
+                }
+            }
         }
     }
 }
