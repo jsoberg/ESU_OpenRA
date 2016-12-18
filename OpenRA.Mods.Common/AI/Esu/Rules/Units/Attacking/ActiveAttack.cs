@@ -9,8 +9,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     {
         public List<Actor> AttackTroops;
 
+        private int TargetPositionReachedTickCount;
+
         /** Stack holding most recent target position to oldest target position. */
-        public readonly Stack<CPos> TargetPositionStack;
+        private readonly Stack<CPos> TargetPositionStack;
 
         /** Contains the collection of positions that this attack was damaged from.*/
         private readonly List<CPos> AttackerLocationList;
@@ -29,6 +31,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         {
             AttackerLocationList.Add(attacker.Location);
             LastTickDamageTaken = world.GetCurrentLocalTickCount();
+        }
+
+        public bool HasReachedTargetPosition(World world)
+        {
+            if (TargetPositionReachedTickCount > 0) {
+                return true;
+            }
+
+            CPos targetPosition = TargetPositionStack.Peek();
+            foreach (Actor troop in AttackTroops) {
+                if (troop.Location == targetPosition) {
+                    TargetPositionReachedTickCount = world.GetCurrentLocalTickCount();
+                    return true;
+                }
+            }
+            return false;
         }
     }
 }
