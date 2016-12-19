@@ -108,13 +108,21 @@ namespace OpenRA.Mods.Common.AI.Esu
             foreach (BaseEsuAIRuleset rs in rulesets) {
                 rs.Tick(self, worldState, orders);
             }
+            IssueOrders(orders);
+        }
 
+        private void IssueOrders(Queue<Order> orders)
+        {
             double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
-            foreach (Order order in orders) {
+            foreach (Order order in orders)
+            {
                 // We don't have the marked minimum resources to execute this order, so ignore it.
-                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
+                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction)
+                {
                     OrderDenied(order);
-                } else {
+                }
+                else
+                {
                     world.IssueOrder(order);
                 }
             }
