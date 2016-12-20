@@ -9,13 +9,14 @@ using OpenRA.Mods.Common.AI.Esu.Rules;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 using OpenRA.Mods.Common.AI.Esu.Rules.Buildings;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
 /// </summary>
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyDiscovered, INotifyOtherProduction
+    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyAppliedDamage, INotifyDiscovered, INotifyOtherProduction
     {
         private readonly EsuAIInfo info;
         private readonly World world;
@@ -61,7 +62,12 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
+            DamageNotifier.Damaged(self, e);
+        }
 
+        void INotifyAppliedDamage.AppliedDamage(Actor self, Actor damaged, AttackInfo e)
+        {
+            DamageNotifier.Damaged(damaged, e);
         }
 
         void INotifyDiscovered.OnDiscovered(Actor self, Player discoverer, bool playNotification)
@@ -102,13 +108,21 @@ namespace OpenRA.Mods.Common.AI.Esu
             foreach (BaseEsuAIRuleset rs in rulesets) {
                 rs.Tick(self, worldState, orders);
             }
+            IssueOrders(orders);
+        }
 
+        private void IssueOrders(Queue<Order> orders)
+        {
             double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
-            foreach (Order order in orders) {
+            foreach (Order order in orders)
+            {
                 // We don't have the marked minimum resources to execute this order, so ignore it.
-                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction) {
+                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction)
+                {
                     OrderDenied(order);
-                } else {
+                }
+                else
+                {
                     world.IssueOrder(order);
                 }
             }
