@@ -7,13 +7,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
+        private static readonly int DistanceFromStagedPosition = 10;
+
         public List<Actor> AttackTroops;
         public int LastTickDamageMade;
 
         private int TargetPositionReachedTickCount;
 
+        private int StagedPositionReachedTickCount;
+
         /** Stack holding most recent target position to oldest target position. */
         private readonly Stack<CPos> TargetPositionStack;
+
+        /** Position where the next attack should be staged before following through. */
+        private readonly CPos StagedPosition = CPos.Invalid;
 
         /** Contains the collection of positions that this attack was damaged from.*/
         private readonly List<CPos> AttackerLocationList;
@@ -52,6 +59,28 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 }
             }
             return false;
+        }
+
+        public bool HasReachedStagedPosition(World world)
+        {
+            if (StagedPositionReachedTickCount > 0) {
+                return true;
+            }
+
+            foreach (Actor troop in AttackTroops)
+            {
+                if (((StagedPosition.X - DistanceFromStagedPosition) < troop.Location.X && troop.Location.X < (StagedPosition.X + DistanceFromStagedPosition))
+                        && ((StagedPosition.Y -DistanceFromStagedPosition) < troop.Location.Y && troop.Location.Y < (StagedPosition.Y + DistanceFromStagedPosition)))
+                {
+                    continue;
+                } else {
+                    return false;
+                }
+            }
+
+            // All troops have reached staging area.
+            StagedPositionReachedTickCount = world.GetCurrentLocalTickCount();
+            return true;
         }
 
         public void IssueNextAttack(StrategicWorldState state, Queue<Order> orders)
