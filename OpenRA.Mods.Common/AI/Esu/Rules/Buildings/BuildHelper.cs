@@ -23,6 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
+        private int SetRallyPointTick;
         private int placementCooldown;
 
         public BuildHelper(World world, Player selfPlayer, EsuAIInfo info)
@@ -61,8 +62,53 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                         TargetActor = queue.Actor,
                         SuppressVisualFeedback = true
                     });
+
+                    SetRallyPointTick = world.GetCurrentLocalTickCount() + 20;
                 }
             }
+            
+            if (SetRallyPointTick != 0 && SetRallyPointTick >= world.GetCurrentLocalTickCount())
+            {
+                SetRallyPointsForNewProductionBuildings(orders);
+                // Periodically reset the rally points for buildings, to distribute them through the base. 
+                SetRallyPointTick = world.GetCurrentLocalTickCount() + 40;
+            }
+        }
+
+        public void SetRallyPointsForNewProductionBuildings(Queue<Order> orders)
+        {
+            var baseCenter = GetRandomBaseCenter();
+
+            foreach (var rp in world.ActorsWithTrait<RallyPoint>())
+            {
+                if (rp.Actor.Owner == selfPlayer &&
+                    !IsRallyPointValid(rp.Trait.Location, rp.Actor.Info.TraitInfoOrDefault<BuildingInfo>()))
+                {
+                    Order order = new Order("SetRallyPoint", rp.Actor, false)
+                    {
+                        TargetLocation = ChooseRallyLocationNear(baseCenter, rp.Actor)
+                    };
+                    orders.Enqueue(order);
+                }
+            }
+        }
+
+        private CPos ChooseRallyLocationNear(CPos location, Actor producer)
+        {
+            var possibleRallyPoints = world.Map.FindTilesInCircle(location, 6)
+                .Where(c => IsRallyPointValid(c, producer.Info.TraitInfoOrDefault<BuildingInfo>()));
+
+            if (!possibleRallyPoints.Any())
+            {
+                return producer.Location;
+            }
+
+            return possibleRallyPoints.Random(Random);
+        }
+
+        private bool IsRallyPointValid(CPos x, BuildingInfo info)
+        {
+            return info != null && world.IsCellBuildable(x, info);
         }
 
         private bool IsBuilding(string actorType)

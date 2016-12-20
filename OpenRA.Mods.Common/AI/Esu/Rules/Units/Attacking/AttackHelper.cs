@@ -16,19 +16,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private readonly Player SelfPlayer;
         private readonly EsuAIInfo Info;
 
-        private readonly List<AttackInAction> CurrentAttacks;
+        private readonly ActiveAttackController AttackController;
 
         public AttackHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
             this.Info = info;
-
-            this.CurrentAttacks = new List<AttackInAction>();
+            this.AttackController = new ActiveAttackController(world);
         }
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
+            AttackController.Tick(self, state, orders);
+
             if (World.GetCurrentLocalTickCount() % TICKS_TO_CHECK == 0) {
                 CheckStrategicStateForAttack(state, orders);
             }
@@ -49,13 +50,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private void IssueAttackIfViable(StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
         {
             var metric = new BaseLethalityMetric(World, SelfPlayer);
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, CurrentAttacks);
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, AttackController.GetActiveAttacks());
 
             IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(defensiveCoverage.ActorsNecessaryForDefense);
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
             // TODO add more logic here
             if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) == PredictedAttackStrength.Medium) {
-                IssueAttackOrders(orders, possibleAttackActors, bestCell.RelativePosition);
+                AttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, possibleAttackActors);
             }
         }
 
@@ -70,36 +71,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private IEnumerable<Actor> AllActorsInAttack()
         {
             List<Actor> actors = new List<Actor>();
-            foreach (AttackInAction attack in CurrentAttacks) {
+            IEnumerable<ActiveAttack> currentAttacks = AttackController.GetActiveAttacks();
+            foreach (ActiveAttack attack in currentAttacks) {
                 actors.Concat(actors);
             }
             return actors;
-        }
-
-        private void IssueAttackOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
-        {
-            AddAttackMoveOrders(orders, attackActors, targetPosition);
-            CurrentAttacks.Add(new AttackInAction(targetPosition, attackActors));
-        }
-
-        private void AddAttackMoveOrders(Queue<Order> orders, IEnumerable<Actor> attackActors, CPos targetPosition)
-        {
-            foreach (Actor actor in attackActors) {
-                var move = new Order("AttackMove", actor, false) { TargetLocation = targetPosition };
-                orders.Enqueue(move);
-            }
-        }
-
-        public class AttackInAction
-        {
-            public CPos TargetPosition;
-            public IEnumerable<Actor> AttackTroops;
-
-            public AttackInAction(CPos targetPosition, IEnumerable<Actor> attackTroops)
-            {
-                this.TargetPosition = targetPosition;
-                this.AttackTroops = attackTroops;
-            }
         }
     }
 }
