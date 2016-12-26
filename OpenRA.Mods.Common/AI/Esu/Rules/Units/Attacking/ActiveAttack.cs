@@ -91,6 +91,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 return;
             }
 
+            TargetPositionStack.Push(nextMove);
             TargetPositionReachedTickCount = 0;
             AddAttackMoveOrders(orders, nextMove, AttackTroops);
         }
