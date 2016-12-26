@@ -34,7 +34,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         }
 
         // @return - returns true if the produced unit was claimed, false otherwise.
-        public bool UnitProduced(Actor self, Actor other)
+        public bool UnitProduced(Actor producer, Actor other)
         {
             if (other.Info.Name == scoutInProductionName) {
                 currentScouts.Add(new ScoutActor(other));

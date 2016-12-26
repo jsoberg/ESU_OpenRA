@@ -5,7 +5,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
-    class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction, IOrderDeniedListener
+    class UnitRuleset : BaseEsuAIRuleset, IUnitProduced, IOrderDeniedListener
     {
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
@@ -23,13 +23,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.attackHelper = new AttackHelper(world, selfPlayer, info);
         }
 
-        void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
+        void IUnitProduced.OnUnitProduced(Actor producer, Actor produced)
         {
             if (producer.Owner != selfPlayer) {
                 return;
             }
 
-            scoutHelper.UnitProduced(self, produced);
+            scoutHelper.UnitProduced(producer, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)
