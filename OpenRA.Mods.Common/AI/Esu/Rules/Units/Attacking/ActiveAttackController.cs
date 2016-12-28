@@ -9,7 +9,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     public class ActiveAttackController : INotifyDamage
     {
         /** Number of ticks to wait before moving attack. */
-        private static int TICKS_UNTIL_ATTACK_MOVE = 1000;
+        private static int TICKS_UNTIL_ATTACK_MOVE = 400;
 
         private readonly List<ActiveAttack> CurrentAttacks;
 
