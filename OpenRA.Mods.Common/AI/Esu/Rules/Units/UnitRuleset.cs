@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
+using System.Collections;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
+using OpenRA.Mods.Common.Traits;
+using OpenRA.Mods.Common.Activities;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
@@ -44,6 +47,42 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             // Always allow the attack helper to add orders.
             attackHelper.AddAttackOrdersIfApplicable(self, state, orders);
+
+            // Stop harvesters from idling.
+            GiveOrdersToIdleHarvesters(orders);
+        }
+
+        // Modified slightly from HackyAI.
+        private void GiveOrdersToIdleHarvesters(Queue<Order> orders)
+        {
+            // For some unknown readon, I can't purge unwanted harvesters here using a Where statement, so I have to do it later on...
+            var harvesters = world.ActorsHavingTrait<Harvester>();
+
+            // Find idle harvesters and give them orders:
+            foreach (var harvester in harvesters)
+            {
+                if (harvester.Owner != selfPlayer || harvester.IsDead) {
+                    continue;
+                }
+
+                var harv = harvester.TraitOrDefault<Harvester>();
+                if (harv == null)
+                    continue;
+
+                if (!harvester.IsIdle)
+                {
+                    var act = harvester.GetCurrentActivity();
+
+                    if (act.NextActivity == null || act.NextActivity.GetType() != typeof(FindResources))
+                        continue;
+                }
+
+                if (!harv.IsEmpty)
+                    continue;
+
+                // Tell the idle harvester to quit slacking:
+                orders.Enqueue(new Order("Harvest", harvester, false));
+            }
         }
     }
 }
