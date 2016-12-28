@@ -63,6 +63,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return false;
         }
 
+        public bool IsActorInvolvedInActiveAttack(Actor actor)
+        {
+            foreach (ActiveAttack attack in CurrentAttacks)
+            {
+                foreach (Actor troop in attack.AttackTroops)
+                {
+                    if (troop == actor)
+                    {
+                        return true;
+                    }
+                }
+            }
+            return false;
+        }
+
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             RemoveDeadTroopsFromAttacks();
