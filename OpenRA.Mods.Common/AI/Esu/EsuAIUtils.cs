@@ -14,7 +14,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         // Location Tasks
         // ========================================
 
-        public static CPos OppositeBaseLocationOfPlayer(World world, Player player)
+        public static IEnumerable<CPos> PossibleEnemyLocationsForPlayer(World world, Player player)
         {
             var constructionYard = world.Actors.Where(a => a.Owner == player &&
                 a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD).FirstOrDefault();
@@ -24,7 +24,9 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             var selfLocation = constructionYard.Location;
 
-            return GeometryUtils.OppositeLocationOnMap(selfLocation, world.Map);
+            CPos opposite = GeometryUtils.OppositeLocationOnMap(selfLocation, world.Map);
+            CPos parallel = GeometryUtils.ParallelXLocationOnMap(selfLocation, world.Map);
+            return new List<CPos> { opposite, parallel };
         }
 
         // ========================================

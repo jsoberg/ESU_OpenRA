@@ -112,14 +112,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         
         public CPos GetBestAvailableEnemyLocation(StrategicWorldState state, Player selfPlayer)
         {
-            return (FoundEnemyLocation == CPos.Invalid) ? GetPredictedEnemyLocation(state, selfPlayer) : FoundEnemyLocation;
+            return (FoundEnemyLocation == CPos.Invalid) ? GetPredictedEnemyLocations(state, selfPlayer).First() : FoundEnemyLocation;
         }
 
-        public CPos GetPredictedEnemyLocation(StrategicWorldState state, Player selfPlayer)
+        public IEnumerable<CPos> GetPredictedEnemyLocations(StrategicWorldState state, Player selfPlayer)
         {
             // TODO: This is "2-player centric", in that it's predicting the same location for every enemy player. 
             // This works fine for one enemy, but once we begin facing more than that we'll need a better method.
-            return EsuAIUtils.OppositeBaseLocationOfPlayer(state.World, selfPlayer);
+            return EsuAIUtils.PossibleEnemyLocationsForPlayer(state.World, selfPlayer);
         }
     }
 }
