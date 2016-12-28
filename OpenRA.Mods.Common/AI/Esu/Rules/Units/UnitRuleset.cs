@@ -5,7 +5,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
-    class UnitRuleset : BaseEsuAIRuleset, INotifyOtherProduction, IOrderDeniedListener
+    class UnitRuleset : BaseEsuAIRuleset, IUnitProduced, IOrderDeniedListener
     {
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
@@ -23,13 +23,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.attackHelper = new AttackHelper(world, selfPlayer, info);
         }
 
-        void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
+        void IUnitProduced.OnUnitProduced(Actor producer, Actor produced)
         {
             if (producer.Owner != selfPlayer) {
                 return;
             }
 
-            scoutHelper.UnitProduced(self, produced);
+            scoutHelper.UnitProduced(producer, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)
@@ -40,10 +40,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             scoutHelper.AddScoutOrdersIfApplicable(self, state, orders);
-            // Let scout produce units before considering other units.
-            if (!scoutHelper.IsScoutBeingProduced()) {
-                unitHelper.AddUnitOrdersIfApplicable(self, state, orders);
-            }
+            unitHelper.AddUnitOrdersIfApplicable(self, state, orders);
+
             // Always allow the attack helper to add orders.
             attackHelper.AddAttackOrdersIfApplicable(self, state, orders);
         }

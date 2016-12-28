@@ -9,7 +9,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     public class ActiveAttackController : INotifyDamage
     {
         /** Number of ticks to wait before moving attack. */
-        private static int TICKS_UNTIL_ATTACK_MOVE = 1000;
+        private static int TICKS_UNTIL_ATTACK_MOVE = 400;
 
         private readonly List<ActiveAttack> CurrentAttacks;
 
@@ -29,11 +29,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return CurrentAttacks;
         }
 
-        public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackTroops)
+        public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, CPos stagedPosition, IEnumerable<Actor> attackTroops)
         {
-            ActiveAttack attack = new ActiveAttack(targetPosition, attackTroops);
+            ActiveAttack attack = new ActiveAttack(targetPosition, stagedPosition, attackTroops);
             CurrentAttacks.Add(attack);
-            attack.AddAttackMoveOrders(orders, targetPosition, attackTroops);
+            if (stagedPosition != CPos.Invalid) {
+                attack.AddAttackMoveOrders(orders, stagedPosition);
+            } else {
+                attack.AddAttackMoveOrders(orders, targetPosition);
+            }
         }
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
@@ -58,6 +62,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 } else if (self == e.Attacker) {
                     attack.AttackedTo(e.Attacker, self, World);
                     return true;
+                }
+            }
+            return false;
+        }
+
+        public bool IsActorInvolvedInActiveAttack(Actor actor)
+        {
+            foreach (ActiveAttack attack in CurrentAttacks)
+            {
+                foreach (Actor troop in attack.AttackTroops)
+                {
+                    if (troop == actor)
+                    {
+                        return true;
+                    }
                 }
             }
             return false;
@@ -99,10 +118,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         {
             foreach (ActiveAttack attack in CurrentAttacks)
             {
+                if (!attack.HasMovedFromStagedToTarget && attack.HasReachedStagedPosition(state.World))
+                {
+                    attack.MoveFromStagedToTarget(orders);
+                }
+
                 if (attack.HasReachedTargetPosition(state.World)
                     && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
                 {
-                    attack.IssueNextAttack(state, orders);
+                    attack.MoveAttack(state, orders);
                 }
             }
         }

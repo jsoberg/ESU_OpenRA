@@ -2,11 +2,28 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Collections;
 
 namespace OpenRA.Mods.Common.AI.Esu.Geometry
 {
     class GeometryUtils
     {
+        public static CPos GetPositionClosestToStart(CPos startPosition,  IEnumerable<CPos> positions)
+        {
+            CPos closestPosition = CPos.Invalid;
+            double minDistance = double.MaxValue;
+
+            foreach (CPos pos in positions) {
+                double distance = EuclideanDistance(startPosition, pos);
+                if (distance < minDistance)
+                {
+                    minDistance = distance;
+                    closestPosition = pos;
+                }
+            }
+            return closestPosition;
+        }
+
         public static double EuclideanDistance(CPos p1, CPos p2)
         {
             return Math.Sqrt(Math.Pow(p1.X - p2.X, 2) + Math.Pow(p1.Y - p2.Y, 2));
