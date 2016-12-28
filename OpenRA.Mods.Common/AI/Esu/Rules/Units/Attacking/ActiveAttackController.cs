@@ -105,7 +105,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         {
             for (int i = attack.AttackTroops.Count - 1; i >= 0; i --)
             { 
-                if (attack.AttackTroops[i].IsDead)
+                if (attack.AttackTroops[i].IsDead || !attack.AttackTroops[i].IsInWorld)
                 {
                     attack.AttackTroops.RemoveAt(i);
                 }
