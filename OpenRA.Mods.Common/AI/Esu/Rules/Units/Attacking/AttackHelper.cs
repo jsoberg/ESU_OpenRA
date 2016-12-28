@@ -62,7 +62,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(StrategicWorldState state, IEnumerable<Actor> defensiveActors)
         {
             IEnumerable<Actor> actors = World.ActorsHavingTrait<Armament>().Where(a => a.Owner == SelfPlayer && !a.IsDead 
-                && !defensiveActors.Contains(a));
+                && !defensiveActors.Contains(a) && !state.ActiveAttackController.IsActorInvolvedInActiveAttack(a));
 
             return actors.Except(AllActorsInAttack(state));
         }

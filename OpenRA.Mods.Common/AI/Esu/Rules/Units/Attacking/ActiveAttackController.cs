@@ -34,9 +34,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             ActiveAttack attack = new ActiveAttack(targetPosition, stagedPosition, attackTroops);
             CurrentAttacks.Add(attack);
             if (stagedPosition != CPos.Invalid) {
-                attack.AddAttackMoveOrders(orders, stagedPosition, attackTroops);
+                attack.AddAttackMoveOrders(orders, stagedPosition);
             } else {
-                attack.AddAttackMoveOrders(orders, targetPosition, attackTroops);
+                attack.AddAttackMoveOrders(orders, targetPosition);
             }
         }
 

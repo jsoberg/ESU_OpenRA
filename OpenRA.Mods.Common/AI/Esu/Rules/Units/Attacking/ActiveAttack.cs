@@ -91,7 +91,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             {
                 StagedPosition = CPos.Invalid;
                 HasMovedFromStagedToTarget = true;
-                AddAttackMoveOrders(orders, TargetPositionStack.Peek(), AttackTroops);
+                AddAttackMoveOrders(orders, TargetPositionStack.Peek());
             }
         }
 
@@ -105,12 +105,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
             TargetPositionStack.Push(nextMove);
             TargetPositionReachedTickCount = 0;
-            AddAttackMoveOrders(orders, nextMove, AttackTroops);
+            AddAttackMoveOrders(orders, nextMove);
         }
 
-        public void AddAttackMoveOrders(Queue<Order> orders, CPos position, IEnumerable<Actor> attackActors)
+        public void AddAttackMoveOrders(Queue<Order> orders, CPos position)
         {
-            foreach (Actor actor in attackActors)
+            foreach (Actor actor in AttackTroops)
             {
                 var move = new Order("AttackMove", actor, false) { TargetLocation = position };
                 orders.Enqueue(move);
