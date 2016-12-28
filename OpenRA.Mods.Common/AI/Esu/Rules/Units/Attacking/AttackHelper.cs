@@ -16,19 +16,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private readonly Player SelfPlayer;
         private readonly EsuAIInfo Info;
 
-        private readonly ActiveAttackController AttackController;
-
         public AttackHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
             this.Info = info;
-            this.AttackController = new ActiveAttackController(world);
         }
 
         public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            AttackController.Tick(self, state, orders);
+            state.ActiveAttackController.Tick(self, state, orders);
 
             if (World.GetCurrentLocalTickCount() % TICKS_TO_CHECK == 0) {
                 CheckStrategicStateForAttack(state, orders);
@@ -50,28 +47,28 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private void IssueAttackIfViable(StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
         {
             var metric = new BaseLethalityMetric(World, SelfPlayer);
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, AttackController.GetActiveAttacks());
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, state.ActiveAttackController.GetActiveAttacks());
 
-            IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(defensiveCoverage.ActorsNecessaryForDefense);
+            IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(state, defensiveCoverage.ActorsNecessaryForDefense);
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
             // TODO add more logic here
             if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) == PredictedAttackStrength.Medium) {
-                AttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, possibleAttackActors);
+                state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, possibleAttackActors);
             }
         }
 
-        private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(IEnumerable<Actor> defensiveActors)
+        private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(StrategicWorldState state, IEnumerable<Actor> defensiveActors)
         {
             IEnumerable<Actor> actors = World.ActorsHavingTrait<Armament>().Where(a => a.Owner == SelfPlayer && !a.IsDead 
                 && !defensiveActors.Contains(a));
 
-            return actors.Except(AllActorsInAttack());
+            return actors.Except(AllActorsInAttack(state));
         }
 
-        private IEnumerable<Actor> AllActorsInAttack()
+        private IEnumerable<Actor> AllActorsInAttack(StrategicWorldState state)
         {
             List<Actor> actors = new List<Actor>();
-            IEnumerable<ActiveAttack> currentAttacks = AttackController.GetActiveAttacks();
+            IEnumerable<ActiveAttack> currentAttacks = state.ActiveAttackController.GetActiveAttacks();
             foreach (ActiveAttack attack in currentAttacks) {
                 actors.Concat(actors);
             }

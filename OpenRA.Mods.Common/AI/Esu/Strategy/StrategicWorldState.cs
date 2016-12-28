@@ -2,6 +2,7 @@
 using System.Linq;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
@@ -21,6 +22,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public World World;
 		public Player SelfPlayer;
 
+        public ActiveAttackController ActiveAttackController;
+
         public StrategicWorldState()
         {
             this.EnemyInfoList = new List<EnemyInfo>();
@@ -33,6 +36,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.SelfPlayer = selfPlayer;
 
             this.ScoutReportGrid = new ScoutReportLocationGrid(world);
+            this.ActiveAttackController = new ActiveAttackController(world);
 
             // Cache our own location for now.
             var selfYard = world.Actors.Where(a => a.Owner == selfPlayer &&
