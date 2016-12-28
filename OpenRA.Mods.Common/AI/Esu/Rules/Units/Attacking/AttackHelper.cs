@@ -1,4 +1,4 @@
-﻿using System.Collections.Generic;
+﻿ using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
@@ -53,7 +53,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
             // TODO add more logic here
             if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) == PredictedAttackStrength.Medium) {
-                state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, possibleAttackActors);
+                ScoutReportLocationGrid reportGrid = state.ScoutReportGrid;
+                CPos stagedPosition = reportGrid.GetSafeCellPositionClosestToCell(bestCell);
+                state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, stagedPosition, possibleAttackActors);
             }
         }
 

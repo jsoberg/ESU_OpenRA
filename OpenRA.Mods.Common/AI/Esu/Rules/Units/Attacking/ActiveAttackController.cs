@@ -29,11 +29,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return CurrentAttacks;
         }
 
-        public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, IEnumerable<Actor> attackTroops)
+        public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, CPos stagedPosition, IEnumerable<Actor> attackTroops)
         {
-            ActiveAttack attack = new ActiveAttack(targetPosition, attackTroops);
+            ActiveAttack attack = new ActiveAttack(targetPosition, stagedPosition, attackTroops);
             CurrentAttacks.Add(attack);
-            attack.AddAttackMoveOrders(orders, targetPosition, attackTroops);
+            if (stagedPosition != CPos.Invalid) {
+                attack.AddAttackMoveOrders(orders, stagedPosition, attackTroops);
+            } else {
+                attack.AddAttackMoveOrders(orders, targetPosition, attackTroops);
+            }
         }
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
@@ -114,10 +118,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         {
             foreach (ActiveAttack attack in CurrentAttacks)
             {
+                if (!attack.HasMovedFromStagedToTarget && attack.HasReachedStagedPosition(state.World))
+                {
+                    attack.MoveFromStagedToTarget(orders);
+                }
+
                 if (attack.HasReachedTargetPosition(state.World)
                     && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
                 {
-                    attack.IssueNextAttack(state, orders);
+                    attack.MoveAttack(state, orders);
                 }
             }
         }
