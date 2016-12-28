@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Mods.Common.AI.Esu.Database;
+using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
@@ -125,6 +126,33 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                     }
                 }
             }
+        }
+
+        public CPos GetSafeCellPositionInbetweenCells(AggregateScoutReportData cell, CPos startPosition)
+        {
+            int cellGridPosX = cell.RelativePosition.X / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosY = cell.RelativePosition.Y / WIDTH_PER_GRID_SQUARE;
+
+            int startPosX = (cellGridPosX - 2 < 0) ? cellGridPosX : cellGridPosX - 2;
+            int startPosY = (cellGridPosY - 2 < 0) ? cellGridPosY : cellGridPosY - 2;
+            int endPosX = (cellGridPosX + 2 > GridWidth - 1) ? cellGridPosX : cellGridPosX + 2;
+            int endPosY = (cellGridPosY + 2 > GridHeight - 1) ? cellGridPosY : cellGridPosY + 2;
+
+            List<CPos> possiblePositions = new List<CPos>();
+            for (int rowNum = startPosX; rowNum <= endPosX; rowNum++)
+            {
+                for (int colNum = startPosY; colNum <= endPosY; colNum++)
+                {
+                    AggregateScoutReportData cellData = GetAggregateDataForCell(rowNum, colNum);
+                    if (cellData == null || cellData.AverageRiskValue == 0) {
+                        CPos position = new CPos(rowNum * WIDTH_PER_GRID_SQUARE, colNum * WIDTH_PER_GRID_SQUARE);
+                        possiblePositions.Add(position);
+                    }
+                }
+            }
+
+            // Get the closest safe position to the start position.
+            return GeometryUtils.GetPositionClosestToStart(startPosition, possiblePositions);
         }
 
         public AggregateScoutReportData GetCurrentBestFitCell()

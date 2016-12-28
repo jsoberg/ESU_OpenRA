@@ -15,6 +15,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private readonly List<ScoutActor> currentScouts;
         private readonly List<ScoutActor> deadScouts;
         private readonly ScoutTargetLocationPool targetPool;
+
         private string scoutInProductionName;
 
         public ScoutHelper(World world, Player selfPlayer, EsuAIInfo info)
@@ -28,26 +29,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.targetPool = new ScoutTargetLocationPool(selfPlayer);
         }
 
-        public bool IsScoutBeingProduced()
-        {
-            return (scoutInProductionName != null);
-        }
-
         // @return - returns true if the produced unit was claimed, false otherwise.
-        public bool UnitProduced(Actor self, Actor other)
+        public bool UnitProduced(Actor producer, Actor other)
         {
             if (other.Info.Name == scoutInProductionName) {
-                currentScouts.Add(new ScoutActor(other));
-                scoutInProductionName = null;
+                AddActorAsScout(other);
                 return true;
             }
             return false;
         }
 
+        private void AddActorAsScout(Actor actor)
+        {
+            currentScouts.Add(new ScoutActor(actor));
+            scoutInProductionName = null;
+        }
+
         public void AddScoutOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders) 
         {
             IssueBuildScoutOrdersIfApplicable(self, state, orders);
-            PerformCurrentScoutMaintenance(self, state, orders);
+            PerformCurrentScoutMaintenance(state, orders);
         }
 
         // ========================================
@@ -60,7 +61,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 return;
             }
 
-            AddBuildNewScoutOrder(self, orders);
+            AddBuildNewScoutOrder(self, state, orders);
         }
 
         private bool ShouldBuildNewScout(StrategicWorldState state)
@@ -78,7 +79,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             return true;
         }
 
-        private void AddBuildNewScoutOrder(Actor self, Queue<Order> orders)
+        private void AddBuildNewScoutOrder(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             scoutInProductionName = GetBestAvailableScoutName();
             if (scoutInProductionName == null) {
@@ -86,6 +87,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
 
             orders.Enqueue(Order.StartProduction(self, scoutInProductionName, 1));
+            // Try to consume this scout as an existing unit if one exists.
+            TryObtainScoutNow(state);
         }
 
         [Desc("Uses the current world state to find the best available scouting unit to build.")]
@@ -102,18 +105,30 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             return null;
         }
 
+        private void TryObtainScoutNow(StrategicWorldState state)
+        {
+            // All available actors (living actors owned by the player with the scout in production name which are not currently scouts and are not currently involved in an attack).
+            var availableActors = state.World.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && a.Info.Name == scoutInProductionName 
+                && !currentScouts.Any(sa => sa.Actor == a) && !state.ActiveAttackController.IsActorInvolvedInActiveAttack(a));
+
+            // Grab first available unit as scout.
+            if (availableActors.Count() > 0) {
+                AddActorAsScout(availableActors.First());
+            }
+        }
+
         // ========================================
         // Scout Movement/ Upkeep
         // ========================================
 
-        private void PerformCurrentScoutMaintenance(Actor self, StrategicWorldState state, Queue<Order> orders)
+        private void PerformCurrentScoutMaintenance(StrategicWorldState state, Queue<Order> orders)
         {
             RemoveDeadScouts();
             if (currentScouts.Count() == 0) {
                 return;
             }
 
-            IssueMovementOrdersForScouts(self, state, orders);
+            IssueMovementOrdersForScouts(state, orders);
             IssueScoutReports(state);
         }
 
@@ -132,7 +147,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         // Scout Movement
         // ========================================
 
-        private void IssueMovementOrdersForScouts(Actor self, StrategicWorldState state, Queue<Order> orders)
+        private void IssueMovementOrdersForScouts(StrategicWorldState state, Queue<Order> orders)
         {
             foreach (ScoutActor scout in currentScouts) {
                 scout.ProductionCooldown--;
