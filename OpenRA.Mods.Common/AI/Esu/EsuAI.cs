@@ -16,7 +16,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 /// </summary>
 namespace OpenRA.Mods.Common.AI.Esu
 {
-    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyAppliedDamage, INotifyDiscovered, INotifyOtherProduction
+    public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyAppliedDamage, INotifyDiscovered, INotifyOtherProduction, INotifyProduction
     {
         private readonly EsuAIInfo info;
         private readonly World world;
@@ -75,11 +75,22 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         }
 
+        void INotifyProduction.UnitProduced(Actor self, Actor other, CPos exit)
+        {
+            OnUnitProduced(self, other);
+        }
+
         void INotifyOtherProduction.UnitProducedByOther(Actor self, Actor producer, Actor produced)
         {
-            var notifyOtherProductionRulesets = rulesets.Where(a => a is INotifyOtherProduction);
-            foreach (INotifyOtherProduction rs in notifyOtherProductionRulesets) {
-                rs.UnitProducedByOther(self, producer, produced);
+            OnUnitProduced(producer, produced);
+        }
+
+        private void OnUnitProduced(Actor producer, Actor produced)
+        {
+            var notifyOtherProductionRulesets = rulesets.Where(a => a is IUnitProduced);
+            foreach (IUnitProduced rs in notifyOtherProductionRulesets)
+            {
+                rs.OnUnitProduced(producer, produced);
             }
         }
 
@@ -210,5 +221,10 @@ namespace OpenRA.Mods.Common.AI.Esu
     public interface IOrderDeniedListener
     {
         void OnOrderDenied(Order order);
+    }
+
+    public interface IUnitProduced
+    {
+        void OnUnitProduced(Actor producer, Actor produced);
     }
 }
