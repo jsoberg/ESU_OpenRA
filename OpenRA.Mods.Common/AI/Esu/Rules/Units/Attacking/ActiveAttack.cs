@@ -7,7 +7,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
-        private static readonly int DistanceFromStagedPosition = 10;
+        private static readonly int DistanceFromStagedPosition = 5;
 
         public List<Actor> AttackTroops;
         public int LastTickDamageMade;
