@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Traits;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
@@ -84,15 +85,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            RemoveDeadTroopsFromAttacks();
+            RemoveDeadTroopsFromAttacks(state, orders);
             MaintainActiveAttacks(state, orders);
         }
 
-        private void RemoveDeadTroopsFromAttacks()
+        private void RemoveDeadTroopsFromAttacks(StrategicWorldState state, Queue<Order> orders)
         {
             for (int i = CurrentAttacks.Count - 1; i >= 0; i--)
             {
-                bool IsAttackOver = TrimAttack(CurrentAttacks[i]);
+                bool IsAttackOver = TrimAttack(CurrentAttacks[i], state, orders);
                 if (IsAttackOver)
                 {
                     CurrentAttacks.RemoveAt(i);
@@ -101,17 +102,32 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         }
 
         /** @return true if all troops in this attack are dead, false otherwise. */
-        private bool TrimAttack(ActiveAttack attack)
+        private bool TrimAttack(ActiveAttack attack, StrategicWorldState state, Queue<Order> orders)
         {
             for (int i = attack.AttackTroops.Count - 1; i >= 0; i --)
-            { 
-                if (attack.AttackTroops[i].IsDead)
+            {
+                bool WasTroopKilled = false;
+                if (attack.AttackTroops[i].IsDead || !attack.AttackTroops[i].IsInWorld)
                 {
+                    WasTroopKilled = true;
                     attack.AttackTroops.RemoveAt(i);
+                }
+
+                // If we've lost a troop and haven't moved back yet, our staged position is compromised and we need to move it back.
+                if (WasTroopKilled && !attack.WasStagedPositionMoved && !attack.HasReachedStagedPosition(state.World))
+                {
+                    MoveStagedPositionBack(attack, state, orders);
                 }
             }
 
             return (attack.AttackTroops.Count() == 0);
+        }
+
+        private void MoveStagedPositionBack(ActiveAttack attack, StrategicWorldState state, Queue<Order> orders)
+        {
+            ScoutReportLocationGrid reportGrid = state.ScoutReportGrid;
+            CPos stagedPosition = reportGrid.GetSafeCellPositionInbetweenCells(attack.StagedPosition, state.SelfIntialBaseLocation);
+            attack.MoveStagedPosition(orders, stagedPosition);
         }
 
         private void MaintainActiveAttacks(StrategicWorldState state, Queue<Order> orders)
