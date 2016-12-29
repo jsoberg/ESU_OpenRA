@@ -7,7 +7,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
-        private static readonly int DistanceFromStagedPosition = 5;
+        private const int DistanceToMoveAttack = 5;
+        private const int DistanceFromStagedPosition = 5;
 
         public List<Actor> AttackTroops;
         public int LastTickDamageMade;
@@ -107,12 +108,18 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void MoveAttack(StrategicWorldState state, Queue<Order> orders)
         {
-            CPos nextMove = GeometryUtils.Center(AttackerLocationList);
-            if (nextMove == CPos.Invalid) {
+            CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
+            if (attackerCenter == CPos.Invalid) {
                 // TODO try to get a location from scout reports or somewhere else.
                 return;
             }
+            CPos nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, DistanceToMoveAttack, state.World.Map);
+            ActivateNewTargetPosition(nextMove, orders);
+        }
 
+        private void ActivateNewTargetPosition(CPos nextMove, Queue<Order> orders)
+        {
+            AttackerLocationList.Clear();
             TargetPositionStack.Push(nextMove);
             TargetPositionReachedTickCount = 0;
             AddAttackMoveOrders(orders, nextMove);
