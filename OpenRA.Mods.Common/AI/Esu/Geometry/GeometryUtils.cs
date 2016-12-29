@@ -40,6 +40,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             return new CPos(x, y);
         }
 
+        public static CPos ParallelXLocationOnMap(CPos location, Map map)
+        {
+            var width = map.MapSize.X;
+            var x = width - location.X;
+            var y = location.Y;
+
+            return new CPos(x, y);
+        }
+
         public static CPos MoveTowards(CPos start, CPos end, int distance, Map map)
         {
             int deltaX = start.X - end.X;

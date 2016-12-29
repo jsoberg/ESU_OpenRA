@@ -12,12 +12,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         public List<Actor> AttackTroops;
         public int LastTickDamageMade;
 
+        public bool WasStagedPositionMoved { get; internal set; }
         private int TargetPositionReachedTickCount;
         private int StagedPositionReachedTickCount;
         public bool HasMovedFromStagedToTarget { get; internal set; }
 
         /** Position where the next attack should be staged before following through. */
-        private CPos StagedPosition = CPos.Invalid;
+        public CPos StagedPosition = CPos.Invalid;
 
         /** Stack holding most recent target position to oldest target position. */
         private readonly Stack<CPos> TargetPositionStack;
@@ -85,10 +86,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return true;
         }
 
+        public void MoveStagedPosition(Queue<Order> orders, CPos newStagedPosition)
+        {
+            WasStagedPositionMoved = true;
+            StagedPosition = newStagedPosition;
+            StagedPositionReachedTickCount = 0;
+            AddAttackMoveOrders(orders, StagedPosition);
+        }
+
         public void MoveFromStagedToTarget(Queue<Order> orders)
         {
             if (!HasMovedFromStagedToTarget)
             {
+                WasStagedPositionMoved = false;
                 StagedPosition = CPos.Invalid;
                 HasMovedFromStagedToTarget = true;
                 AddAttackMoveOrders(orders, TargetPositionStack.Peek());

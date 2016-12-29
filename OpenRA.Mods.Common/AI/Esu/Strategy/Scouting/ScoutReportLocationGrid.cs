@@ -8,11 +8,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
     public class ScoutReportLocationGrid
     {
+        // Size of a given cell in the report grid.
+        public const int WIDTH_PER_GRID_SQUARE = 10;
+
         // Number of ticks to wait between scout report data updates.
         private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
-
-        // Size of a given cell in the report grid.
-        private const int WIDTH_PER_GRID_SQUARE = 10;
 
         // How many ticks before scout report times out and is thrown away.
         private const int TICK_TIMEOUT = 3000;
@@ -128,15 +128,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             }
         }
 
-        public CPos GetSafeCellPositionInbetweenCells(AggregateScoutReportData cell, CPos startPosition)
+        public CPos GetSafeCellPositionInbetweenCells(CPos cell, CPos startPosition)
         {
-            int cellGridPosX = cell.RelativePosition.X / WIDTH_PER_GRID_SQUARE;
-            int cellGridPosY = cell.RelativePosition.Y / WIDTH_PER_GRID_SQUARE;
+            if (cell == CPos.Invalid) {
+                return CPos.Invalid;
+            }
 
-            int startPosX = (cellGridPosX - 2 < 0) ? cellGridPosX : cellGridPosX - 2;
-            int startPosY = (cellGridPosY - 2 < 0) ? cellGridPosY : cellGridPosY - 2;
-            int endPosX = (cellGridPosX + 2 > GridWidth - 1) ? cellGridPosX : cellGridPosX + 2;
-            int endPosY = (cellGridPosY + 2 > GridHeight - 1) ? cellGridPosY : cellGridPosY + 2;
+            int cellGridPosX = cell.X / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosY = cell.Y / WIDTH_PER_GRID_SQUARE;
+
+            int startPosX = (cellGridPosX - 1 < 0) ? cellGridPosX : cellGridPosX - 1;
+            int startPosY = (cellGridPosY - 1 < 0) ? cellGridPosY : cellGridPosY - 1;
+            int endPosX = (cellGridPosX + 1 > GridWidth - 1) ? cellGridPosX : cellGridPosX + 1;
+            int endPosY = (cellGridPosY + 1 > GridHeight - 1) ? cellGridPosY : cellGridPosY + 1;
 
             List<CPos> possiblePositions = new List<CPos>();
             for (int rowNum = startPosX; rowNum <= endPosX; rowNum++)

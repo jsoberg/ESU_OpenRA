@@ -45,8 +45,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             foreach (EnemyInfo enemy in state.EnemyInfoList) {
                 // TODO: This is "2-player centric", in that it's predicting the same location for every enemy player. 
                 // This works fine for one enemy, but once we begin facing more than that we'll need a better method.
-                var predictedEnemyLocation = enemy.GetPredictedEnemyLocation(state, SelfPlayer);
-                AvailablePositions.Enqueue(predictedEnemyLocation);
+                var predictedEnemyLocations = enemy.GetPredictedEnemyLocations(state, SelfPlayer);
+                foreach (CPos location in predictedEnemyLocations) {
+                    AvailablePositions.Enqueue(location);
+                }
             }
         }
 
