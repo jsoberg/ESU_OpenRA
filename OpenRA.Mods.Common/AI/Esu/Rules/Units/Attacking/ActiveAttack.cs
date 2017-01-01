@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
@@ -108,13 +109,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void MoveAttack(StrategicWorldState state, Queue<Order> orders)
         {
+            CPos nextMove = CPos.Invalid;
+
             CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
-            if (attackerCenter == CPos.Invalid) {
-                // TODO try to get a location from scout reports or somewhere else.
-                return;
+            if (attackerCenter != CPos.Invalid) {
+                nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, DistanceToMoveAttack, state.World.Map);
+            } else {
+                AggregateScoutReportData best = state.ScoutReportGrid.GetBestSurroundingCell(TargetPositionStack.Peek());
+                if (best != null) {
+                    nextMove = best.RelativePosition;
+                }
+                // TODO What if we don't have any surrounding information either? Random direction maybe?
             }
-            CPos nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, DistanceToMoveAttack, state.World.Map);
-            ActivateNewTargetPosition(nextMove, orders);
+
+            
+            if (nextMove != CPos.Invalid) {
+                ActivateNewTargetPosition(nextMove, orders);
+            }
         }
 
         private void ActivateNewTargetPosition(CPos nextMove, Queue<Order> orders)
