@@ -198,14 +198,17 @@ namespace OpenRA.Mods.Common.AI.Esu
             return (ScoutRecommendationImportanceMultiplier / 10);
         }
 
+        [Desc("Minimum number of refineries to have built.")]
+        public readonly int MinNumRefineries = 2;
+
+        [Desc("Minimum number of active harvesters to have in the game.")]
+        public readonly int MinNumHarvesters = 3;
+
         // ========================================
         // Static
         // ========================================
         [Desc("Radius in cells around the center of the base to expand.")]
         public readonly int MaxBaseRadius = 20;
-
-        [Desc("Minimum number of refineries to build in the beginning of the game.")]
-        public readonly int MinNumRefineries = 3;
 
         string IBotInfo.Name
         {
