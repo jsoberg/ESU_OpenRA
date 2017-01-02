@@ -88,8 +88,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public void AddScoutReportInformation(Actor scoutActor, ScoutReportInfoBuilder infoBuilder)
         {
             ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder);
-            ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
+            // 0/0 reports tell us nothing and should be ignored.
+            if (recommendation.RewardValue == 0 && recommendation.RiskValue == 0) {
+                return;
+            }
 
+            ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
             ScoutReportGrid.AddScoutReportForActor(scoutActor, report);
         }
     }

@@ -49,14 +49,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             return new CPos(x, y);
         }
 
+        public static double BearingBetween(CPos first, CPos second)
+        {
+            int deltaX = second.X - first.X;
+            int deltaY = second.Y - first.Y;
+            return Math.Atan2(deltaY, deltaX);
+        }
+
         public static CPos MoveTowards(CPos start, CPos end, int distance, Map map)
         {
-            int deltaX = start.X - end.X;
-            int deltaY = start.Y - end.Y;
-            double angle = Math.Atan2(deltaY, deltaX);
+            double bearing = BearingBetween(start, end);
+            return MoveTowards(start, bearing, distance, map);
+        }
 
-            int changeX = (int) (distance * Math.Cos(angle));
-            int changeY = (int) (distance * Math.Sin(angle));
+        public static CPos MoveTowards(CPos start, double bearing, int distance, Map map)
+        {
+            int changeX = (int)(distance * Math.Cos(bearing));
+            int changeY = (int)(distance * Math.Sin(bearing));
 
             int towardX = SanitizedValue(start.X + changeX, 0, map.MapSize.X);
             int towardY = SanitizedValue(start.Y + changeY, 0, map.MapSize.Y);
