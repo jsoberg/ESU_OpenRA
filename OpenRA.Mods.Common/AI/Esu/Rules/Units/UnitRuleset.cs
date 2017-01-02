@@ -1,6 +1,5 @@
-﻿using System.Collections.Generic;
-using System.Collections;
-using OpenRA.Traits;
+﻿using System.Linq;
+using System.Collections.Generic;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.Traits;
@@ -43,7 +42,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         public override void AddOrdersForTick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             scoutHelper.AddScoutOrdersIfApplicable(self, state, orders);
-            unitHelper.AddUnitOrdersIfApplicable(self, state, orders);
+            unitHelper.AddUnitOrdersIfApplicable(state, orders);
 
             // Always allow the attack helper to add orders.
             attackHelper.AddAttackOrdersIfApplicable(self, state, orders);
@@ -55,16 +54,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         // Modified slightly from HackyAI.
         private void GiveOrdersToIdleHarvesters(Queue<Order> orders)
         {
-            // For some unknown readon, I can't purge unwanted harvesters here using a Where statement, so I have to do it later on...
-            var harvesters = world.ActorsHavingTrait<Harvester>();
+            var harvesters = world.ActorsHavingTrait<Harvester>().Where(a => a.Owner == selfPlayer && !a.IsDead);
 
             // Find idle harvesters and give them orders:
             foreach (var harvester in harvesters)
             {
-                if (harvester.Owner != selfPlayer || harvester.IsDead) {
-                    continue;
-                }
-
                 var harv = harvester.TraitOrDefault<Harvester>();
                 if (harv == null)
                     continue;
