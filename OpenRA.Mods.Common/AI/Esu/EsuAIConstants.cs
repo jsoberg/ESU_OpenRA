@@ -139,6 +139,8 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public static class Vehicles
         {
+            public const string HARVESTER = "harv";
+
             public static class Soviet
             {
                 public const string V2_ROCKET = "v2rl";

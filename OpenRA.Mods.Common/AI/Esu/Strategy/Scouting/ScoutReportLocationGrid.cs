@@ -128,6 +128,38 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             }
         }
 
+        public AggregateScoutReportData GetBestSurroundingCell(CPos cell)
+        {
+            if (cell == CPos.Invalid) {
+                return null;
+            }
+
+            int cellGridPosX = cell.X / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosY = cell.Y / WIDTH_PER_GRID_SQUARE;
+
+            int startPosX = (cellGridPosX - 1 < 0) ? cellGridPosX : cellGridPosX - 1;
+            int startPosY = (cellGridPosY - 1 < 0) ? cellGridPosY : cellGridPosY - 1;
+            int endPosX = (cellGridPosX + 1 > GridWidth - 1) ? cellGridPosX : cellGridPosX + 1;
+            int endPosY = (cellGridPosY + 1 > GridHeight - 1) ? cellGridPosY : cellGridPosY + 1;
+
+            AggregateScoutReportData best = null;
+            for (int rowNum = startPosX; rowNum <= endPosX; rowNum++)
+            {
+                for (int colNum = startPosY; colNum <= endPosY; colNum++)
+                {
+                    AggregateScoutReportData cellData = GetAggregateDataForCell(rowNum, colNum);
+                    if (best == null) {
+                        best = cellData;
+                    } else {
+                        if (cellData != null) {
+                            best = (cellData.AverageRewardValue >= best.AverageRewardValue && cellData.AverageRiskValue <= best.AverageRiskValue) ? cellData : best;
+                        }
+                    }
+                }
+            }
+            return best;
+        }
+
         public CPos GetSafeCellPositionInbetweenCells(CPos cell, CPos startPosition)
         {
             if (cell == CPos.Invalid) {
