@@ -188,7 +188,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
 
         [Desc("Determines amount of resources to have on hand before the next production is considered (Rule AmountOfResourcesToHaveBeforeNextProduction)")]
-        public readonly int AmountOfResourcesToHaveBeforeNextProduction = 400;
+        public readonly int AmountOfResourcesToHaveBeforeNextProduction = 200;
 
         [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;
@@ -203,6 +203,9 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Minimum number of active harvesters to have in the game.")]
         public readonly int MinNumHarvesters = 3;
+
+        [Desc("Amount of resources we hold before we consider it to be an excess amount.")]
+        public readonly int ExcessResourceLevel = 800;
 
         // ========================================
         // Static

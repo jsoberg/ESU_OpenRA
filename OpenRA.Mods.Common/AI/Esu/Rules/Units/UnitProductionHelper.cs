@@ -97,15 +97,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             return state.World.ActorsHavingTrait<Harvester>().Count(a => a.Owner == selfPlayer && !a.IsDead);
         }
 
+        // Produces units for the specified distribution. If we currently have excess resources, we will produce units without taking the distribution into account.
         private void ProduceUnitForDistribution(StrategicWorldState state, Queue<Order> orders, double infantryPercent, double vehiclePercent, double airPercent)
         {
+            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
+
             // TODO: Check here for vehicle and air.
             double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.INFANTRY);
-            if (currentInfantryPercentage < infantryPercent)
+            if (currentInfantryPercentage < infantryPercent || currentResources > info.ExcessResourceLevel)
             {
                 ProduceInfantry(state, orders);
             }
-            else
+
+            double currentVehiclePercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.VEHICLE);
+            if (currentVehiclePercentage < vehiclePercent || currentResources > info.ExcessResourceLevel)
             {
                 var vehicleName = GetVehicleToProduce();
                 ProduceVehicle(state, orders, vehicleName);
@@ -114,7 +119,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private double PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(string type)
         {
-            var actors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && EsuAIUtils.IsActorOfType(world, a, type));
+            // Don't include harvesters (not offense)
+            var actors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && EsuAIUtils.IsActorOfType(world, a, type) && a.Info.Name != "harv");
             // TODO yech... find a better way to get this.
             // All offensive actors.
             var allActors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && a.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.BUILDING)
