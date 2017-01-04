@@ -47,12 +47,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private int ComputeRewardValue(ScoutReportInfoBuilder builder)
         {
-            return PowerPlants(builder) + OreRefineries(builder) + OtherBuildings(builder);
+            return Harvesters(builder) + PowerPlants(builder) + OreRefineries(builder) + OtherBuildings(builder);
         }
 
         // ========================================
         // Reward Methods
         // ========================================
+
+        private int Harvesters(ScoutReportInfoBuilder builder)
+        {
+            return (int)((builder.NumHarvesters) * builder.info.GetScoutRecommendationImportanceMultiplier());
+        }
 
         private int PowerPlants(ScoutReportInfoBuilder builder)
         {
@@ -80,7 +85,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private int UnitsAndDefensiveStructures(ScoutReportInfoBuilder builder)
         {
-            return (int) ((builder.AllUnits() + builder.AllDefensiveStructures()) * builder.info.GetScoutRecommendationImportanceMultiplier());
+            return (int) ((builder.AllOffensiveUnits() + builder.AllDefensiveStructures()) * builder.info.GetScoutRecommendationImportanceMultiplier());
         }
 
         public static bool operator ==(ResponseRecommendation a, ResponseRecommendation b)
