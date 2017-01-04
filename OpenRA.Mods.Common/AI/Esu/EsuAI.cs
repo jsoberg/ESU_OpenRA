@@ -207,6 +207,14 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Amount of resources we hold before we consider it to be an excess amount.")]
         public readonly int ExcessResourceLevel = 800;
 
+        [Desc("Determines the multiplier used for viewed harvesters when calculating scout recommendations.")]
+        public readonly int HarvesterScoutRecommendationImportanceMultiplier = 15;
+
+        public float GetHarvesterScoutRecommendationImportanceMultiplier()
+        {
+            return (HarvesterScoutRecommendationImportanceMultiplier / 10);
+        }
+
         // ========================================
         // Static
         // ========================================
