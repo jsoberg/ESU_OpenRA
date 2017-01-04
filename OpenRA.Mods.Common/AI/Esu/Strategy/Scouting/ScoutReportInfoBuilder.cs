@@ -18,6 +18,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         public int NumOtherDefensiveBuildings;
 
         public int NumInfantryUnits;
+        public int NumHarvesters;
         public int NumVehicleUnits;
         public int NumAircraftUnits;
 
@@ -30,7 +31,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             this.info = info;
         }
 
-        public int AllUnits()
+        public int AllOffensiveUnits()
         {
             return (NumAircraftUnits + NumInfantryUnits + NumVehicleUnits);
         }
@@ -89,6 +90,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return this;
         }
 
+        public ScoutReportInfoBuilder AddHarvester()
+        {
+            this.NumHarvesters++;
+            return this;
+        }
+
         public ScoutReportInfoBuilder AddVehicle()
         {
             this.NumVehicleUnits++;
@@ -101,9 +108,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return this;
         }
 
-        public ScoutReportInfoBuilder SetNumUnits(int numInfantryUnits, int numVehicleUnits, int numAircraftUnits)
+        public ScoutReportInfoBuilder SetNumUnits(int numInfantryUnits, int numHarvesters, int numVehicleUnits, int numAircraftUnits)
         {
             this.NumInfantryUnits = numInfantryUnits;
+            this.NumHarvesters = numHarvesters;
             this.NumVehicleUnits = numVehicleUnits;
             this.NumAircraftUnits = numAircraftUnits;
             return this;

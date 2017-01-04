@@ -78,8 +78,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                     return;
                 }
 
-                if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE))
-                {
+                if (enemy.TraitOrDefault<Harvester>() != null) {
+                    builder.AddHarvester();
+                    return;
+                } else if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE)) {
                     builder.AddVehicle();
                     return;
                 }

@@ -8,8 +8,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
-        private const int DistanceToMoveAttack = 5;
-        private const int DistanceFromStagedPosition = 5;
+        private const int DistanceToMoveAttack = 6;
+        private const int DistanceFromStagedPosition = 6;
 
         public List<Actor> AttackTroops;
         public int LastTickDamageMade;
@@ -119,7 +119,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 if (best != null) {
                     nextMove = best.RelativePosition;
                 }
-                // TODO What if we don't have any surrounding information either? Random direction maybe?
+            }
+
+            // If we still haven't found a location, or have found our current location, search the scout report grid for another good cell anywhere on the map.
+            CPos currentTarget = TargetPositionStack.Peek();
+            if (nextMove == CPos.Invalid || nextMove == currentTarget) {
+                AggregateScoutReportData best = state.ScoutReportGrid.GetCurrentBestFitCellExcludingPosition(currentTarget);
+                if (best != null) {
+                    nextMove = best.RelativePosition;
+                }
             }
 
             
