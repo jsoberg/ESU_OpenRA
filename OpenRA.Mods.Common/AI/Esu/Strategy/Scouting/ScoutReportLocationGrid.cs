@@ -193,6 +193,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         public AggregateScoutReportData GetCurrentBestFitCell()
         {
+            return GetCurrentBestFitCellExcludingPosition(CPos.Invalid);
+        }
+
+        public AggregateScoutReportData GetCurrentBestFitCellExcludingPosition(CPos excludingPosition)
+        {
+            int x = excludingPosition != CPos.Invalid ? GetRoundedIntDividedByCellSize(excludingPosition.X) : -1;
+            int y = excludingPosition != CPos.Invalid ? GetRoundedIntDividedByCellSize(excludingPosition.Y) : -1;
+
             AggregateScoutReportData best = null;
 
             for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
@@ -200,6 +208,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 List<ScoutReport>[] row = ScoutReportGridMatrix[i];
                 for (int j = 0; j < row.Count(); j++)
                 {
+                    if (i == x && j == y)
+                    {
+                        continue;
+                    }
+
                     AggregateScoutReportData current = GetAggregateDataForCell(i, j);
                     if (best == null || (current != null && (current.CompareTo(best) > 0)))
                     {
