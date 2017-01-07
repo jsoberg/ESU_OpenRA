@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units.Defense;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.Activities;
 
@@ -12,6 +13,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
         private AttackHelper attackHelper;
+        private DefenseHelper defenseHelper;
 
         public UnitRuleset(World world, EsuAIInfo info) : base(world, info)
         {
@@ -23,6 +25,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.scoutHelper = new ScoutHelper(world, selfPlayer, info);
             this.unitHelper = new UnitProductionHelper(world, selfPlayer, info);
             this.attackHelper = new AttackHelper(world, selfPlayer, info);
+            this.defenseHelper = new DefenseHelper(world, selfPlayer, info);
         }
 
         void IUnitProduced.OnUnitProduced(Actor producer, Actor produced)
@@ -45,7 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             unitHelper.AddUnitOrdersIfApplicable(state, orders);
 
             // Always allow the attack helper to add orders.
-            attackHelper.AddAttackOrdersIfApplicable(self, state, orders);
+            attackHelper.Tick(self, state, orders);
 
             // Stop harvesters from idling.
             GiveOrdersToIdleHarvesters(orders);
