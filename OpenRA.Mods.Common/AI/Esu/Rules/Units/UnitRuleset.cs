@@ -47,8 +47,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             scoutHelper.AddScoutOrdersIfApplicable(self, state, orders);
             unitHelper.AddUnitOrdersIfApplicable(state, orders);
 
-            // Always allow the attack helper to add orders.
+            // Allow the attack helper to add orders.
             attackHelper.Tick(self, state, orders);
+
+            // Allow the defense helper to add orders.
+            defenseHelper.Tick(self, state, orders);
 
             // Stop harvesters from idling.
             GiveOrdersToIdleHarvesters(orders);
