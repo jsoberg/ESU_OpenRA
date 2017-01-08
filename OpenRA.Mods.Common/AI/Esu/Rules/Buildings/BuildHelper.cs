@@ -78,6 +78,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         public void SetRallyPointsForNewProductionBuildings(Queue<Order> orders)
         {
             var baseCenter = GetRandomBaseCenter();
+            if (baseCenter == CPos.Invalid) {
+                return;
+            }
 
             foreach (var rp in world.ActorsWithTrait<RallyPoint>())
             {
@@ -121,6 +124,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         {
             var type = GetBuildingTypeForActorType(actorType);
             var baseCenter = GetRandomBaseCenter();
+            if (baseCenter == CPos.Invalid) {
+                return CPos.Invalid;
+            }
 
             switch (type) {
                 case BuildingType.Refinery:
@@ -152,6 +158,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         public CPos FindBuildableLocationNearResources()
         {
             var baseCenter = GetRandomBaseCenter();
+            if (baseCenter == CPos.Invalid) {
+                return CPos.Invalid;
+            }
 
             var tileset = world.Map.Rules.TileSet;
             var resourceTypeIndices = new BitArray(tileset.TerrainInfo.Length);
@@ -230,8 +239,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD)
                 .RandomOrDefault(Random);
 
-            // TODO: Possible NPE
-            return randomConstructionYard.Location;
+            return (randomConstructionYard != null) ? randomConstructionYard.Location : CPos.Invalid;
         }
 
         [Desc("Attempts to find a location to place a defensive structure, based on the DefensiveBuildingPlacement rule.")]

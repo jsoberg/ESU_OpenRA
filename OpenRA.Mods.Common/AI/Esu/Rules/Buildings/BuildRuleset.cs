@@ -199,6 +199,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
                 // TODO not first, decide where to go.
                 var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == defenseiveBuilding);
+                if (buildable == null) {
+                    // We have no construction yard.
+                    return;
+                }
+
                 var prereqs = buildable.TraitInfo<BuildableInfo>().Prerequisites.Where(s => !s.StartsWith("~"));
 
                 foreach (string req in prereqs) {
