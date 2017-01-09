@@ -11,6 +11,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class ScoutTargetLocationPool
     {
+        private const int DistanceToWanderTowardEnemy = 8;
+
         private readonly Player SelfPlayer;
         private readonly Queue<CPos> AvailablePositions;
         private readonly MersenneTwister Random;
@@ -30,7 +32,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 InitializeTargetLocations(state);
                 IsInitialized = true;
             }
-            return GetNextAvailableTargetLocation(state, scoutActor);
+            return GetNextTargetLocation(state, scoutActor);
         }
 
         // Initialize predicted enemy location queue, from most important to least.
@@ -60,12 +62,49 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        private CPos GetNextAvailableTargetLocation(StrategicWorldState state, Actor scoutActor)
+        private CPos GetNextTargetLocation(StrategicWorldState state, Actor scoutActor)
         {
+            // If we can see an enemy actor, wander toward it.
+            CPos wanderLocation = GetLocationForViewedEnemy(state, scoutActor);
+            if (wanderLocation != CPos.Invalid) {
+                return wanderLocation;
+            }
+
             if (AvailablePositions.Count > 0) {
                 return AvailablePositions.Dequeue();
             }
             return GetFoundEnemyLocationOrRandom(state, scoutActor);
+        }
+
+        private CPos GetLocationForViewedEnemy(StrategicWorldState state, Actor scoutActor)
+        {
+            Rect visibility = VisibilityBounds.GetCurrentVisibilityRectForActor(scoutActor);
+            var visibleEnemyItems = state.World.Actors.Where(a => a.Owner != scoutActor.Owner && state.EnemyInfoList.Any(e => e.EnemyName == a.Owner.InternalName)
+                && a.OccupiesSpace != null && visibility.ContainsPosition(a.CenterPosition));
+            if (visibleEnemyItems == null || visibleEnemyItems.Count() == 0) {
+                return CPos.Invalid;
+            }
+
+            // Move toward harvesters first if we see one.
+            var harvester = visibleEnemyItems.FirstOrDefault(a => a.Info.Name == EsuAIConstants.Vehicles.HARVESTER);
+            if (harvester != null) {
+                return GeometryUtils.MoveTowards(scoutActor.Location, harvester.Location, DistanceToWanderTowardEnemy, state.World.Map);
+            }
+
+            // Move next toward buildings.
+            var building = visibleEnemyItems.FirstOrDefault(a => EsuAIUtils.IsActorOfType(state.World, a, EsuAIConstants.ProductionCategories.BUILDING));
+            if (building != null) {
+                return GeometryUtils.MoveTowards(scoutActor.Location, building.Location, DistanceToWanderTowardEnemy, state.World.Map);
+            }
+
+            // Lastly, move toward units.
+            var unit = visibleEnemyItems.FirstOrDefault(a => EsuAIUtils.IsActorOfType(state.World, a, EsuAIConstants.ProductionCategories.INFANTRY) 
+                || EsuAIUtils.IsActorOfType(state.World, a, EsuAIConstants.ProductionCategories.VEHICLE));
+            if (unit != null) {
+                return GeometryUtils.MoveTowards(scoutActor.Location, unit.Location, DistanceToWanderTowardEnemy, state.World.Map);
+            }
+
+            return CPos.Invalid;
         }
 
         private CPos GetFoundEnemyLocationOrRandom(StrategicWorldState state, Actor scoutActor)
