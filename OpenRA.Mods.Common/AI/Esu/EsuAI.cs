@@ -195,7 +195,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public float GetScoutRecommendationImportanceMultiplier()
         {
-            return (ScoutRecommendationImportanceMultiplier / 10);
+            return ((float)ScoutRecommendationImportanceMultiplier / 10f);
         }
 
         [Desc("Minimum number of refineries to have built.")]
@@ -212,7 +212,15 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         public float GetHarvesterScoutRecommendationImportanceMultiplier()
         {
-            return (HarvesterScoutRecommendationImportanceMultiplier / 10);
+            return ((float) HarvesterScoutRecommendationImportanceMultiplier / 10f);
+        }
+
+        [Desc("Determines the percentage of lethality coverage we want to hold at the base for defense.")]
+        public readonly int DefenseLethalityCoverage = 2;
+
+        public float GetDefenseLethalityCoveragePercentage()
+        {
+            return ((float)DefenseLethalityCoverage / 10f);
         }
 
         // ========================================

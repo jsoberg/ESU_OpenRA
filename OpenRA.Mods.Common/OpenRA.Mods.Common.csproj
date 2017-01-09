@@ -154,6 +154,7 @@
     <Compile Include="AI\Esu\Rules\Units\Attacking\AttackStrengthPredictor.cs" />
     <Compile Include="AI\Esu\Rules\Units\Attacking\ActiveAttackController.cs" />
     <Compile Include="AI\Esu\Rules\Units\Attacking\DamageNotifier.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Defense\DefenseHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutTargetLocationPool.cs" />
     <Compile Include="AI\Esu\Rules\Units\UnitProductionHelper.cs" />
