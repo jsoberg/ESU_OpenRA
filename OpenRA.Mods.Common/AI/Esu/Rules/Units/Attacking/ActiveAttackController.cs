@@ -136,11 +136,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             {
                 if (!attack.HasMovedFromStagedToTarget && attack.HasReachedStagedPosition(state.World))
                 {
-                    attack.MoveFromStagedToTarget(orders);
+                    attack.MoveFromStagedToTarget(state, orders);
                 }
 
                 if (attack.HasReachedTargetPosition(state.World)
-                    && (state.World.GetCurrentLocalTickCount() - attack.LastTickDamageMade) >= TICKS_UNTIL_ATTACK_MOVE)
+                    && (state.World.GetCurrentLocalTickCount() - attack.LastActionTick) >= TICKS_UNTIL_ATTACK_MOVE)
                 {
                     attack.MoveAttack(state, orders);
                 }

@@ -8,11 +8,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
-        private const int DistanceToMoveAttack = 6;
-        private const int DistanceFromStagedPosition = 6;
+        private const int DistanceToMoveAttack = 10;
+        private const int DistanceFromPosition = 8;
 
         public List<Actor> AttackTroops;
-        public int LastTickDamageMade;
+        public int LastActionTick;
 
         public bool WasStagedPositionMoved { get; internal set; }
         private int TargetPositionReachedTickCount;
@@ -42,12 +42,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         public void AttackedFrom(Actor attacker, World world)
         {
             AttackerLocationList.Add(attacker.Location);
-            LastTickDamageMade = world.GetCurrentLocalTickCount();
+            LastActionTick = world.GetCurrentLocalTickCount();
         }
 
         public void AttackedTo(Actor attackingTroop, Actor actorAttacked, World world)
         {
-            LastTickDamageMade = world.GetCurrentLocalTickCount();
+            LastActionTick = world.GetCurrentLocalTickCount();
         }
 
         public bool HasReachedTargetPosition(World world)
@@ -56,12 +56,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 return true;
             }
 
-            CPos targetPosition = TargetPositionStack.Peek();
-            foreach (Actor troop in AttackTroops) {
-                if (troop.Location == targetPosition) {
-                    TargetPositionReachedTickCount = world.GetCurrentLocalTickCount();
-                    return true;
-                }
+            if (HasReachedPosition(TargetPositionStack.Peek()))
+            {
+                // All troops have reached target position.
+                TargetPositionReachedTickCount = world.GetCurrentLocalTickCount();
+                return true;
             }
             return false;
         }
@@ -72,19 +71,29 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 return true;
             }
 
+            if (HasReachedPosition(StagedPosition))
+            {
+                // All troops have reached staging area.
+                StagedPositionReachedTickCount = world.GetCurrentLocalTickCount();
+                return true;
+            }
+            return false;
+        }
+
+        private bool HasReachedPosition(CPos position)
+        {
             foreach (Actor troop in AttackTroops)
             {
-                if (((StagedPosition.X - DistanceFromStagedPosition) < troop.Location.X && troop.Location.X < (StagedPosition.X + DistanceFromStagedPosition))
-                        && ((StagedPosition.Y -DistanceFromStagedPosition) < troop.Location.Y && troop.Location.Y < (StagedPosition.Y + DistanceFromStagedPosition)))
+                if (((position.X - DistanceFromPosition) < troop.Location.X && troop.Location.X < (position.X + DistanceFromPosition))
+                        && ((position.Y - DistanceFromPosition) < troop.Location.Y && troop.Location.Y < (position.Y + DistanceFromPosition)))
                 {
                     continue;
-                } else {
+                }
+                else
+                {
                     return false;
                 }
             }
-
-            // All troops have reached staging area.
-            StagedPositionReachedTickCount = world.GetCurrentLocalTickCount();
             return true;
         }
 
@@ -96,13 +105,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             AddAttackMoveOrders(orders, StagedPosition);
         }
 
-        public void MoveFromStagedToTarget(Queue<Order> orders)
+        public void MoveFromStagedToTarget(StrategicWorldState state, Queue<Order> orders)
         {
             if (!HasMovedFromStagedToTarget)
             {
                 WasStagedPositionMoved = false;
                 StagedPosition = CPos.Invalid;
                 HasMovedFromStagedToTarget = true;
+                LastActionTick = state.World.GetCurrentLocalTickCount();
                 AddAttackMoveOrders(orders, TargetPositionStack.Peek());
             }
         }
@@ -132,15 +142,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
             
             if (nextMove != CPos.Invalid) {
-                ActivateNewTargetPosition(nextMove, orders);
+                ActivateNewTargetPosition(state, nextMove, orders);
             }
         }
 
-        private void ActivateNewTargetPosition(CPos nextMove, Queue<Order> orders)
+        private void ActivateNewTargetPosition(StrategicWorldState state, CPos nextMove, Queue<Order> orders)
         {
             AttackerLocationList.Clear();
             TargetPositionStack.Push(nextMove);
             TargetPositionReachedTickCount = 0;
+
+            LastActionTick = state.World.GetCurrentLocalTickCount();
             AddAttackMoveOrders(orders, nextMove);
         }
 

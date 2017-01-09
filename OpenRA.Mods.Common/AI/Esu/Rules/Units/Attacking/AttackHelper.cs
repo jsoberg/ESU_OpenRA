@@ -9,7 +9,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class AttackHelper
     {
-        private const double DEFENSIVE_COVERAGE = .2;
         private const int TICKS_TO_CHECK = 10;
 
         private readonly World World;
@@ -23,7 +22,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             this.Info = info;
         }
 
-        public void AddAttackOrdersIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
+        public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             state.ActiveAttackController.Tick(self, state, orders);
 
@@ -47,7 +46,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private void IssueAttackIfViable(StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
         {
             var metric = new BaseLethalityMetric(World, SelfPlayer);
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(DEFENSIVE_COVERAGE, state.ActiveAttackController.GetActiveAttacks());
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(Info.GetDefenseLethalityCoveragePercentage(), state.ActiveAttackController.GetActiveAttacks());
 
             IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(state, defensiveCoverage.ActorsNecessaryForDefense);
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
