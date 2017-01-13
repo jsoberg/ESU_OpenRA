@@ -109,7 +109,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             }
 
             if (!worldState.IsInitialized) {
-                worldState.Initalize(world, selfPlayer);
+                worldState.Initalize(world, info, selfPlayer);
             } else {
                 worldState.UpdateCurrentWorldState();
             }
@@ -222,6 +222,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return ((float)DefenseLethalityCoverage / 10f);
         }
+
+        [Desc("Determines the distance to move an attack when moving toward damaged enemy units.")]
+        public int DistanceToMoveAttack = 8;
 
         // ========================================
         // Static

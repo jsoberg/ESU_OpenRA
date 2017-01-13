@@ -8,7 +8,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
-        private const int DistanceToMoveAttack = 10;
         private const int DistanceFromPosition = 8;
 
         public List<Actor> AttackTroops;
@@ -123,7 +122,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
             CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
             if (attackerCenter != CPos.Invalid) {
-                nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, DistanceToMoveAttack, state.World.Map);
+                nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, state.Info.DistanceToMoveAttack, state.World.Map);
             } else {
                 AggregateScoutReportData best = state.ScoutReportGrid.GetBestSurroundingCell(TargetPositionStack.Peek());
                 if (best != null) {
