@@ -21,6 +21,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public CPos SelfIntialBaseLocation;
         public World World;
 		public Player SelfPlayer;
+        public EsuAIInfo Info;
 
         public ActiveAttackController ActiveAttackController;
 
@@ -30,9 +31,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.RequestedBuildingQueue = new Queue<string>();
         }
 
-        public void Initalize(World world, Player selfPlayer)
+        public void Initalize(World world, EsuAIInfo info, Player selfPlayer)
         {
             this.World = world;
+            this.Info = info;
             this.SelfPlayer = selfPlayer;
 
             this.ScoutReportGrid = new ScoutReportLocationGrid(world);
