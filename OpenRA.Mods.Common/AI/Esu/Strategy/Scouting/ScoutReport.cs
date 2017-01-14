@@ -19,6 +19,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             this.TickReported = world.GetCurrentLocalTickCount();
         }
 
+        /** @return true if buildings are part of this report, false otherwise. */
+        public bool IsStaticReport()
+        {
+            return (ResponseRecommendation.InfoBuilder.AllBuildings() + ResponseRecommendation.InfoBuilder.AllDefensiveStructures()) > 0;
+        }
+
         private class Comparator : IComparer<ScoutReport>
         {
             int IComparer<ScoutReport>.Compare(ScoutReport x, ScoutReport y)
