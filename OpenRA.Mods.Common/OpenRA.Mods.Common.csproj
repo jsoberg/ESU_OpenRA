@@ -144,6 +144,7 @@
     <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
     <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
     <Compile Include="AI\Esu\Database\SQLiteUtils.cs" />
+    <Compile Include="AI\Esu\Database\UnitDamageDataTable.cs" />
     <Compile Include="AI\Esu\Rules\BaseEsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
     <Compile Include="AI\Esu\Rules\Buildings\BuildHelper.cs" />
@@ -172,6 +173,7 @@
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportLocationGrid.cs" />
     <Compile Include="AI\Esu\Strategy\Scouting\ScoutReportUtils.cs" />
     <Compile Include="AI\Esu\Strategy\StrategicWorldState.cs" />
+    <Compile Include="AI\Esu\Strategy\UnitDamageInformationLogger.cs" />
     <Compile Include="AI\HackyAI.cs" />
     <Compile Include="AI\Squad.cs" />
     <Compile Include="AI\StateMachine.cs" />
