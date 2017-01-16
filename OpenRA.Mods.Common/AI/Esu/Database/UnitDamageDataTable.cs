@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Traits;
 using System.Data.SQLite;
 
 namespace OpenRA.Mods.Common.AI.Esu.Database
@@ -39,6 +40,45 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             {
                 connection.Close();
             }
+        }
+
+        public void InsertUnitDamageData(UnitDamageData data)
+        {
+            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
+            connection.Open();
+            try
+            {
+                ColumnWithValue[] colsWithValues = {
+                    new ColumnWithValue(AttackingUnit, data.AttackerName),
+                    new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
+                    new ColumnWithValue(Damage, data.Damage),
+                    new ColumnWithValue(WasUnitKilled, data.WasKilled ? 1 : 0)
+                };
+
+                string insert = SQLiteUtils.GetInsertSQLCommandString(UnitDamageDataTableName, colsWithValues);
+                SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
+                insertCommand.ExecuteNonQuery();
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+    }
+
+    public class UnitDamageData
+    {
+        public readonly string AttackerName;
+        public readonly string DamagedUnitName;
+        public readonly int Damage;
+        public readonly bool WasKilled;
+
+        public UnitDamageData(Actor damagedUnit, AttackInfo attackInfo)
+        {
+            this.AttackerName = attackInfo.Attacker.Info.Name;
+            this.DamagedUnitName = damagedUnit.Info.Name;
+            this.Damage = attackInfo.Damage;
+            this.WasKilled = damagedUnit.IsDead;
         }
     }
 }
