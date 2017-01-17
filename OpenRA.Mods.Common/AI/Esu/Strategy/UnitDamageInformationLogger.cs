@@ -21,6 +21,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public AsyncUnitDamageInformationLogger()
         {
             this.UnitDamageDataTable = new UnitDamageDataTable();
+            StartThread();
         }
 
         private void StartThread()
@@ -73,6 +74,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         public void QueueUnitDamageData(UnitDamageData data)
         {
+            if (data.Damage <= 0) {
+                return;
+            }
+
             lock (LogQueueLock)
             {
                 LogQueue.Enqueue(data);

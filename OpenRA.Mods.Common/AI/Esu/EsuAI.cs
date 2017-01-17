@@ -10,6 +10,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 using OpenRA.Mods.Common.AI.Esu.Rules.Buildings;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
+using OpenRA.Mods.Common.AI.Esu.Database;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
@@ -29,11 +30,14 @@ namespace OpenRA.Mods.Common.AI.Esu
         private bool isEnabled;
         private int tickCount;
 
+        private readonly AsyncUnitDamageInformationLogger UnitDamageInformationLogger;
+
         public EsuAI(EsuAIInfo info, ActorInitializer init)
         {
             this.info = info;
             this.world = init.World;
             this.worldState = new StrategicWorldState();
+            this.UnitDamageInformationLogger = new AsyncUnitDamageInformationLogger();
 
             rulesets = new List<BaseEsuAIRuleset>();
             addRulesets();
@@ -62,11 +66,13 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
+            UnitDamageInformationLogger.QueueUnitDamageData(new UnitDamageData(self, e));
             DamageNotifier.Damaged(self, e);
         }
 
         void INotifyAppliedDamage.AppliedDamage(Actor self, Actor damaged, AttackInfo e)
         {
+            UnitDamageInformationLogger.QueueUnitDamageData(new UnitDamageData(damaged, e));
             DamageNotifier.Damaged(damaged, e);
         }
 
