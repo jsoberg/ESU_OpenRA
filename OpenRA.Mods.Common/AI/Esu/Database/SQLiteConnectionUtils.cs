@@ -11,17 +11,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         private const string DataSourceConnectionPrepend = "URI = file:";
         private const string DatabaseFileName = "EsuAIInformation.sqlite";
 
-        private static SQLiteConnection DatabaseConnection;
-
         public static SQLiteConnection GetDatabaseConnection()
         {
-            if (DatabaseConnection == null) {
-                string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
-                CreateFileIfNotExists(fileLocation);
+            string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
+            CreateFileIfNotExists(fileLocation);
 
-                DatabaseConnection = new SQLiteConnection(DataSourceConnectionPrepend + fileLocation);
-            }
-            return DatabaseConnection;
+            return new SQLiteConnection(DataSourceConnectionPrepend + fileLocation);
         }
 
         private static void CreateFileIfNotExists(string fileLocation)
