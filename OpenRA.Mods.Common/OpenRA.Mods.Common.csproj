@@ -144,6 +144,7 @@
     <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
     <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
     <Compile Include="AI\Esu\Database\SQLiteUtils.cs" />
+    <Compile Include="AI\Esu\Database\UnitDamageData.cs" />
     <Compile Include="AI\Esu\Database\UnitDamageDataTable.cs" />
     <Compile Include="AI\Esu\Rules\BaseEsuAIRuleset.cs" />
     <Compile Include="AI\Esu\EsuAI.cs" />
