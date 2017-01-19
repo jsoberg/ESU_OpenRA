@@ -64,5 +64,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 connection.Close();
             }
         }
+
+        public SQLiteDataReader Query()
+        {
+            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
+            connection.Open();
+            try
+            {
+                string sql = "SELECT *.* FROM " + UnitDamageDataTableName;
+                SQLiteCommand queryCommand = new SQLiteCommand(sql, connection);
+                return queryCommand.ExecuteReader();
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
     }
 }
