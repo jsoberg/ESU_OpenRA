@@ -141,6 +141,7 @@
     <Compile Include="ActorExts.cs" />
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
+    <Compile Include="AI\Esu\Rules\Units\CompiledUnitDamageStatistics.cs" />
     <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
     <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
     <Compile Include="AI\Esu\Database\SQLiteUtils.cs" />
@@ -156,6 +157,7 @@
     <Compile Include="AI\Esu\Rules\Units\Attacking\AttackStrengthPredictor.cs" />
     <Compile Include="AI\Esu\Rules\Units\Attacking\ActiveAttackController.cs" />
     <Compile Include="AI\Esu\Rules\Units\Attacking\DamageNotifier.cs" />
+    <Compile Include="AI\Esu\Rules\Units\CompiledUnitDamageStatisticsLoader.cs" />
     <Compile Include="AI\Esu\Rules\Units\Defense\DefenseHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\Scouting\ScoutTargetLocationPool.cs" />
