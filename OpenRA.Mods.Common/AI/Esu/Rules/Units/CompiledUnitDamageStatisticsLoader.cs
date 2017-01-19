@@ -28,19 +28,36 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void LoadUnitDamageStats()
         {
-            CompiledUnitDamageStatistics stats = new CompiledUnitDamageStatistics();
+            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
+            connection.Open();
+            SQLiteDataReader reader = UnitDamageDataTable.Query(connection);
 
-            SQLiteDataReader reader = UnitDamageDataTable.Query();
-            while (reader.Read()) {
-                string attackerName = (string) reader[UnitDamageDataTable.AttackingUnit.ColumnName];
+            try
+            {
+                LoadNewUnitDamageDataFromReader(reader);
+            }
+            finally
+            {
+                reader.Close();
+                connection.Close();
+            }
+        }
+
+        private void LoadNewUnitDamageDataFromReader(SQLiteDataReader reader)
+        {
+            CompiledUnitDamageStatistics stats = new CompiledUnitDamageStatistics();
+            while (reader.Read())
+            {
+                string attackerName = (string)reader[UnitDamageDataTable.AttackingUnit.ColumnName];
                 int damage = (int)reader[UnitDamageDataTable.Damage.ColumnName];
-                bool wasKilled = ((int) reader[UnitDamageDataTable.WasUnitKilled.ColumnName]) > 0;
+                bool wasKilled = ((int)reader[UnitDamageDataTable.WasUnitKilled.ColumnName]) > 0;
 
                 stats.AddStatsForUnit(attackerName, damage, wasKilled);
             }
 
-            lock (StatsLock) {
-                UnitDamageStats = stats;    
+            lock (StatsLock)
+            {
+                UnitDamageStats = stats;
             }
         }
     }

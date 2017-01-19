@@ -23,11 +23,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
+        private readonly CompiledUnitDamageStatisticsLoader UnitStatsLoader;
+
         public UnitProductionHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;
+
+            this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+            UnitStatsLoader.ReloadUnitDamageStats();
         }
 
         public void OnOrderDenied(Order order)
