@@ -45,4 +45,3 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         }
     }
 }
-s
