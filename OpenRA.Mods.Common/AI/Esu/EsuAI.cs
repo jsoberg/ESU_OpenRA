@@ -170,7 +170,9 @@ namespace OpenRA.Mods.Common.AI.Esu
 
     public sealed class EsuAIInfo : IBotInfo, ITraitInfo
     {
-        private const string AI_NAME = "ESU AI";
+        private const string DEFAULT_AI_NAME = "ESU AI";
+
+        public readonly String Name = DEFAULT_AI_NAME;
 
         // ========================================
         // Rule Tunable
@@ -241,7 +243,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         string IBotInfo.Name
         {
-            get { return AI_NAME; }
+            get { return Name; }
         }
 
         object ITraitInfo.Create(ActorInitializer init)
