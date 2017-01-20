@@ -10,6 +10,7 @@ using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 using OpenRA.Mods.Common.AI.Esu.Rules.Buildings;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
+using System.Reflection;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
@@ -239,7 +240,30 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         object ITraitInfo.Create(ActorInitializer init)
         {
+            DebugLogFields();
             return new EsuAI(this, init);
+        }
+
+        private static bool WasLogged = false;
+
+        private void DebugLogFields()
+        {
+            if (WasLogged)
+            {
+                return;
+            }
+
+            // Output values for all of our modifiable GA values.
+            FieldInfo[] myFields = GetType().GetFields(BindingFlags.Public | BindingFlags.Instance);
+            foreach (FieldInfo field in myFields)
+            {
+                if (field.Name == "MaxBaseRadius")
+                    continue;
+
+                Log.Write("debug", "{0} = {1}".F(field.Name, field.GetValue(this)));
+            }
+
+            WasLogged = true;
         }
     }
 
