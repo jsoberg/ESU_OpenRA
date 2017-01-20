@@ -256,23 +256,7 @@ namespace OpenRA
 
             InitializeSettings(args);
             LaunchArguments launchArgs = new LaunchArguments(args);
-            // ===========================================================================================================================
-            // JJS Issue 22 - Add log prepend
-            // ===========================================================================================================================
-            if (launchArgs.LogPrepend != null) {
-                Log.Initialize(launchArgs.LogPrepend);
-            }
-
-            Log.AddChannel("perf", "perf.log");
-            Log.AddChannel("debug", "debug.log");
-            Log.AddChannel("sync", "syncreport.log");
-            Log.AddChannel("server", "server.log");
-            Log.AddChannel("sound", "sound.log");
-            Log.AddChannel("graphics", "graphics.log");
-            Log.AddChannel("geoip", "geoip.log");
-            Log.AddChannel("irc", "irc.log");
-
-            Log.AddChannel("order_manager", "order_manager.log");
+            InitializeLogs(launchArgs);
 
             if (Settings.Server.DiscoverNatDevices)
                 UPnP.TryNatDiscovery();
@@ -511,24 +495,38 @@ namespace OpenRA
         // END No Graphics Implementation
         // ===========================================================================================================================
 
+        private static void InitializeLogs(LaunchArguments launchArgs)
+        {
+            // ===========================================================================================================================
+            // JJS Issue 22 - Add log prepend
+            // ===========================================================================================================================
+            if (launchArgs.LogPrepend != null)
+            {
+                Log.Initialize(launchArgs.LogPrepend);
+            }
+
+            Log.AddChannel("perf", "perf.log");
+            Log.AddChannel("debug", "debug.log");
+            Log.AddChannel("sync", "syncreport.log");
+            Log.AddChannel("server", "server.log");
+            Log.AddChannel("sound", "sound.log");
+            Log.AddChannel("graphics", "graphics.log");
+            Log.AddChannel("geoip", "geoip.log");
+            Log.AddChannel("irc", "irc.log");
+
+            Log.AddChannel("scout_report", "scout_report.log");
+            Log.AddChannel("order_manager", "order_manager.log");
+        }
+
 		internal static void Initialize(Arguments args)
 		{
 			Console.WriteLine("Platform is {0}", Platform.CurrentPlatform);
 
             InitializeSettings(args);
             LaunchArguments launchArgs = new LaunchArguments(args);
+            InitializeLogs(launchArgs);
 
-			Log.AddChannel("perf", "perf.log");
-			Log.AddChannel("debug", "debug.log");
-			Log.AddChannel("sync", "syncreport.log");
-			Log.AddChannel("server", "server.log");
-			Log.AddChannel("sound", "sound.log");
-			Log.AddChannel("graphics", "graphics.log");
-			Log.AddChannel("geoip", "geoip.log");
-			Log.AddChannel("irc", "irc.log");
-			Log.AddChannel("scout_report", "scout_report.log");
-
-			if (Settings.Server.DiscoverNatDevices)
+            if (Settings.Server.DiscoverNatDevices)
 				UPnP.TryNatDiscovery();
 			else
 			{
