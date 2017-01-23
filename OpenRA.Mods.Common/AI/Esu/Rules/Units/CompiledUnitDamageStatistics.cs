@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
@@ -23,9 +22,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             UnitNameToDamageStatsMap[attackingUnit] = stats;
         }
+
+        public Dictionary<string, DamageKillStats> GetStatsForActors(string[] actors)
+        {
+            Dictionary<string, DamageKillStats> actorStats = new Dictionary<string, DamageKillStats>();
+            foreach (string name in actors)
+            {
+                if (UnitNameToDamageStatsMap.ContainsKey(name)) {
+                    actorStats.Add(name, UnitNameToDamageStatsMap[name]);
+                }
+            }
+
+            return actorStats;
+        }
     }
 
-    class DamageKillStats
+    public class DamageKillStats
     {
         public int Damage;
         public int KillCount;
