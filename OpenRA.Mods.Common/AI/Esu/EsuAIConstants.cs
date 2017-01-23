@@ -200,6 +200,19 @@ namespace OpenRA.Mods.Common.AI.Esu
                         throw new SystemException("Unknown faction side: " + player.Faction.Side);
                 }
             }
+
+            public static string[] GetVehiclesForPlayer(Player player)
+            {
+                switch (player.Faction.Side)
+                {
+                    case ALLIES:
+                        return Allies.VALUES;
+                    case SOVIET:
+                        return Soviet.VALUES;
+                    default:
+                        throw new SystemException("Unknown faction side: " + player.Faction.Side);
+                }
+            }
         }
 
         public static class ProductionCategories

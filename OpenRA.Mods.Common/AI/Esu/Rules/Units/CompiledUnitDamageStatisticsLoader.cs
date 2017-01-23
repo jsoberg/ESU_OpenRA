@@ -20,6 +20,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.UnitDamageDataTable = new UnitDamageDataTable();
         }
 
+        public Dictionary<string, DamageKillStats> GetStatsForActors(string[] actors)
+        {
+            CompiledUnitDamageStatistics stats;
+            lock (StatsLock) {
+                stats = UnitDamageStats;
+            }
+
+            if (stats != null) {
+                return stats.GetStatsForActors(actors);
+            }
+            return null;
+        }
+
         public void ReloadUnitDamageStats()
         {
             var thread = new Thread(() => LoadUnitDamageStats());
