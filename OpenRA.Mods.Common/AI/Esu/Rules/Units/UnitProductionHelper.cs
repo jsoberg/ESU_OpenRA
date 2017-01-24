@@ -156,11 +156,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private string GetInfantryToProduce()
         {
             Dictionary<string, DamageKillStats> infantryStats = UnitStatsLoader.GetStatsForActors(EsuAIConstants.Infantry.AVAILABLE_WITH_BARRACKS);
-            if (infantryStats == null) {
+            if (infantryStats == null || ShouldProduceRandomUnit()) {
                 return EsuAIConstants.Infantry.AVAILABLE_WITH_BARRACKS.Random(RANDOM);
             } else {
                 return GetUnitForStats(infantryStats);
             }
+        }
+
+        private bool ShouldProduceRandomUnit()
+        {
+            float chooseRandom = RANDOM.NextFloat();
+            return chooseRandom <= info.GetUnitProductionRandomPercentage();
         }
 
         private string GetUnitForStats(Dictionary<string, DamageKillStats> stats)
@@ -205,7 +211,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private string GetVehicleToProduce()
         {
             Dictionary<string, DamageKillStats> vehicleStats = UnitStatsLoader.GetStatsForActors(EsuAIConstants.Vehicles.GetVehiclesForPlayer(selfPlayer));
-            if (vehicleStats == null) {
+            if (vehicleStats == null || ShouldProduceRandomUnit()) {
                 return EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(selfPlayer);
             } else {
                 return GetUnitForStats(vehicleStats);

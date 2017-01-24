@@ -235,6 +235,14 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the distance to move an attack when moving toward damaged enemy units.")]
         public int DistanceToMoveAttack = 8;
 
+        [Desc("Determines the probability (in percent) that we will build a unit randomly rather than based on the compiled distribution.")]
+        public int UnitProductionRandomPercent = 1;
+
+        public float GetUnitProductionRandomPercentage()
+        {
+            return ((float) UnitProductionRandomPercent / 10f);
+        }
+
         // ========================================
         // Static
         // ========================================
