@@ -8,7 +8,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttack
     {
-        private const int DistanceFromPosition = 8;
+        private const int DistanceToMoveAttackTowardEnemy = 10;
+
+        private const int DistanceFromPositionToConsiderOnTarget = 8;
 
         public List<Actor> AttackTroops;
         public int LastActionTick;
@@ -83,8 +85,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         {
             foreach (Actor troop in AttackTroops)
             {
-                if (((position.X - DistanceFromPosition) < troop.Location.X && troop.Location.X < (position.X + DistanceFromPosition))
-                        && ((position.Y - DistanceFromPosition) < troop.Location.Y && troop.Location.Y < (position.Y + DistanceFromPosition)))
+                if (((position.X - DistanceFromPositionToConsiderOnTarget) < troop.Location.X && troop.Location.X < (position.X + DistanceFromPositionToConsiderOnTarget))
+                        && ((position.Y - DistanceFromPositionToConsiderOnTarget) < troop.Location.Y && troop.Location.Y < (position.Y + DistanceFromPositionToConsiderOnTarget)))
                 {
                     continue;
                 }
@@ -123,20 +125,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
             if (attackerCenter != CPos.Invalid) {
                 nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, state.Info.DistanceToMoveAttack, state.World.Map);
-            } else {
-                AggregateScoutReportData best = state.ScoutReportGrid.GetBestSurroundingCell(TargetPositionStack.Peek());
-                if (best != null) {
+            }
+
+            // If we still haven't found a location, search the scout report grid for another good cell anywhere on the map.
+            CPos currentTarget = TargetPositionStack.Peek();
+            if (nextMove == CPos.Invalid || nextMove == currentTarget) {
+                AggregateScoutReportData best = state.ScoutReportGrid.GetCurrentBestFitCellExcludingPosition(currentTarget);
+                if (best != null && (best.AverageRewardValue > best.AverageRiskValue)) {
                     nextMove = best.RelativePosition;
                 }
             }
 
-            // If we still haven't found a location, or have found our current location, search the scout report grid for another good cell anywhere on the map.
-            CPos currentTarget = TargetPositionStack.Peek();
-            if (nextMove == CPos.Invalid || nextMove == currentTarget) {
-                AggregateScoutReportData best = state.ScoutReportGrid.GetCurrentBestFitCellExcludingPosition(currentTarget);
-                if (best != null) {
-                    nextMove = best.RelativePosition;
-                }
+            // Still haven't found a location to attack next, so move attack closer to enemy.
+            if (nextMove == null) {
+                CPos enemyLoc = state.GetClosestEnemyLocation(currentTarget);
+                nextMove = GeometryUtils.MoveTowards(currentTarget, enemyLoc, DistanceToMoveAttackTowardEnemy, state.World.Map);
             }
 
             
