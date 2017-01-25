@@ -131,13 +131,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             CPos currentTarget = TargetPositionStack.Peek();
             if (nextMove == CPos.Invalid || nextMove == currentTarget) {
                 AggregateScoutReportData best = state.ScoutReportGrid.GetCurrentBestFitCellExcludingPosition(currentTarget);
+                // Only choose a report with higher reward than risk for attack move.
                 if (best != null && (best.AverageRewardValue > best.AverageRiskValue)) {
                     nextMove = best.RelativePosition;
                 }
             }
 
             // Still haven't found a location to attack next, so move attack closer to enemy.
-            if (nextMove == null) {
+            if (nextMove == CPos.Invalid) {
                 CPos enemyLoc = state.GetClosestEnemyLocation(currentTarget);
                 nextMove = GeometryUtils.MoveTowards(currentTarget, enemyLoc, DistanceToMoveAttackTowardEnemy, state.World.Map);
             }
