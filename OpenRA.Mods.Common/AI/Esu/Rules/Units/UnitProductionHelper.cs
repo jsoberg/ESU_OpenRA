@@ -23,11 +23,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private readonly Player selfPlayer;
         private readonly EsuAIInfo info;
 
+        private readonly CompiledUnitDamageStatisticsLoader UnitStatsLoader;
+
         public UnitProductionHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.world = world;
             this.selfPlayer = selfPlayer;
             this.info = info;
+
+            this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+            UnitStatsLoader.ReloadUnitDamageStats();
         }
 
         public void OnOrderDenied(Order order)
@@ -148,10 +153,45 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        // TODO: This is mostly for debug purposes, we don't want to just build random infantry.
         private string GetInfantryToProduce()
         {
-            return EsuAIConstants.Infantry.AVAILABLE_WITH_BARRACKS.Random(RANDOM);
+            Dictionary<string, DamageKillStats> infantryStats = UnitStatsLoader.GetStatsForActors(EsuAIConstants.Infantry.AVAILABLE_WITH_BARRACKS);
+            if (infantryStats == null || ShouldProduceRandomUnit()) {
+                return EsuAIConstants.Infantry.AVAILABLE_WITH_BARRACKS.Random(RANDOM);
+            } else {
+                return GetUnitForStats(infantryStats);
+            }
+        }
+
+        private bool ShouldProduceRandomUnit()
+        {
+            float chooseRandom = RANDOM.NextFloat();
+            return chooseRandom <= info.GetUnitProductionRandomPercentage();
+        }
+
+        private string GetUnitForStats(Dictionary<string, DamageKillStats> stats)
+        {
+            double totalDamage = 0;
+            foreach (DamageKillStats stat in stats.Values) {
+                totalDamage += stat.Damage;
+            }
+
+            Dictionary<float, string> percentDamageToUnit = new Dictionary<float, string>();
+            foreach (KeyValuePair<string, DamageKillStats> stat in stats) {
+                percentDamageToUnit.Add((float) (stat.Value.Damage / totalDamage), stat.Key);
+            }
+
+            var sorted = from entry in percentDamageToUnit orderby entry.Value descending select entry;
+            float val = RANDOM.NextFloat();
+            float current = 0;
+            foreach (KeyValuePair<float, string> entry in sorted)
+            {
+                current += entry.Key;
+                if (val <= current) {
+                    return entry.Value;
+                }
+            }
+            return null;
         }
 
         private void ProduceVehicle(StrategicWorldState state, Queue<Order> orders, string vehicleName)
@@ -168,10 +208,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        // TODO: This is mostly for debug purposes, we don't want to just build random vehicles.
         private string GetVehicleToProduce()
         {
-            return EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(selfPlayer);
+            Dictionary<string, DamageKillStats> vehicleStats = UnitStatsLoader.GetStatsForActors(EsuAIConstants.Vehicles.GetVehiclesForPlayer(selfPlayer));
+            if (vehicleStats == null || ShouldProduceRandomUnit()) {
+                return EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(selfPlayer);
+            } else {
+                return GetUnitForStats(vehicleStats);
+            }
         }
 
         private void ProduceUnit(StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)

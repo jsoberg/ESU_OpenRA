@@ -14,8 +14,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         // Number of ticks to wait between scout report data updates.
         private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
 
-        // How many ticks before scout report times out and is thrown away.
-        private const int TICK_TIMEOUT = 3000;
+        // How many ticks before more static scout reports (buidlings/defense) time out and are thrown away.
+        private const int TickStaticReportTimeout = 2400;
+
+        // How many ticks before more transient scout reports (units) time out and are thrown away.
+        private const int TickTransientReportTimeout = 800;
 
         private readonly int GridWidth;
         private readonly int GridHeight;
@@ -119,10 +122,31 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 List<ScoutReport>[] row = ScoutReportGridMatrix[i];
                 for (int j = 0; j < row.Count(); j++)
                 {
-                    List<ScoutReport> report = row[j];
-                    if (report != null)
+                    List<ScoutReport> reports = row[j];
+                    RemoveDeadReportsBasedOnTransiency(world, reports);
+                }
+            }
+        }
+
+        private void RemoveDeadReportsBasedOnTransiency(World world, List<ScoutReport> reports)
+        {
+            if (reports == null)
+            {
+                return;
+            }
+
+            for (int i = reports.Count - 1; i >= 0; i --)
+            {
+                ScoutReport report = reports[i];
+                if (report.IsStaticReport()) {
+                    if ((report.TickReported + TickStaticReportTimeout) <= world.GetCurrentLocalTickCount())
                     {
-                        report.RemoveAll(sr => (sr.TickReported + TICK_TIMEOUT) <= world.GetCurrentLocalTickCount());
+                        reports.RemoveAt(i);
+                    }
+                } else {
+                    if ((report.TickReported + TickTransientReportTimeout) <= world.GetCurrentLocalTickCount())
+                    {
+                        reports.RemoveAt(i);
                     }
                 }
             }
