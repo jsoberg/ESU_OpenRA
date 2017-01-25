@@ -36,6 +36,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return (NumAircraftUnits + NumInfantryUnits + NumVehicleUnits);
         }
 
+        public int AllBuildings()
+        {
+            return (NumPowerPlants + NumAdvancedPowerPlants + NumOreRefineries + NumOtherBuildings);
+        }
+
         public int AllDefensiveStructures()
         {
             return (NumAntiInfantryDefense + NumAntiVehicleDefense + NumAntiAirDefense + NumOtherDefensiveBuildings);
