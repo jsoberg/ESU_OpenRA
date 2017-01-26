@@ -10,11 +10,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public class AsyncUnitDamageInformationLogger
     {
-        private const int ThreadWaitBetweenLogCheckMillis = 100;
+        private const int ThreadWaitBetweenLogCheckMillis = 10;
+        private const int ChecksBeforeShuttingDownThread = 200;
 
         private readonly Queue<UnitDamageData> LogQueue = new Queue<UnitDamageData>();
         private readonly object LogQueueLock = new object();
-        private volatile bool IsShutdown;
+        private volatile bool IsRunning = false;
 
         private readonly UnitDamageDataTable UnitDamageDataTable;
 
@@ -26,49 +27,72 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         private void StartThread()
         {
-            IsShutdown = false;
             var thread = new Thread(() => Run());
             thread.Start();
         }
 
         private void Run()
         {
-            while (!IsShutdown)
-            {
-                LogQueuedDamageInfo();
-                if (IsShutdown) {
-                    return;
-                }
+            int numChecksWithoutLog = 0;
 
-                try {
-                    Thread.Sleep(ThreadWaitBetweenLogCheckMillis);
-                } catch (ThreadInterruptedException) {
-                    /* Continue. */
+            IsRunning = true;
+            while (IsRunning)
+            {
+                bool wasLogged = LogQueuedDamageInfo();
+                // If we logged, try again immediately.
+                if (wasLogged)
+                {
+                    numChecksWithoutLog = 0;
+                    continue;
+                }
+                // If we didn't log, either shutdown the thread (if we haven't received a message in awhile) or sleep for a bit.
+                else
+                {
+                    numChecksWithoutLog++;
+                    if (numChecksWithoutLog >= ChecksBeforeShuttingDownThread)
+                    {
+                        numChecksWithoutLog = 0;
+                        IsRunning = false;
+                        return;
+                    }
+                    else
+                    {
+                        SleepThread();
+                    }
                 }
             }
         }
 
-        private void LogQueuedDamageInfo()
+        /** @return true if something was logged, false otherwise. */
+        private bool LogQueuedDamageInfo()
         {
-            while (!IsShutdown)
+            UnitDamageData info;
+            lock (LogQueueLock)
             {
-                UnitDamageData info;
-                lock (LogQueueLock)
-                {
-                    // Return when there is nothing left in the queue.
-                    if (LogQueue.Count == 0)
-                    {
-                        return;
-                    }
-                    info = LogQueue.Dequeue();
+                // Return when there is nothing left in the queue.
+                if (LogQueue.Count == 0) {
+                    return false;
                 }
+                info = LogQueue.Dequeue();
+            }
 
-                if (info == null)
-                {
-                    return;
-                }
+            if (info == null) {
+                return false;
+            }
 
-                UnitDamageDataTable.InsertUnitDamageData(info);
+            UnitDamageDataTable.InsertUnitDamageData(info);
+            return true;
+        }
+
+        private void SleepThread()
+        {
+            try
+            {
+                Thread.Sleep(ThreadWaitBetweenLogCheckMillis);
+            }
+            catch (ThreadInterruptedException)
+            {
+                /* Continue. */
             }
         }
 
@@ -78,15 +102,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return;
             }
 
-            lock (LogQueueLock)
-            {
+            lock (LogQueueLock) {
                 LogQueue.Enqueue(data);
             }
-        }
 
-        public void Shutdown()
-        {
-            IsShutdown = true;
+            if (!IsRunning) {
+                StartThread();
+            }
         }
     }
 }
