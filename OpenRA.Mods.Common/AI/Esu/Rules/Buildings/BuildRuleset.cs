@@ -14,7 +14,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private const int BUILDING_ORDER_COOLDOWN = 10;
 
         private int buildingOrderCooldown = 0;
-        private int defensiveOrderCooldown = 0;
+        private int DefensiveOrderCheckCooldown = 0;
 
         private bool wasBuildingOrderIssuedThisTick;
 
@@ -43,7 +43,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private void AddApplicableBuildRules(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             buildingOrderCooldown--;
-            defensiveOrderCooldown--;
+            DefensiveOrderCheckCooldown--;
 
             // No producers in world; this could be while we are building the construction yard, or if all yards have been destroyed.
             // TODO: Do we need this check, or will the build checks take care of it for us?
@@ -174,21 +174,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         {
             // If a defensive building is already being built or we're waiting for the cooldown, wait.
             if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE)
-                || defensiveOrderCooldown > 0) 
+                || DefensiveOrderCheckCooldown > 0) 
             {
                 return;
             }
 
             BuildDefensiveStructures(self, state, orders);
+                            DefensiveOrderCheckCooldown = BUILDING_ORDER_COOLDOWN;
         }
 
         private void BuildDefensiveStructures(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            double percentageSpentOnDefense;
-            try {
-                percentageSpentOnDefense = EsuAIUtils.GetPercentageOfResourcesSpentOnProductionType(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
-            } catch (NullReferenceException) {
-                // Noting yet earned.
+            double percentageSpentOnDefense = EsuAIUtils.GetPercentageOfResourcesSpentOnProductionType(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
+            if (percentageSpentOnDefense < 0) {
                 return;
             }
 
@@ -216,7 +214,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
                 // We can build now.
                 orders.Enqueue(Order.StartProduction(self, defenseiveBuilding, 1));
-                defensiveOrderCooldown = BUILDING_ORDER_COOLDOWN;
             }
         }
     }

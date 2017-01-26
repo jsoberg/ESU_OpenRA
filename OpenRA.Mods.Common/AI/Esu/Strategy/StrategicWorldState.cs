@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
@@ -97,6 +98,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
             ScoutReportGrid.AddScoutReportForActor(scoutActor, report);
+        }
+
+        public CPos GetClosestEnemyLocation(CPos current)
+        {
+            CPos closest = CPos.Invalid;
+            double minDistance = double.MaxValue;
+
+            foreach (EnemyInfo enemy in EnemyInfoList) {
+                CPos enemyLoc = enemy.GetBestAvailableEnemyLocation(this, SelfPlayer);
+                double dist = GeometryUtils.EuclideanDistance(current, enemyLoc);
+
+                if (dist < minDistance) {
+                    minDistance = dist;
+                    closest = enemyLoc;
+                }                
+            }
+            return closest;
         }
     }
 
