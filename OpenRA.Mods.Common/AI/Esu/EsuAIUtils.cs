@@ -124,7 +124,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             double totalEarned = owner.PlayerActor.Trait<PlayerResources>().Earned;
             if (totalEarned == 0) {
-                throw new NullReferenceException("Nothing yet earned");
+                return -1;
             }
 
             var ownedActorsWithTrait = world.ActorsHavingTrait<Buildable>().Where(a => a.Owner == owner && a.Info.TraitInfo<BuildableInfo>().Queue.Contains(productionType));

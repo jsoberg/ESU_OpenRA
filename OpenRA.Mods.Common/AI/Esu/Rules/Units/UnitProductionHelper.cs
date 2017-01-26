@@ -17,7 +17,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private static MersenneTwister RANDOM = new MersenneTwister(); 
 
         private const int UNIT_PRODUCTION_COOLDOWN = 10;
-        private int unitProductionCooldown;
+        private int UnitProductionCheckCooldown;
 
         private readonly World world;
         private readonly Player selfPlayer;
@@ -42,8 +42,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         public void AddUnitOrdersIfApplicable(StrategicWorldState state, Queue<Order> orders)
         {
-            unitProductionCooldown --;
-            if (unitProductionCooldown > 0) {
+            UnitProductionCheckCooldown --;
+            if (UnitProductionCheckCooldown > 0) {
                 return;
             }
 
@@ -145,12 +145,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             var infantry = GetInfantryToProduce();
 
-            try {
-                ProduceUnit(state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
-            } catch (UnbuildableException) {
-                // We have no production queue for infantry yet, which means we need a barracks.
+
+            bool wasOrderIssued = ProduceUnit(state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
+            if (!wasOrderIssued) {
                 ScheduleBuildingProduction(EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), state, orders);
             }
+            UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
         }
 
         private string GetInfantryToProduce()
@@ -200,12 +200,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 return;
             }
 
-            try {
-                ProduceUnit(state, orders, vehicleName, EsuAIConstants.ProductionCategories.VEHICLE);
-            } catch (UnbuildableException) {
-                // We have no production queue for vehicles yet, which means we need a war factory.
+            bool wasOrderIssued = ProduceUnit(state, orders, vehicleName, EsuAIConstants.ProductionCategories.VEHICLE);
+            if (!wasOrderIssued) {
                 ScheduleBuildingProduction(EsuAIConstants.Buildings.WAR_FACTORY, state, orders);
             }
+            UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
         }
 
         private string GetVehicleToProduce()
@@ -218,26 +217,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        private void ProduceUnit(StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)
+        private bool ProduceUnit(StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)
         {
             var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, productionCategory);
 
             var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == unitName);
             if (buildable == null) {
-                throw new UnbuildableException("No queues to build " + unitName);
+                return false;
             }
 
             var prereqs = buildable.TraitInfo<BuildableInfo>().Prerequisites.Where(s => !s.StartsWith("~"));
             foreach (string req in prereqs) {
                 if (ScheduleBuildingProduction(req, state, orders)) {
                     // We have scheduled construction of this building.
-                    return;
+                    return true;
                 }
             }
 
             // We can build now.
             orders.Enqueue(Order.StartProduction(selfPlayer.PlayerActor, unitName, 1));
-            unitProductionCooldown = UNIT_PRODUCTION_COOLDOWN;
+            return false;
         }
 
         /** @return - true if the building production has been scheduled, false otherwise. */
@@ -247,17 +246,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                     && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, building)) 
             {
                 state.RequestedBuildingQueue.Enqueue(building);
-                unitProductionCooldown = UNIT_PRODUCTION_COOLDOWN;
+                UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
                 return true;
             }
             return false;
-        }
-    }
-
-    public class UnbuildableException : SystemException
-    {
-        public UnbuildableException(String message) : base(message)
-        {
         }
     }
 }
