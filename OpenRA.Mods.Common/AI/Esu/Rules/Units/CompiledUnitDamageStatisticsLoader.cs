@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Database;
 using System.Threading;
 using System.Data.SQLite;
@@ -10,6 +11,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class CompiledUnitDamageStatisticsLoader
     {
+        private static MersenneTwister RANDOM = new MersenneTwister();
+
         private CompiledUnitDamageStatistics UnitDamageStats;
         private readonly object StatsLock = new object();
 
@@ -72,6 +75,34 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             {
                 UnitDamageStats = stats;
             }
+        }
+
+        public string GetUnitForStats(Dictionary<string, DamageKillStats> stats)
+        {
+            double totalDamage = 0;
+            foreach (DamageKillStats stat in stats.Values)
+            {
+                totalDamage += stat.Damage;
+            }
+
+            Dictionary<float, string> percentDamageToUnit = new Dictionary<float, string>();
+            foreach (KeyValuePair<string, DamageKillStats> stat in stats)
+            {
+                percentDamageToUnit.Add((float)(stat.Value.Damage / totalDamage), stat.Key);
+            }
+
+            var sorted = from entry in percentDamageToUnit orderby entry.Value descending select entry;
+            float val = RANDOM.NextFloat();
+            float current = 0;
+            foreach (KeyValuePair<float, string> entry in sorted)
+            {
+                current += entry.Key;
+                if (val <= current)
+                {
+                    return entry.Value;
+                }
+            }
+            return null;
         }
     }
 }

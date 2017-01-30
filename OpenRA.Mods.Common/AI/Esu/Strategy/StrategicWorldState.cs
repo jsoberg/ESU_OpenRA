@@ -4,6 +4,7 @@ using System;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
@@ -18,6 +19,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         // This queue will be periodically polled from the build ruleset.
         public readonly Queue<string> RequestedBuildingQueue;
 
+        public readonly CompiledUnitDamageStatisticsLoader UnitStatsLoader;
+
         public ScoutReportLocationGrid ScoutReportGrid;
         public CPos SelfIntialBaseLocation;
         public World World;
@@ -30,6 +33,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             this.EnemyInfoList = new List<EnemyInfo>();
             this.RequestedBuildingQueue = new Queue<string>();
+
+            this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+            UnitStatsLoader.ReloadUnitDamageStats();
         }
 
         public void Initalize(World world, EsuAIInfo info, Player selfPlayer)
