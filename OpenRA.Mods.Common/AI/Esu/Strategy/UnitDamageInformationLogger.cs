@@ -11,7 +11,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
     public class AsyncUnitDamageInformationLogger
     {
         private const int ThreadWaitBetweenLogCheckMillis = 10;
-        private const int ChecksBeforeShuttingDownThread = 200;
+        private const int ChecksBeforeShuttingDownThread = 600;
 
         private readonly Queue<UnitDamageData> LogQueue = new Queue<UnitDamageData>();
         private readonly object LogQueueLock = new object();
