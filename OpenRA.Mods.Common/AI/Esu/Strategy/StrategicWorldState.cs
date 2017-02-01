@@ -102,8 +102,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return;
             }
 
-            ScoutReport report = new ScoutReport(recommendation, scoutActor.CenterPosition, World);
-            ScoutReportGrid.AddScoutReportForActor(scoutActor, report);
+            ScoutReport report = new ScoutReport(recommendation, scoutActor.Location, scoutActor.CenterPosition, World);
+            ScoutReportGrid.QueueScoutReport(report);
         }
 
         public CPos GetClosestEnemyLocation(CPos current)
