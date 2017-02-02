@@ -13,10 +13,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
         public static SQLiteConnection GetDatabaseConnection()
         {
-            string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
-            CreateFileIfNotExists(fileLocation);
+            try {
+                string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
+                CreateFileIfNotExists(fileLocation);
 
-            return new SQLiteConnection(DataSourceConnectionPrepend + fileLocation);
+                return new SQLiteConnection(DataSourceConnectionPrepend + fileLocation);
+            } catch (SQLiteException) {
+                LogSqliteException();
+                return null;
+            }
         }
 
         private static void CreateFileIfNotExists(string fileLocation)
@@ -25,6 +30,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             {
                 SQLiteConnection.CreateFile(fileLocation);
             }
+        }
+
+        public static void LogSqliteException()
+        {
+            Log.AddChannel("sqlite_errors", "sqlite_errors.log");
+            Log.Write("sqlite_errors", "Problem opening SQLite connection ");
         }
     }
 }
