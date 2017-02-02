@@ -12,7 +12,6 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.AI.Esu.Database;
 using System.Reflection;
-
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
 /// </summary>
@@ -172,7 +171,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private const string DEFAULT_AI_NAME = "ESU AI";
 
-        public readonly String Name = DEFAULT_AI_NAME;
+        public readonly string Name = DEFAULT_AI_NAME;
 
         // ========================================
         // Rule Tunable
@@ -251,16 +250,15 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         string IBotInfo.Name
         {
-            get { return Name; }
+            get { DebugLogFields(); return Name; }
         }
 
         object ITraitInfo.Create(ActorInitializer init)
         {
-            DebugLogFields();
             return new EsuAI(this, init);
         }
 
-        private static bool WasLogged = false;
+        private bool WasLogged = false;
 
         private void DebugLogFields()
         {
