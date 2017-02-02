@@ -24,10 +24,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         // Thread unsafe objects
         private readonly Queue<ScoutReport> QueuedReports = new Queue<ScoutReport>();
-        private readonly List<ScoutReport>[][] CurrentScoutReportGridMatrix;
         private readonly object ReportQueueLock = new object();
-        private readonly AutoResetEvent WaitHandle = new AutoResetEvent(false);
-        private volatile bool IsShutdown;
+        private List<ScoutReport>[][] CurrentScoutReportGridMatrix;
+        private readonly object MatrixLock = new object();
 
         public ScoutReportLocationGridUpdateThread(UpdateListener listener, World world, int width, int height, int widthPerGridSquare)
         {
@@ -38,9 +37,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             this.WidthPerGridSquare = widthPerGridSquare;
 
             this.CurrentScoutReportGridMatrix = BuildScoutReportGridMatrix();
-
-            var thread = new Thread(() => RunRecreateScoutReportMatrixThread());
-            thread.Start();
         }
 
         private List<ScoutReport>[][] BuildScoutReportGridMatrix()
@@ -63,57 +59,60 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         {
             TicksSinceLastRecreation++;
             if (TicksSinceLastRecreation >= NumTicksBeforeRecreation) {
-                // Signal thread to recreate.
-                WaitHandle.Set();
+                ThreadPool.QueueUserWorkItem(t => RunRecreateScoutReportMatrixThread());
                 TicksSinceLastRecreation = 0;
             }
         }
 
         public void RunRecreateScoutReportMatrixThread()
         {
-            while (!IsShutdown)
+            // Clone queued reports and free the queue up to continue to be added to.
+            Queue<ScoutReport> currentQueuedReports = new Queue<ScoutReport>();
+            lock (ReportQueueLock)
             {
-                // Clone queued reports and free the queue up to continue to be added to.
-                Queue<ScoutReport> currentQueuedReports = new Queue<ScoutReport>();
-                lock (ReportQueueLock)
+                while (QueuedReports.Count > 0)
                 {
-                    while (QueuedReports.Count > 0)
-                    {
-                        currentQueuedReports.Enqueue(QueuedReports.Dequeue());
-                    }
+                    currentQueuedReports.Enqueue(QueuedReports.Dequeue());
                 }
+            }
 
-                // Add queued reports to matrix.
-                foreach (ScoutReport report in currentQueuedReports)
-                {
-                    AddScoutToMatrix(report);
-                }
+            // Clone matrix
+            List<ScoutReport>[][] clonedMatrix;
+            lock (MatrixLock) {
+                clonedMatrix = Clone(CurrentScoutReportGridMatrix);
+            }
 
-                // Remove any dead reports.
-                RemoveDeadReports(World.GetCurrentLocalTickCount());
+            // Add queued reports to matrix.
+            foreach (ScoutReport report in currentQueuedReports)
+            {
+                AddScoutToMatrix(report, clonedMatrix);
+            }
 
-                // Clone matrix and send to listener.
-                var clonedMatrix = Clone(CurrentScoutReportGridMatrix);
-                var bestCell = ScoutReportLocationGridUtils.GetCurrentBestFitCell(clonedMatrix, WidthPerGridSquare);
-                UpdateListener.OnGridUpdated(clonedMatrix, bestCell);
+            // Remove any dead reports.
+            RemoveDeadReports(World.GetCurrentLocalTickCount());
 
-                // Wait until we are signaled to recreate again.
-                WaitHandle.WaitOne();
+            // Signal listener.
+            var bestCell = ScoutReportLocationGridUtils.GetCurrentBestFitCell(clonedMatrix, WidthPerGridSquare);
+            UpdateListener.OnGridUpdated(clonedMatrix, bestCell);
+
+            // Set new matrix.
+            lock (MatrixLock) {
+                CurrentScoutReportGridMatrix = clonedMatrix;
             }
         }
 
-        private void AddScoutToMatrix(ScoutReport report)
+        private void AddScoutToMatrix(ScoutReport report, List<ScoutReport>[][] matrix)
         {
             int x = GetRoundedIntDividedByCellSize(report.ReportedCPosition.X);
             x = Normalize(x, GridWidth - 1);
             int y = GetRoundedIntDividedByCellSize(report.ReportedCPosition.Y);
             y = Normalize(y, GridHeight - 1);
 
-            List<ScoutReport> reportsForLocation = CurrentScoutReportGridMatrix[x][y];
+            List<ScoutReport> reportsForLocation = matrix[x][y];
             if (reportsForLocation == null)
             {
                 reportsForLocation = new List<ScoutReport>();
-                CurrentScoutReportGridMatrix[x][y] = reportsForLocation;
+                matrix[x][y] = reportsForLocation;
             }
 
             Log.Write("scout_report", "Report; Risk: {0}, Reward: {1} | Map X: {2}, Map Y {3} | Grid X: {4}, Grid Y: {5}".F(
