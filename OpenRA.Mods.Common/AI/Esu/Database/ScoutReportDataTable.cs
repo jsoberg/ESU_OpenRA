@@ -25,12 +25,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         private void CreateTableIfNotExists()
         {
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            connection.Open();
-            try {
+            if (connection == null) {
+                return;
+            }
+
+            try
+            {
+                connection.Open();
                 string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(ScoutReportDataTableName, Columns);
                 SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
                 createTableCommand.ExecuteNonQuery();
-            } finally {
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return;
+            }
+            finally
+            {
                 connection.Close();
             }
         }
@@ -38,8 +50,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         public void InsertScoutReportData(BestScoutReportData data)
         {
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            connection.Open();
-            try {
+            if (connection == null) {
+                return;
+            }
+
+            try
+            {
+                connection.Open();
+
                 ColumnWithValue[] colsWithValues = {
                     new ColumnWithValue(LowestRisk, data.LowestRisk),
                     new ColumnWithValue(HighestRisk, data.HighestRisk),
@@ -51,7 +69,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 string insert = SQLiteUtils.GetInsertSQLCommandString(ScoutReportDataTableName, colsWithValues);
                 SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
                 insertCommand.ExecuteNonQuery();
-            } finally {
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return;
+            }
+            finally
+            {
                 connection.Close();
             }
         }
@@ -59,8 +84,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         public BestScoutReportData QueryForBestScoutReportData()
         {
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            connection.Open();
-            try {
+            if (connection == null) {
+                return null;
+            }
+
+            try
+            {
+                connection.Open();
                 long count = SQLiteUtils.GetCountForTable(connection, ScoutReportDataTableName);
                 if (count <= 0) {
                     return null;
@@ -72,7 +102,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                     .addRewardValue(QueryFirstValueOrderedByColumn(connection, LowestReward, "ASC"))
                     .addRewardValue(QueryFirstValueOrderedByColumn(connection, HighestReward, "DESC"));
                 return builder.Build();
-            } finally {
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return null;
+            }
+            finally
+            {
                 connection.Close();
             }
         }

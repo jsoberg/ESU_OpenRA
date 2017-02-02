@@ -89,7 +89,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             }
 
             // Remove any dead reports.
-            RemoveDeadReports(World.GetCurrentLocalTickCount());
+            RemoveDeadReports(World.GetCurrentLocalTickCount(), clonedMatrix);
 
             // Signal listener.
             var bestCell = ScoutReportLocationGridUtils.GetCurrentBestFitCell(clonedMatrix, WidthPerGridSquare);
@@ -132,12 +132,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return Math.Max(value, 0);
         }
 
-        private void RemoveDeadReports(int currentTickCount)
+        private void RemoveDeadReports(int currentTickCount, List<ScoutReport>[][] matrix)
         {
-            for (int i = 0; i < CurrentScoutReportGridMatrix.Count(); i++)
+            for (int i = 0; i < matrix.Count(); i++)
             {
-
-                List<ScoutReport>[] row = CurrentScoutReportGridMatrix[i];
+                List<ScoutReport>[] row = matrix[i];
                 for (int j = 0; j < row.Count(); j++)
                 {
                     List<ScoutReport> reports = row[j];
@@ -166,13 +165,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             }
         }
 
-        private List<ScoutReport>[][] Clone(List<ScoutReport>[][] CurrentScoutReportGridMatrix)
+        private List<ScoutReport>[][] Clone(List<ScoutReport>[][] matrix)
         {
             List<ScoutReport>[][] ClonedScoutReportGridMatrix = BuildScoutReportGridMatrix();
-            for (int i = 0; i < CurrentScoutReportGridMatrix.Count(); i++) {
-                List<ScoutReport>[] row = CurrentScoutReportGridMatrix[i];
+            for (int i = 0; i < matrix.Count(); i++) {
+                List<ScoutReport>[] row = matrix[i];
                 for (int j = 0; j < row.Count(); j++) {
-                    List<ScoutReport> entry = CurrentScoutReportGridMatrix[i][j];
+                    List<ScoutReport> entry = matrix[i][j];
                     ClonedScoutReportGridMatrix[i][j] = CloneList(entry);
                 }
             }

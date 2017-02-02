@@ -29,12 +29,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         private void CreateTableIfNotExists()
         {
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            connection.Open();
+            if (connection == null) {
+                return;
+            }
+
             try
             {
+                connection.Open();
                 string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(UnitDamageDataTableName, Columns);
                 SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
                 createTableCommand.ExecuteNonQuery();
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return;
             }
             finally
             {
@@ -45,9 +54,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         public void InsertUnitDamageData(UnitDamageData data)
         {
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            connection.Open();
+            if (connection == null) {
+                return;
+            }
+
             try
             {
+                connection.Open();
+
                 ColumnWithValue[] colsWithValues = {
                     new ColumnWithValue(AttackingUnit, data.AttackerName),
                     new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
@@ -58,6 +72,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 string insert = SQLiteUtils.GetInsertSQLCommandString(UnitDamageDataTableName, colsWithValues);
                 SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
                 insertCommand.ExecuteNonQuery();
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return;
             }
             finally
             {
