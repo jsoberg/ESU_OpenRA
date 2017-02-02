@@ -171,7 +171,7 @@ namespace OpenRA.Mods.Common.AI.Esu
     {
         private const string DEFAULT_AI_NAME = "ESU AI";
 
-        public readonly String Name = DEFAULT_AI_NAME;
+        public readonly string Name = DEFAULT_AI_NAME;
 
         // ========================================
         // Rule Tunable
@@ -250,16 +250,15 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         string IBotInfo.Name
         {
-            get { return Name; }
+            get { DebugLogFields(); return Name; }
         }
 
         object ITraitInfo.Create(ActorInitializer init)
         {
-            DebugLogFields();
             return new EsuAI(this, init);
         }
 
-        private static bool WasLogged = false;
+        private bool WasLogged = false;
 
         private void DebugLogFields()
         {
