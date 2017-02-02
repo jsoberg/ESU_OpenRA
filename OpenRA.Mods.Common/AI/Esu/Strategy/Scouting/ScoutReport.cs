@@ -8,13 +8,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         ///  The recommended response reward and risk for this report.
         /// </summary>
         public readonly ResponseRecommendation ResponseRecommendation;
-        public WPos ReportedPosition { get; internal set;  }
-        public long TickReported { get; internal set; }
+        public readonly CPos ReportedCPosition;
+        public readonly WPos ReportedWPosition;
+        public readonly long TickReported;
 
-        public ScoutReport(ResponseRecommendation response, WPos currentPosition, World world)
+        public ScoutReport(ResponseRecommendation response, CPos currentCPosition, WPos currentWPosition, World world)
         {
             this.ResponseRecommendation = response;
-            this.ReportedPosition = currentPosition;
+            this.ReportedCPosition = currentCPosition;
+            this.ReportedWPosition = currentWPosition;
 
             this.TickReported = world.GetCurrentLocalTickCount();
         }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 {
@@ -193,7 +194,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             double percentageToSpend = (info.PercentageOfResourcesToSpendOnDefensiveBuildings / 100.0);
             if (percentageSpentOnDefense < percentageToSpend) {
 
-                var defenseiveBuilding = EsuAIConstants.Defense.GetRandomDefenseStructureForPlayer(selfPlayer);
+                var defenseiveBuilding = GetDefensiveStructureToProduce(state);
                 var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
                 // TODO not first, decide where to go.
                 var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == defenseiveBuilding);
@@ -214,6 +215,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
                 // We can build now.
                 orders.Enqueue(Order.StartProduction(self, defenseiveBuilding, 1));
+            }
+        }
+
+        private string GetDefensiveStructureToProduce(StrategicWorldState state)
+        {
+            Dictionary<string, DamageKillStats> defenseStats = state.UnitStatsLoader.GetStatsForActors(EsuAIConstants.Defense.GetDefenseStructuresForPlayer(selfPlayer));
+            if (defenseStats == null) {
+                return EsuAIConstants.Defense.GetRandomDefenseStructureForPlayer(selfPlayer);
+            } else {
+                return state.UnitStatsLoader.GetUnitForStats(defenseStats);
             }
         }
     }

@@ -102,12 +102,17 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             public static string GetRandomDefenseStructureForPlayer(Player player)
             {
+                return GetDefenseStructuresForPlayer(player).Random(RANDOM);
+            }
+
+            public static string[] GetDefenseStructuresForPlayer(Player player)
+            {
                 switch (player.Faction.Side)
                 {
                     case ALLIES:
-                        return Allies.VALUES.Random(RANDOM);
+                        return Allies.VALUES;
                     case SOVIET:
-                        return Soviet.VALUES.Random(RANDOM);
+                        return Soviet.VALUES;
                     default:
                         throw new SystemException("Unknown faction side: " + player.Faction.Side);
                 }
