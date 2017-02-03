@@ -8,13 +8,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public static class ScoutReportUtils
     {
-        public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor)
+
+        public static IEnumerable<Actor> EnemyActorsInWorld(StrategicWorldState state, Player selfPlayer)
+        {
+            return state.World.Actors.Where(a => a.Owner != selfPlayer && state.EnemyInfoList.Any(e => e.EnemyName == a.Owner.InternalName)
+                && a.OccupiesSpace != null);
+        }
+
+        public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor, IEnumerable<Actor> enemyActors)
         {
             Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
 
             // Visible actors whose owners are in the enemy info list.
-            var visibileEnemyItems = state.World.Actors.Where(a => a.Owner != actor.Owner && state.EnemyInfoList.Any(e => e.EnemyName == a.Owner.InternalName) 
-                && a.OccupiesSpace != null && visibileRect.ContainsPosition(a.CenterPosition));
+            var visibileEnemyItems = enemyActors.Where(a => visibileRect.ContainsPosition(a.CenterPosition));
 
             if (visibileEnemyItems == null || visibileEnemyItems.Count() == 0) {
                 return null;
