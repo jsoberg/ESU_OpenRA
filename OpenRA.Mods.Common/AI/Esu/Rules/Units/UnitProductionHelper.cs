@@ -48,15 +48,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private void ChooseAndProduceUnit(StrategicWorldState state, Queue<Order> orders)
         {
             // Give harvesters precedence.
-            if (ProduceHarvesterIfApplicable(state, orders))
-            {
+            if (ProduceHarvesterIfApplicable(state, orders)) {
                 return;
-            }
-
-            // TODO We don't necessarily want the best fit cell.
-            AggregateScoutReportData data = state.ScoutReportGrid.GetCurrentBestFitCell();
-            if (data == null) {
-                ProduceUnitForDistribution(state, orders, DefaultInfantryPercentage, DefaultVehiclePercentage, 0d);
             }
 
             // TODO : debug code (we want to base this off of the aggregate info).
@@ -77,7 +70,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 return false;
             }
 
-            if (NumLivingHarvesters(state) < info.MinNumHarvesters)
+            if (NumLivingHarvesters(state) < info.MinNumHarvesters 
+                && (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE)))
             {
                 ProduceVehicle(state, orders, EsuAIConstants.Vehicles.HARVESTER);
                 return true;
@@ -102,18 +96,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         {
             double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
 
-            // TODO: Check here for vehicle and air.
-            double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.INFANTRY);
-            if (currentInfantryPercentage < infantryPercent || currentResources > info.ExcessResourceLevel)
+            if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY))
             {
-                ProduceInfantry(state, orders);
+                // TODO: Check here for vehicle and air.
+                double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.INFANTRY);
+                if (currentInfantryPercentage < infantryPercent || currentResources > info.ExcessResourceLevel)
+                {
+                    ProduceInfantry(state, orders);
+                }
             }
 
-            double currentVehiclePercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.VEHICLE);
-            if (currentVehiclePercentage < vehiclePercent || currentResources > info.ExcessResourceLevel)
-            {
-                var vehicleName = GetVehicleToProduce(state);
-                ProduceVehicle(state, orders, vehicleName);
+            if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE))
+            { 
+                double currentVehiclePercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.VEHICLE);
+                if (currentVehiclePercentage < vehiclePercent || currentResources > info.ExcessResourceLevel)
+                {
+                    var vehicleName = GetVehicleToProduce(state);
+                    ProduceVehicle(state, orders, vehicleName);
+                }
             }
         }
 
@@ -134,10 +134,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void ProduceInfantry(StrategicWorldState state, Queue<Order> orders)
         {
-            if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY)) {
-                return;
-            }
-
             var infantry = GetInfantryToProduce(state);
             bool wasOrderIssued = ProduceUnit(state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
             if (!wasOrderIssued) {
@@ -164,10 +160,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void ProduceVehicle(StrategicWorldState state, Queue<Order> orders, string vehicleName)
         {
-            if (EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE)) {
-                return;
-            }
-
             bool wasOrderIssued = ProduceUnit(state, orders, vehicleName, EsuAIConstants.ProductionCategories.VEHICLE);
             if (!wasOrderIssued) {
                 ScheduleBuildingProduction(EsuAIConstants.Buildings.WAR_FACTORY, state, orders);
