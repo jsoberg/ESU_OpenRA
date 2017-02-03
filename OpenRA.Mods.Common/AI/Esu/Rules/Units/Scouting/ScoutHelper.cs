@@ -183,14 +183,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         // Scout Reporting
         // ========================================
 
+        private List<Actor> CachedEnemyActors;
+
         private void IssueScoutReports(StrategicWorldState state)
         {
-            // Since finding enemy actors in the world is relatively taxing, cache it here and send it in when building response info.
-            var cachedEnemyActors = ScoutReportUtils.EnemyActorsInWorld(state, selfPlayer);
+            // Since finding enemy actors in the world is relatively taxing, 
+            //     cache it here every 4 ticks and send it in when building response info.
+            if (CachedEnemyActors == null || (state.World.GetCurrentLocalTickCount() % 4) == 0) {
+                CachedEnemyActors = ScoutReportUtils.EnemyActorsInWorld(state, selfPlayer);
+            } else {
+                CachedEnemyActors.RemoveAll(a => a.IsDead);
+            }
 
             var actorsWhoCanReport = world.ActorsHavingTrait<RevealsShroud>().Where(a => a.Owner == selfPlayer && a.IsInWorld && !a.IsDead);
             foreach (Actor actor in actorsWhoCanReport) {
-                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, actor, cachedEnemyActors);
+                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, actor, CachedEnemyActors);
                 if (responseBuilder == null) {
                     continue;
                 }
