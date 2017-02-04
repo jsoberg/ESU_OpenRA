@@ -12,6 +12,7 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.AI.Esu.Database;
 using System.Reflection;
+
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
 /// </summary>
@@ -97,6 +98,9 @@ namespace OpenRA.Mods.Common.AI.Esu
                 State.CheckAttackStrengthPredictionFlag = true;
             }
 
+            // Inform the world state.
+            State.UnitProduced(producer, produced);
+
             var notifyOtherProductionRulesets = Rulesets.Where(a => a is IUnitProduced);
             foreach (IUnitProduced rs in notifyOtherProductionRulesets)
             {
@@ -119,11 +123,11 @@ namespace OpenRA.Mods.Common.AI.Esu
             }
             UnitDamageInformationLogger.Tick(World);
 
-            if (!State.IsInitialized) {
+            if (!State.IsInitialized)
+            {
                 State.Initalize(World, Info, SelfPlayer);
-            } else {
-                State.UpdateCurrentWorldState();
             }
+            State.Tick();
 
             // Get and issue orders.
             Queue<Order> orders = new Queue<Order>();
@@ -246,6 +250,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return ((float) UnitProductionRandomPercent / 10f);
         }
+
+        [Desc("Determines the attack strength to be predicted before launching an attack.")]
+        public int PredictedAttackStrengthNeededToLaunchAttack = (int) PredictedAttackStrength.Medium;
 
         // ========================================
         // Static

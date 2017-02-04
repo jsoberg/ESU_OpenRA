@@ -19,45 +19,47 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
         /// </summary>
         public readonly Dictionary<Actor, int> OffensiveActorToLethalityMap;
 
-        public BaseLethalityMetric(World world, Player selfPlayer)
+        public BaseLethalityMetric(StrategicWorldState state, Player selfPlayer)
         {
-            this.VulnerableActorToLethalityMap = BuildVulnerableActorMapForPlayer(world, selfPlayer);
-            this.OffensiveActorToLethalityMap = BuildOffensiveActorMapForPlayer(world, selfPlayer);
+            this.VulnerableActorToLethalityMap = BuildVulnerableActorMapForPlayer(state, selfPlayer);
+            this.OffensiveActorToLethalityMap = BuildOffensiveActorMapForPlayer(state, selfPlayer);
         }
 
-        private Dictionary<Actor, int> BuildVulnerableActorMapForPlayer(World world, Player selfPlayer)
+        private Dictionary<Actor, int> BuildVulnerableActorMapForPlayer(StrategicWorldState state, Player selfPlayer)
         {
-            var vulnerableItems = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead 
+            var vulnerableItems = state.World.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead 
                 && (!a.Info.HasTraitInfo<ArmamentInfo>() && !a.Info.HasTraitInfo<AttackGarrisonedInfo>()) && a.TraitOrDefault<Health>() != null);
 
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
-            foreach (Actor item in vulnerableItems) {
+            foreach (Actor actor in vulnerableItems) {
                 // TODO do we want current HP, or max HP? Also consider cost, test and see what's most useful.
-                map.Add(item, item.Trait<Health>().HP);
+                map.Add(actor, LethalityForActor(actor));
             }
             return map;
         }
 
-        private Dictionary<Actor, int> BuildOffensiveActorMapForPlayer(World world, Player selfPlayer)
+        private Dictionary<Actor, int> BuildOffensiveActorMapForPlayer(StrategicWorldState state, Player selfPlayer)
         {
-            var offensiveItems = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead 
-                && (a.Info.HasTraitInfo<ArmamentInfo>() || a.Info.HasTraitInfo<AttackGarrisonedInfo>()) && a.TraitOrDefault<Health>() != null);
-
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
-            foreach (Actor item in offensiveItems) {
+            foreach (Actor actor in state.OffensiveActorsCache) {
                 // TODO find actual lethality metric to use (Maybe something in item.Trait<Armament>().Weapon?)
-                map.Add(item, item.Trait<Health>().HP);
+                map.Add(actor, LethalityForActor(actor));
             }
             return map;
+        }
+
+        private int LethalityForActor(Actor actor)
+        {
+            return actor.Trait<Health>().HP;
         }
 
         /// <summary>
         ///  Provides defensive coverage of base, without taking into account actor placement.
         /// </summary>
-        public DefenseCoverage CurrentDefenseCoverage_Simple(double desiredDefensePercentage, IEnumerable<ActiveAttack> currentAttacks)
+        public DefenseCoverage CurrentDefenseCoverage_Simple(StrategicWorldState state, double desiredDefensePercentage, IEnumerable<ActiveAttack> currentAttacks)
         {
             List<Actor> necessaryActors = new List<Actor>();
-            int currentLethalityNeeded = GetLethalityCoverageRequiredForVulnerableUnits(desiredDefensePercentage);
+            int currentLethalityNeeded = GetLethalityCoverageRequiredForVulnerableUnits(state, desiredDefensePercentage);
             Dictionary<Actor, int> offenseClone = new Dictionary<Actor, int>(OffensiveActorToLethalityMap);
             // Remove any actors currently in an attack.
             foreach (ActiveAttack attack in currentAttacks) {
@@ -76,11 +78,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
             return new DefenseCoverage(currentLethalityNeeded, necessaryActors);
         }
 
-        private int GetLethalityCoverageRequiredForVulnerableUnits(double desiredDefensePercentage)
+        private int GetLethalityCoverageRequiredForVulnerableUnits(StrategicWorldState state, double desiredDefensePercentage)
         {
             int lethalityNeeded = 0;
             foreach (int entry in VulnerableActorToLethalityMap.Values) {
                 lethalityNeeded += entry;
+            }
+
+            // Account for static defensive coverage at base.
+            foreach (Actor defender in state.DefensiveStructureCache) {
+                lethalityNeeded -= LethalityForActor(defender);
             }
 
             return (int) Math.Round(lethalityNeeded * desiredDefensePercentage);

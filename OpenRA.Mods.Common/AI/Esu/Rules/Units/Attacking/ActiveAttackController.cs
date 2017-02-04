@@ -9,17 +9,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
     public class ActiveAttackController : INotifyDamage
     {
+        public const string AttackDataLogName = "attack_data";
+
         /** Number of ticks to wait before moving attack. */
         private static int TICKS_UNTIL_ATTACK_MOVE = 400;
 
-        private readonly List<ActiveAttack> CurrentAttacks;
+        private static int NextAttackId;
 
+        private readonly List<ActiveAttack> CurrentAttacks;
         private readonly World World;
 
         public ActiveAttackController(World world)
         {
             this.World = world;
             this.CurrentAttacks = new List<ActiveAttack>();
+
+            // Add attack log channel.
+            Log.AddChannel(AttackDataLogName, "attack_data.log");
 
             // Add to callback list to get damage callbacks.
             DamageNotifier.AddDamageNotificationListener(this);
@@ -32,7 +38,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void AddNewActiveAttack(Queue<Order> orders, CPos targetPosition, CPos stagedPosition, IEnumerable<Actor> attackTroops)
         {
-            ActiveAttack attack = new ActiveAttack(targetPosition, stagedPosition, attackTroops);
+            ActiveAttack attack = new ActiveAttack(NextAttackId++, targetPosition, stagedPosition, attackTroops);
             CurrentAttacks.Add(attack);
             if (stagedPosition != CPos.Invalid) {
                 attack.AddAttackMoveOrders(orders, stagedPosition);
@@ -96,6 +102,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 bool IsAttackOver = TrimAttack(CurrentAttacks[i], state, orders);
                 if (IsAttackOver)
                 {
+                    Log.Write(ActiveAttackController.AttackDataLogName, "{0} has been wiped out".F(CurrentAttacks[i].Id));
                     CurrentAttacks.RemoveAt(i);
                 }
             }

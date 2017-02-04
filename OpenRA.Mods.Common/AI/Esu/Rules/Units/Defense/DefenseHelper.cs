@@ -42,8 +42,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Defense
 
         private void IssueDefenseActionAtLocation(CPos location, StrategicWorldState state, Queue<Order> orders)
         {
-            var metric = new BaseLethalityMetric(World, SelfPlayer);
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(Info.GetDefenseLethalityCoveragePercentage(), state.ActiveAttackController.GetActiveAttacks());
+            var metric = new BaseLethalityMetric(state, SelfPlayer);
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(state, Info.GetDefenseLethalityCoveragePercentage(), state.ActiveAttackController.GetActiveAttacks());
             AddAttackMoveOrders(defensiveCoverage.ActorsNecessaryForDefense, orders, location);
 
             var da = new DefenseAction(location, state.World.GetCurrentLocalTickCount());

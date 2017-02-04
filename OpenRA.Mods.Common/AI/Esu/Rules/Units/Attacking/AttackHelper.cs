@@ -50,13 +50,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 return;
             }
 
-            var metric = new BaseLethalityMetric(World, SelfPlayer);
-            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(Info.GetDefenseLethalityCoveragePercentage(), state.ActiveAttackController.GetActiveAttacks());
+            var metric = new BaseLethalityMetric(state, SelfPlayer);
+            var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(state, Info.GetDefenseLethalityCoveragePercentage(), state.ActiveAttackController.GetActiveAttacks());
 
             IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(state, defensiveCoverage.ActorsNecessaryForDefense);
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
             // TODO add more logic here
-            if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) == PredictedAttackStrength.Medium) {
+            if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) 
+                == (PredictedAttackStrength) Info.PredictedAttackStrengthNeededToLaunchAttack)
+            {
                 ScoutReportLocationGrid reportGrid = state.ScoutReportGrid;
                 CPos stagedPosition = reportGrid.GetSafeCellPositionInbetweenCells(bestCell.RelativePosition, state.SelfIntialBaseLocation);
                 state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, stagedPosition, possibleAttackActors);
@@ -68,18 +70,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(StrategicWorldState state, IEnumerable<Actor> defensiveActors)
         {
-            IEnumerable<Actor> actors = World.ActorsHavingTrait<Armament>().Where(a => a.Owner == SelfPlayer && !a.IsDead 
-                && !defensiveActors.Contains(a) && !state.ActiveAttackController.IsActorInvolvedInActiveAttack(a));
-
-            return actors.Except(AllActorsInAttack(state));
+            var actorsNotInAttack = state.OffensiveActorsCache.Except(AllActorsInAttack(state));
+            return actorsNotInAttack.Except(defensiveActors);
         }
 
         private IEnumerable<Actor> AllActorsInAttack(StrategicWorldState state)
         {
-            List<Actor> actors = new List<Actor>();
-            IEnumerable<ActiveAttack> currentAttacks = state.ActiveAttackController.GetActiveAttacks();
+            IEnumerable<Actor> actors = new List<Actor>();
+            var currentAttacks = state.ActiveAttackController.GetActiveAttacks();
             foreach (ActiveAttack attack in currentAttacks) {
-                actors.Concat(actors);
+                actors = actors.Concat(attack.AttackTroops);
             }
             return actors;
         }

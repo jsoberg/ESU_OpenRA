@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System;
+using System.Collections.ObjectModel;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
@@ -26,8 +26,18 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public World World;
 		public Player SelfPlayer;
         public EsuAIInfo Info;
+
+        public bool CheckNewDefensiveStructureFlag;
+
         public bool CheckAttackStrengthPredictionFlag;
         public ActiveAttackController ActiveAttackController;
+
+        // Actor caches
+        private readonly List<Actor> InternalOffensiveActorsCache;
+        public readonly ReadOnlyCollection<Actor> OffensiveActorsCache;
+
+        private readonly List<Actor> InternalDefensiveStructureCache;
+        public readonly ReadOnlyCollection<Actor> DefensiveStructureCache;
 
         public StrategicWorldState()
         {
@@ -35,6 +45,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.RequestedBuildingQueue = new Queue<string>();
 
             this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+
+            this.InternalOffensiveActorsCache = new List<Actor>();
+            this.OffensiveActorsCache = InternalOffensiveActorsCache.AsReadOnly();
+            this.InternalDefensiveStructureCache = new List<Actor>();
+            this.DefensiveStructureCache = InternalDefensiveStructureCache.AsReadOnly();
         }
 
         public void Initalize(World world, EsuAIInfo info, Player selfPlayer)
@@ -70,14 +85,51 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             IsInitialized = true;
         }
 
-        public void UpdateCurrentWorldState()
+        public void UnitProduced(Actor producer, Actor produced)
         {
+            if (produced.Owner == SelfPlayer && produced.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.BUILDING)
+                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE))
+            {
+                InternalOffensiveActorsCache.Add(produced);
+            }
+        }
+
+        // ============================================
+        // Tick Updates
+        // ============================================
+
+        public void Tick()
+        {
+            if (CheckNewDefensiveStructureFlag)
+            {
+                var found = FindNewDefensiveStructures();
+                if (found)
+                {
+                    CheckNewDefensiveStructureFlag = false;
+                }
+            }
+
             VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(World, SelfPlayer);
             foreach (EnemyInfo info in EnemyInfoList) {
                 TryFindEnemyConstructionYard(info, visibility);
             }
 
             ScoutReportGrid.PerformUpdates(World);
+            RemoveDeadActorsFromCaches();
+        }
+
+        /** @return true if new defensive structures were found, false otherwise. */
+        private bool FindNewDefensiveStructures()
+        {
+            var defensiveStructures = World.Actors.Where(a => a.Owner == SelfPlayer && EsuAIUtils.IsActorOfType(World, a, EsuAIConstants.ProductionCategories.DEFENSE));
+            foreach (Actor actor in defensiveStructures) {
+                if (!InternalDefensiveStructureCache.Contains(actor)) {
+                    InternalDefensiveStructureCache.Clear();
+                    InternalDefensiveStructureCache.AddRange(defensiveStructures);
+                    return true;
+                }
+            }
+            return false;
         }
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
@@ -120,6 +172,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 }                
             }
             return closest;
+        }
+
+        private void RemoveDeadActorsFromCaches()
+        {
+            for (int i = InternalOffensiveActorsCache.Count - 1; i >= 0; i--)
+            {
+                if (InternalOffensiveActorsCache[i].IsDead)
+                {
+                    InternalOffensiveActorsCache.RemoveAt(i);
+                }
+            }
+
+            for (int i = InternalDefensiveStructureCache.Count - 1; i >= 0; i--)
+            {
+                if (InternalDefensiveStructureCache[i].IsDead)
+                {
+                    InternalDefensiveStructureCache.RemoveAt(i);
+                }
+            }
         }
     }
 
