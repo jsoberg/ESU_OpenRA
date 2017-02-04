@@ -97,6 +97,9 @@ namespace OpenRA.Mods.Common.AI.Esu
                 State.CheckAttackStrengthPredictionFlag = true;
             }
 
+            // Inform the world state.
+            State.UnitProduced(producer, produced);
+
             var notifyOtherProductionRulesets = Rulesets.Where(a => a is IUnitProduced);
             foreach (IUnitProduced rs in notifyOtherProductionRulesets)
             {
@@ -119,11 +122,11 @@ namespace OpenRA.Mods.Common.AI.Esu
             }
             UnitDamageInformationLogger.Tick(World);
 
-            if (!State.IsInitialized) {
+            if (!State.IsInitialized)
+            {
                 State.Initalize(World, Info, SelfPlayer);
-            } else {
-                State.UpdateCurrentWorldState();
             }
+            State.Tick();
 
             // Get and issue orders.
             Queue<Order> orders = new Queue<Order>();

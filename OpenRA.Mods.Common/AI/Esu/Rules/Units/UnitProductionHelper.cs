@@ -23,15 +23,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private readonly Player SelfPlayer;
         private readonly EsuAIInfo Info;
 
-        private readonly List<Actor> OffensiveActorsCache;
-
         public UnitProductionHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
             this.Info = info;
-
-            this.OffensiveActorsCache = new List<Actor>();
         }
 
         public void OnOrderDenied(Order order)
@@ -39,36 +35,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             /* Do Nothing. */
         }
 
-        public void UnitProduced(Actor producer, Actor produced)
-        {
-            if (produced.Owner == SelfPlayer && produced.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.BUILDING)
-                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE))
-            {
-                OffensiveActorsCache.Add(produced);
-            }
-        }
-
         public void AddUnitOrdersIfApplicable(StrategicWorldState state, Queue<Order> orders)
         {
-            RemoveDeadActorsFromCache();
-
             UnitProductionCheckCooldown --;
             if (UnitProductionCheckCooldown > 0) {
                 return;
             }
 
             ChooseAndProduceUnit(state, orders);
-        }
-
-        private void RemoveDeadActorsFromCache()
-        {
-            for (int i = OffensiveActorsCache.Count - 1; i >= 0; i--)
-            {
-                if (OffensiveActorsCache[i].IsDead)
-                {
-                    OffensiveActorsCache.RemoveAt(i);
-                }
-            }
         }
 
         private void ChooseAndProduceUnit(StrategicWorldState state, Queue<Order> orders)
@@ -125,7 +99,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.INFANTRY))
             {
                 // TODO: Check here for vehicle and air.
-                double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.INFANTRY);
+                double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(state, EsuAIConstants.ProductionCategories.INFANTRY);
                 if (currentInfantryPercentage < infantryPercent || currentResources > Info.ExcessResourceLevel)
                 {
                     ProduceInfantry(state, orders);
@@ -134,7 +108,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.VEHICLE))
             { 
-                double currentVehiclePercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.VEHICLE);
+                double currentVehiclePercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(state, EsuAIConstants.ProductionCategories.VEHICLE);
                 if (currentVehiclePercentage < vehiclePercent || currentResources > Info.ExcessResourceLevel)
                 {
                     var vehicleName = GetVehicleToProduce(state);
@@ -143,15 +117,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        private double PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(string type)
+        private double PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(StrategicWorldState state, string type)
         {
-            if (OffensiveActorsCache.Count() == 0) {
+            if (state.OffensiveActorsCache.Count() == 0) {
                 return 0;
             }
 
             // Don't include harvesters (not offense)
-            var actors = OffensiveActorsCache.Where(a => EsuAIUtils.IsActorOfType(World, a, type) && a.Info.Name != "harv");
-            return ((double) actors.Count() / (double) OffensiveActorsCache.Count());
+            var actors = state.OffensiveActorsCache.Where(a => EsuAIUtils.IsActorOfType(World, a, type));
+            return ((double) actors.Count() / (double) state.OffensiveActorsCache.Count());
         }
 
         private void ProduceInfantry(StrategicWorldState state, Queue<Order> orders)

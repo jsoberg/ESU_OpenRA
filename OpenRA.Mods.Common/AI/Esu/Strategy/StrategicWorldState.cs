@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System;
+using System.Collections.ObjectModel;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
@@ -26,6 +26,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public World World;
 		public Player SelfPlayer;
         public EsuAIInfo Info;
+
+        private readonly List<Actor> InternalOffensiveActorsCache;
+        public readonly ReadOnlyCollection<Actor> OffensiveActorsCache;
+
         public bool CheckAttackStrengthPredictionFlag;
         public ActiveAttackController ActiveAttackController;
 
@@ -35,6 +39,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.RequestedBuildingQueue = new Queue<string>();
 
             this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+            this.InternalOffensiveActorsCache = new List<Actor>();
+            this.OffensiveActorsCache = InternalOffensiveActorsCache.AsReadOnly();
         }
 
         public void Initalize(World world, EsuAIInfo info, Player selfPlayer)
@@ -70,7 +76,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             IsInitialized = true;
         }
 
-        public void UpdateCurrentWorldState()
+        public void UnitProduced(Actor producer, Actor produced)
+        {
+            if (produced.Owner == SelfPlayer && produced.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.BUILDING)
+                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE))
+            {
+                InternalOffensiveActorsCache.Add(produced);
+            }
+        }
+
+        // ============================================
+        // Tick Updates
+        // ============================================
+
+        public void Tick()
         {
             VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(World, SelfPlayer);
             foreach (EnemyInfo info in EnemyInfoList) {
@@ -78,6 +97,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             }
 
             ScoutReportGrid.PerformUpdates(World);
+            RemoveDeadActorsFromCache();
         }
 
         private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
@@ -120,6 +140,17 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 }                
             }
             return closest;
+        }
+
+        private void RemoveDeadActorsFromCache()
+        {
+            for (int i = InternalOffensiveActorsCache.Count - 1; i >= 0; i--)
+            {
+                if (InternalOffensiveActorsCache[i].IsDead)
+                {
+                    InternalOffensiveActorsCache.RemoveAt(i);
+                }
+            }
         }
     }
 
