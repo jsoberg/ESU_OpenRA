@@ -63,6 +63,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                         SuppressVisualFeedback = true
                     });
 
+                    state.CheckNewDefensiveStructureFlag = true;
                     SetRallyPointTick = world.GetCurrentLocalTickCount() + 20;
                 }
             }

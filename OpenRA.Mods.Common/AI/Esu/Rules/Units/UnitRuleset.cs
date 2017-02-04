@@ -35,7 +35,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
 
             scoutHelper.UnitProduced(producer, produced);
-            unitHelper.UnitProduced(producer, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)

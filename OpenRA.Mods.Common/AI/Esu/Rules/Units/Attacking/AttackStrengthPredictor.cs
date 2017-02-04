@@ -13,11 +13,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     /// </summary>
     public enum PredictedAttackStrength
     {
-        None,
-        Low,
-        Medium,
-        High,
-        Overwhelming
+        None = 0,
+        Low = 1,
+        Medium = 2,
+        High = 3,
+        Overwhelming = 4
     };
 
     public class AttackStrengthPredictor
