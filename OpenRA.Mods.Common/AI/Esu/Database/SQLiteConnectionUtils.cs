@@ -8,20 +8,36 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 {
     static class SQLiteConnectionUtils
     {
-        private const string DataSourceConnectionPrepend = "URI = file:";
         private const string DatabaseFileName = "EsuAIInformation.sqlite";
 
         public static SQLiteConnection GetDatabaseConnection()
         {
-            try {
+            try
+            {
                 string fileLocation = Platform.GetSupportDir() + DatabaseFileName;
                 CreateFileIfNotExists(fileLocation);
 
-                return new SQLiteConnection(DataSourceConnectionPrepend + fileLocation);
-            } catch (SQLiteException) {
+                string connectionString = BuildSQLiteConnectionString(fileLocation);
+                SQLiteConnection connection = new SQLiteConnection(connectionString);
+                connection.Open();
+                return connection;
+            }
+            catch (SQLiteException)
+            {
                 LogSqliteException();
                 return null;
             }
+        }
+
+        private static string BuildSQLiteConnectionString(string fileLocation)
+        {
+            SQLiteConnectionStringBuilder builder = new SQLiteConnectionStringBuilder();
+            builder.DataSource = fileLocation;
+            builder.Pooling = true;
+            builder.SyncMode = SynchronizationModes.Full;
+            builder.FailIfMissing = false;
+
+            return builder.ConnectionString;
         }
 
         private static void CreateFileIfNotExists(string fileLocation)

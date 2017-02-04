@@ -31,7 +31,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
             try
             {
-                connection.Open();
                 string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(ScoutReportDataTableName, Columns);
                 SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
                 createTableCommand.ExecuteNonQuery();
@@ -56,8 +55,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
             try
             {
-                connection.Open();
-
                 ColumnWithValue[] colsWithValues = {
                     new ColumnWithValue(LowestRisk, data.LowestRisk),
                     new ColumnWithValue(HighestRisk, data.HighestRisk),
@@ -90,7 +87,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
             try
             {
-                connection.Open();
                 long count = SQLiteUtils.GetCountForTable(connection, ScoutReportDataTableName);
                 if (count <= 0) {
                     return null;
