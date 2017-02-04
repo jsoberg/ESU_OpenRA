@@ -9,7 +9,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     public class ActiveAttack
     {
         private const int DistanceToMoveAttackTowardEnemy = 10;
-
         private const int DistanceFromPositionToConsiderOnTarget = 8;
 
         public List<Actor> AttackTroops;
@@ -22,22 +21,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         /** Position where the next attack should be staged before following through. */
         public CPos StagedPosition = CPos.Invalid;
-
         /** Stack holding most recent target position to oldest target position. */
         private readonly Stack<CPos> TargetPositionStack;
-
         /** Contains the collection of positions that this attack was damaged from.*/
         private readonly List<CPos> AttackerLocationList;
 
-        public ActiveAttack(CPos targetPosition, CPos stagedPosition, IEnumerable<Actor> attackTroops)
+        public readonly int Id;
+
+        public ActiveAttack(int id, CPos targetPosition, CPos stagedPosition, IEnumerable<Actor> attackTroops)
         {
+            this.Id = id;
+
             this.TargetPositionStack = new Stack<CPos>();
             TargetPositionStack.Push(targetPosition);
-
             this.StagedPosition = stagedPosition;
 
             this.AttackerLocationList = new List<CPos>();
             this.AttackTroops = new List<Actor>(attackTroops);
+
+            Log.Write(ActiveAttackController.AttackDataLogName, "Attack with ID {0} has been created".F(Id));
         }
 
         public void AttackedFrom(Actor attacker, World world)
@@ -57,9 +59,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 return true;
             }
 
-            if (HasReachedPosition(TargetPositionStack.Peek()))
+            CPos currentTarget = TargetPositionStack.Peek();
+            if (HasReachedPosition(currentTarget))
             {
                 // All troops have reached target position.
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} has reached target position /{{1},{2}/}".F(Id, currentTarget.X, currentTarget.Y));
                 TargetPositionReachedTickCount = world.GetCurrentLocalTickCount();
                 return true;
             }
@@ -75,6 +79,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             if (HasReachedPosition(StagedPosition))
             {
                 // All troops have reached staging area.
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} has reached staged position /{{1},{2}/}".F(Id, StagedPosition.X, StagedPosition.Y));
                 StagedPositionReachedTickCount = world.GetCurrentLocalTickCount();
                 return true;
             }
@@ -100,6 +105,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void MoveStagedPosition(Queue<Order> orders, CPos newStagedPosition)
         {
+            Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving staged position from /{{1},{2}/} to /{{3},{4}/}".F(Id, StagedPosition.X, StagedPosition.Y, newStagedPosition.X, newStagedPosition.Y));
             WasStagedPositionMoved = true;
             StagedPosition = newStagedPosition;
             StagedPositionReachedTickCount = 0;
@@ -125,6 +131,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
             if (attackerCenter != CPos.Invalid) {
                 nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, state.Info.DistanceToMoveAttack, state.World.Map);
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward attackers, position /{{1},{2}/}".F(Id, nextMove.X, nextMove.Y));
             }
 
             // If we still haven't found a location, search the scout report grid for another good cell anywhere on the map.
@@ -134,6 +141,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 // Only choose a report with higher reward than risk for attack move.
                 if (best != null && (best.AverageRewardValue > best.AverageRiskValue)) {
                     nextMove = best.RelativePosition;
+                    Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving to best next target cell, position /{{1},{2}/}".F(Id, nextMove.X, nextMove.Y));
                 }
             }
 
@@ -141,6 +149,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             if (nextMove == CPos.Invalid) {
                 CPos enemyLoc = state.GetClosestEnemyLocation(currentTarget);
                 nextMove = GeometryUtils.MoveTowards(currentTarget, enemyLoc, DistanceToMoveAttackTowardEnemy, state.World.Map);
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward enemy base, position /{{1},{2}/}".F(Id, nextMove.X, nextMove.Y));
             }
 
             
