@@ -52,7 +52,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             SQLiteDataReader reader = null;
             try
             {
-                connection.Open();
                 reader = UnitDamageDataTable.Query(connection);
                 LoadNewUnitDamageDataFromReader(reader);
             }
