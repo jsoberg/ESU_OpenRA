@@ -39,7 +39,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             this.AttackerLocationList = new List<CPos>();
             this.AttackTroops = new List<Actor>(attackTroops);
 
-            Log.Write(ActiveAttackController.AttackDataLogName, "Attack with ID {0} has been created".F(Id));
+            Log.Write(ActiveAttackController.AttackDataLogName, "Attack with ID {0} has been created, containing {1} units".F(Id, AttackTroops.Count));
         }
 
         public void AttackedFrom(Actor attacker, World world)
