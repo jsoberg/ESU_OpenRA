@@ -19,15 +19,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private const int UNIT_PRODUCTION_COOLDOWN = 10;
         private int UnitProductionCheckCooldown;
 
-        private readonly World world;
-        private readonly Player selfPlayer;
-        private readonly EsuAIInfo info;
+        private readonly World World;
+        private readonly Player SelfPlayer;
+        private readonly EsuAIInfo Info;
+
+        private readonly List<Actor> OffensiveActorsCache;
 
         public UnitProductionHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
-            this.world = world;
-            this.selfPlayer = selfPlayer;
-            this.info = info;
+            this.World = world;
+            this.SelfPlayer = selfPlayer;
+            this.Info = info;
+
+            this.OffensiveActorsCache = new List<Actor>();
         }
 
         public void OnOrderDenied(Order order)
@@ -35,14 +39,36 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             /* Do Nothing. */
         }
 
+        public void UnitProduced(Actor producer, Actor produced)
+        {
+            if (produced.Owner == SelfPlayer && produced.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.BUILDING)
+                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE))
+            {
+                OffensiveActorsCache.Add(produced);
+            }
+        }
+
         public void AddUnitOrdersIfApplicable(StrategicWorldState state, Queue<Order> orders)
         {
+            RemoveDeadActorsFromCache();
+
             UnitProductionCheckCooldown --;
             if (UnitProductionCheckCooldown > 0) {
                 return;
             }
 
             ChooseAndProduceUnit(state, orders);
+        }
+
+        private void RemoveDeadActorsFromCache()
+        {
+            for (int i = OffensiveActorsCache.Count - 1; i >= 0; i--)
+            {
+                if (OffensiveActorsCache[i].IsDead)
+                {
+                    OffensiveActorsCache.RemoveAt(i);
+                }
+            }
         }
 
         private void ChooseAndProduceUnit(StrategicWorldState state, Queue<Order> orders)
@@ -59,19 +85,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         /** @return true if a harvester production order was issued this call, false otherwise. */
         private bool ProduceHarvesterIfApplicable(StrategicWorldState state, Queue<Order> orders)
         {
-            if (EsuAIUtils.IsItemCurrentlyInProductionForCategory(state.World, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE, EsuAIConstants.Vehicles.HARVESTER) ||
-                    EsuAIUtils.IsItemCurrentlyInProductionForCategory(state.World, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.WAR_FACTORY))
+            if (EsuAIUtils.IsItemCurrentlyInProductionForCategory(state.World, SelfPlayer, EsuAIConstants.ProductionCategories.VEHICLE, EsuAIConstants.Vehicles.HARVESTER) ||
+                    EsuAIUtils.IsItemCurrentlyInProductionForCategory(state.World, SelfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.WAR_FACTORY))
             {
                 return false;
             }
 
-            if (NumOreRefineriesBuilt(state) < info.MinNumRefineries)
+            if (NumOreRefineriesBuilt(state) < Info.MinNumRefineries)
             {
                 return false;
             }
 
-            if (NumLivingHarvesters(state) < info.MinNumHarvesters 
-                && (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE)))
+            if (NumLivingHarvesters(state) < Info.MinNumHarvesters 
+                && (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.VEHICLE)))
             {
                 ProduceVehicle(state, orders, EsuAIConstants.Vehicles.HARVESTER);
                 return true;
@@ -82,34 +108,34 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private int NumOreRefineriesBuilt(StrategicWorldState state)
         {
-            return state.World.Actors.Count(a => a.Owner == selfPlayer && a.IsInWorld
+            return state.World.Actors.Count(a => a.Owner == SelfPlayer && a.IsInWorld
                 && !a.IsDead && a.TraitOrDefault<Refinery>() != null);
         }
 
         private int NumLivingHarvesters(StrategicWorldState state)
         {
-            return state.World.ActorsHavingTrait<Harvester>().Count(a => a.Owner == selfPlayer && !a.IsDead);
+            return state.World.ActorsHavingTrait<Harvester>().Count(a => a.Owner == SelfPlayer && !a.IsDead);
         }
 
         // Produces units for the specified distribution. If we currently have excess resources, we will produce units without taking the distribution into account.
         private void ProduceUnitForDistribution(StrategicWorldState state, Queue<Order> orders, double infantryPercent, double vehiclePercent, double airPercent)
         {
-            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
+            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(SelfPlayer);
 
-            if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.INFANTRY))
+            if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.INFANTRY))
             {
                 // TODO: Check here for vehicle and air.
                 double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.INFANTRY);
-                if (currentInfantryPercentage < infantryPercent || currentResources > info.ExcessResourceLevel)
+                if (currentInfantryPercentage < infantryPercent || currentResources > Info.ExcessResourceLevel)
                 {
                     ProduceInfantry(state, orders);
                 }
             }
 
-            if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE))
+            if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.VEHICLE))
             { 
                 double currentVehiclePercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(EsuAIConstants.ProductionCategories.VEHICLE);
-                if (currentVehiclePercentage < vehiclePercent || currentResources > info.ExcessResourceLevel)
+                if (currentVehiclePercentage < vehiclePercent || currentResources > Info.ExcessResourceLevel)
                 {
                     var vehicleName = GetVehicleToProduce(state);
                     ProduceVehicle(state, orders, vehicleName);
@@ -119,17 +145,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private double PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(string type)
         {
-            // Don't include harvesters (not offense)
-            var actors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && EsuAIUtils.IsActorOfType(world, a, type) && a.Info.Name != "harv");
-            // TODO yech... find a better way to get this.
-            // All offensive actors.
-            var allActors = world.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead && a.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.BUILDING)
-                && !EsuAIUtils.IsActorOfType(world, a, EsuAIConstants.ProductionCategories.DEFENSE));
-
-            if (allActors.Count() == 0) {
+            if (OffensiveActorsCache.Count() == 0) {
                 return 0;
             }
-            return ((double) actors.Count() / (double) allActors.Count());
+
+            // Don't include harvesters (not offense)
+            var actors = OffensiveActorsCache.Where(a => EsuAIUtils.IsActorOfType(World, a, type) && a.Info.Name != "harv");
+            return ((double) actors.Count() / (double) OffensiveActorsCache.Count());
         }
 
         private void ProduceInfantry(StrategicWorldState state, Queue<Order> orders)
@@ -137,7 +159,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             var infantry = GetInfantryToProduce(state);
             bool wasOrderIssued = ProduceUnit(state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
             if (!wasOrderIssued) {
-                ScheduleBuildingProduction(EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer), state, orders);
+                ScheduleBuildingProduction(EsuAIConstants.Buildings.GetBarracksNameForPlayer(SelfPlayer), state, orders);
             }
             UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
         }
@@ -155,7 +177,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private bool ShouldProduceRandomUnit()
         {
             float chooseRandom = RANDOM.NextFloat();
-            return chooseRandom <= info.GetUnitProductionRandomPercentage();
+            return chooseRandom <= Info.GetUnitProductionRandomPercentage();
         }
 
         private void ProduceVehicle(StrategicWorldState state, Queue<Order> orders, string vehicleName)
@@ -169,9 +191,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private string GetVehicleToProduce(StrategicWorldState state)
         {
-            Dictionary<string, DamageKillStats> vehicleStats = state.UnitStatsLoader.GetStatsForActors(EsuAIConstants.Vehicles.GetVehiclesForPlayer(selfPlayer));
+            Dictionary<string, DamageKillStats> vehicleStats = state.UnitStatsLoader.GetStatsForActors(EsuAIConstants.Vehicles.GetVehiclesForPlayer(SelfPlayer));
             if (vehicleStats == null || ShouldProduceRandomUnit()) {
-                return EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(selfPlayer);
+                return EsuAIConstants.Vehicles.GetRandomVehicleForPlayer(SelfPlayer);
             } else {
                 return state.UnitStatsLoader.GetUnitForStats(vehicleStats);
             }
@@ -179,7 +201,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private bool ProduceUnit(StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)
         {
-            var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, productionCategory);
+            var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(World, SelfPlayer, productionCategory);
 
             var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == unitName);
             if (buildable == null) {
@@ -195,7 +217,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
 
             // We can build now.
-            orders.Enqueue(Order.StartProduction(selfPlayer.PlayerActor, unitName, 1));
+            orders.Enqueue(Order.StartProduction(SelfPlayer.PlayerActor, unitName, 1));
             return false;
         }
 
@@ -203,7 +225,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private bool ScheduleBuildingProduction(string building, StrategicWorldState state, Queue<Order> orders)
         {
             if (!state.RequestedBuildingQueue.Contains(building)
-                    && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, building)) 
+                    && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(World, SelfPlayer, building)) 
             {
                 state.RequestedBuildingQueue.Enqueue(building);
                 UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
