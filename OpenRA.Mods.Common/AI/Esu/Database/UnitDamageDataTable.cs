@@ -35,7 +35,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
             try
             {
-                connection.Open();
                 string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(UnitDamageDataTableName, Columns);
                 SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
                 createTableCommand.ExecuteNonQuery();
@@ -60,8 +59,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
             try
             {
-                connection.Open();
-
                 ColumnWithValue[] colsWithValues = {
                     new ColumnWithValue(AttackingUnit, data.AttackerName),
                     new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
