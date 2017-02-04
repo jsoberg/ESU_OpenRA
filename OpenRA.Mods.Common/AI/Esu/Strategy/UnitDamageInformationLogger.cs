@@ -10,11 +10,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public class AsyncUnitDamageInformationLogger
     {
+        private const int TicksUntilBatchLog = 100;
+
+        private readonly Queue<UnitDamageData> DamageDataQueue;
         private readonly UnitDamageDataTable UnitDamageDataTable;
         private readonly object UnitDamageDataTableLock = new object();
 
         public AsyncUnitDamageInformationLogger()
         {
+            this.DamageDataQueue = new Queue<UnitDamageData>();
             this.UnitDamageDataTable = new UnitDamageDataTable();
         }
 
@@ -24,13 +28,35 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 return;
             }
 
-            ThreadPool.QueueUserWorkItem(t => LogQueuedDamageInfo(data));
+            DamageDataQueue.Enqueue(data);
         }
 
-        private void LogQueuedDamageInfo(UnitDamageData data)
+        public void Tick(World world)
         {
-            lock (UnitDamageDataTableLock) {
-                UnitDamageDataTable.InsertUnitDamageData(data);
+            if ((world.GetCurrentLocalTickCount() % TicksUntilBatchLog) == 0) {
+                Queue<UnitDamageData> clone = DequeueAndCloneDamageDataQueue();
+                ThreadPool.QueueUserWorkItem(t => LogQueuedDamageInfo(clone));
+            }
+        }
+
+        private Queue<UnitDamageData> DequeueAndCloneDamageDataQueue()
+        {
+            Queue<UnitDamageData> clone = new Queue<UnitDamageData>();
+            while (DamageDataQueue.Count > 0)
+            {
+                clone.Enqueue(DamageDataQueue.Dequeue());
+            }
+            return clone;
+        }
+
+        private void LogQueuedDamageInfo(Queue<UnitDamageData> damageDataQueue)
+        {
+            lock (UnitDamageDataTableLock)
+            {
+                foreach (UnitDamageData data in damageDataQueue)
+                {
+                    UnitDamageDataTable.InsertUnitDamageData(data);
+                }
             }
         }
     }

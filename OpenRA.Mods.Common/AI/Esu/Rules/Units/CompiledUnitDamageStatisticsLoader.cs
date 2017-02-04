@@ -21,6 +21,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         public CompiledUnitDamageStatisticsLoader()
         {
             this.UnitDamageDataTable = new UnitDamageDataTable();
+            ReloadUnitDamageStats();
         }
 
         public Dictionary<string, DamageKillStats> GetStatsForActors(string[] actors)
@@ -38,8 +39,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         public void ReloadUnitDamageStats()
         {
-            var thread = new Thread(() => LoadUnitDamageStats());
-            thread.Start();
+            ThreadPool.QueueUserWorkItem(t => LoadUnitDamageStats());
         }
 
         private void LoadUnitDamageStats()
