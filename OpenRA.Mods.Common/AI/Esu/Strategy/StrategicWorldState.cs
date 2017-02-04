@@ -35,7 +35,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.RequestedBuildingQueue = new Queue<string>();
 
             this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
-            UnitStatsLoader.ReloadUnitDamageStats();
         }
 
         public void Initalize(World world, EsuAIInfo info, Player selfPlayer)
