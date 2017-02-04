@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using OpenRA.Mods.Common.AI.Esu.Database;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 
@@ -23,6 +24,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private List<ScoutReport>[][] ScoutReportGridMatrix;
         private AggregateScoutReportData BestCellData;
 
+        private readonly object BestScoutReportDataLock = new object();
+        private BestScoutReportData CachedBestScoutReportData;
+
         public ScoutReportLocationGrid(World world)
         {
             this.GridWidth = GetRoundedIntDividedByCellSize(world.Map.MapSize.X);
@@ -30,6 +34,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             this.ScoutReportDataTable = new ScoutReportDataTable();
 
             this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, world, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
+
+            // Load the current best scout report data initially.
+            ThreadPool.QueueUserWorkItem(t => ReloadBestScoutReportDataInBackground());
         }
 
         public void QueueScoutReport(ScoutReport report)
@@ -141,16 +148,18 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private void LogCurrentScoutReportDataToDatabase()
         {
             lock (ScoutReportGridMatrixLock) {
-                BestScoutReportData data = GetCurrentScoutReportData();
+                BestScoutReportData data = CompileCurrentBestScoutReportData();
                 if (data == null) {
                     return;
                 }
 
                 ScoutReportDataTable.InsertScoutReportData(data);
+                // Reload the cache since it may have changed.
+                ThreadPool.QueueUserWorkItem(t => ReloadBestScoutReportDataInBackground());
             }
         }
 
-        private BestScoutReportData GetCurrentScoutReportData()
+        private BestScoutReportData CompileCurrentBestScoutReportData()
         {
             bool hasData = false;
             BestScoutReportData.Builder builder = new BestScoutReportData.Builder();
@@ -183,10 +192,28 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         public BestScoutReportData GetBestScoutReportDataFromDatabase()
         {
-            return ScoutReportDataTable.QueryForBestScoutReportData();
+            lock (BestScoutReportDataLock)
+            {
+                return CachedBestScoutReportData;
+            }
         }
 
-        // Convenience methods 
+        // ========================================
+        // Background Threading Methods
+        // ========================================
+
+        private void ReloadBestScoutReportDataInBackground()
+        {
+            BestScoutReportData data = ScoutReportDataTable.QueryForBestScoutReportData();
+            lock (BestScoutReportDataLock)
+            {
+                CachedBestScoutReportData = data; 
+            }
+        }
+
+        // ========================================
+        // Convenience Methods
+        // ========================================
 
         private int GetRoundedIntDividedByCellSize(int pos)
         {
