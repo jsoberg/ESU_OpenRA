@@ -63,7 +63,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             if (HasReachedPosition(currentTarget))
             {
                 // All troops have reached target position.
-                Log.Write(ActiveAttackController.AttackDataLogName, "{0} has reached target position /{{1},{2}/}".F(Id, currentTarget.X, currentTarget.Y));
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} has reached target position [{1},{2}]".F(Id, currentTarget.X, currentTarget.Y));
                 TargetPositionReachedTickCount = world.GetCurrentLocalTickCount();
                 return true;
             }
@@ -79,7 +79,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             if (HasReachedPosition(StagedPosition))
             {
                 // All troops have reached staging area.
-                Log.Write(ActiveAttackController.AttackDataLogName, "{0} has reached staged position /{{1},{2}/}".F(Id, StagedPosition.X, StagedPosition.Y));
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} has reached staged position [{1},{2}]".F(Id, StagedPosition.X, StagedPosition.Y));
                 StagedPositionReachedTickCount = world.GetCurrentLocalTickCount();
                 return true;
             }
@@ -105,7 +105,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public void MoveStagedPosition(Queue<Order> orders, CPos newStagedPosition)
         {
-            Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving staged position from /{{1},{2}/} to /{{3},{4}/}".F(Id, StagedPosition.X, StagedPosition.Y, newStagedPosition.X, newStagedPosition.Y));
+            Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving staged position from [{1},{2}] to [{3},{4}]".F(Id, StagedPosition.X, StagedPosition.Y, newStagedPosition.X, newStagedPosition.Y));
             WasStagedPositionMoved = true;
             StagedPosition = newStagedPosition;
             StagedPositionReachedTickCount = 0;
@@ -131,7 +131,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
             if (attackerCenter != CPos.Invalid) {
                 nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, state.Info.DistanceToMoveAttack, state.World.Map);
-                Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward attackers, position /{{1},{2}/}".F(Id, nextMove.X, nextMove.Y));
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward attackers, position [{1},{2}]".F(Id, nextMove.X, nextMove.Y));
             }
 
             // If we still haven't found a location, search the scout report grid for another good cell anywhere on the map.
@@ -141,7 +141,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 // Only choose a report with higher reward than risk for attack move.
                 if (best != null && (best.AverageRewardValue > best.AverageRiskValue)) {
                     nextMove = best.RelativePosition;
-                    Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving to best next target cell, position /{{1},{2}/}".F(Id, nextMove.X, nextMove.Y));
+                    Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving to best next target cell, position [{1},{2}]".F(Id, nextMove.X, nextMove.Y));
                 }
             }
 
@@ -149,7 +149,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             if (nextMove == CPos.Invalid) {
                 CPos enemyLoc = state.GetClosestEnemyLocation(currentTarget);
                 nextMove = GeometryUtils.MoveTowards(currentTarget, enemyLoc, DistanceToMoveAttackTowardEnemy, state.World.Map);
-                Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward enemy base, position /{{1},{2}/}".F(Id, nextMove.X, nextMove.Y));
+                Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward enemy base, position [{1},{2}]".F(Id, nextMove.X, nextMove.Y));
             }
 
             
