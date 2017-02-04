@@ -12,6 +12,7 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.AI.Esu.Database;
 using System.Reflection;
+
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
 /// </summary>
@@ -249,6 +250,9 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             return ((float) UnitProductionRandomPercent / 10f);
         }
+
+        [Desc("Determines the attack strength to be predicted before launching an attack.")]
+        public int PredictedAttackStrengthNeededToLaunchAttack = (int) PredictedAttackStrength.Medium;
 
         // ========================================
         // Static
