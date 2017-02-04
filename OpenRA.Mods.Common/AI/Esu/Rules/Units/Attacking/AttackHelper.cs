@@ -45,6 +45,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         private void IssueAttackIfViable(StrategicWorldState state, Queue<Order> orders, AggregateScoutReportData bestCell)
         {
+            // Only check for attack strength if we have new information to save on computation time.
+            if (!state.CheckAttackStrengthPredictionFlag) {
+                return;
+            }
+
             var metric = new BaseLethalityMetric(World, SelfPlayer);
             var defensiveCoverage = metric.CurrentDefenseCoverage_Simple(Info.GetDefenseLethalityCoveragePercentage(), state.ActiveAttackController.GetActiveAttacks());
 
@@ -56,6 +61,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 CPos stagedPosition = reportGrid.GetSafeCellPositionInbetweenCells(bestCell.RelativePosition, state.SelfIntialBaseLocation);
                 state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, stagedPosition, possibleAttackActors);
             }
+
+            // We've checked for attack strength, so don't check again until we have new viable information.
+            state.CheckAttackStrengthPredictionFlag = false;
         }
 
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(StrategicWorldState state, IEnumerable<Actor> defensiveActors)
