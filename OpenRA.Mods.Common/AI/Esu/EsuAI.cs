@@ -117,6 +117,7 @@ namespace OpenRA.Mods.Common.AI.Esu
                 DeployMcv(self);
                 return;
             }
+            UnitDamageInformationLogger.Tick(World);
 
             if (!State.IsInitialized) {
                 State.Initalize(World, Info, SelfPlayer);
