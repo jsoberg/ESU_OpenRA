@@ -26,7 +26,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public World World;
 		public Player SelfPlayer;
         public EsuAIInfo Info;
-
+        public bool CheckAttackStrengthPredictionFlag;
         public ActiveAttackController ActiveAttackController;
 
         public StrategicWorldState()
@@ -44,7 +44,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.Info = info;
             this.SelfPlayer = selfPlayer;
 
-            this.ScoutReportGrid = new ScoutReportLocationGrid(world);
+            this.ScoutReportGrid = new ScoutReportLocationGrid(this);
             this.ActiveAttackController = new ActiveAttackController(world);
 
             // Cache our own location for now.

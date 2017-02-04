@@ -19,47 +19,46 @@ namespace OpenRA.Mods.Common.AI.Esu
 {
     public sealed class EsuAI : ITick, IBot, INotifyDamage, INotifyAppliedDamage, INotifyDiscovered, INotifyOtherProduction, INotifyProduction
     {
-        private readonly EsuAIInfo info;
-        private readonly World world;
-        private readonly StrategicWorldState worldState;
+        private readonly EsuAIInfo Info;
+        private readonly World World;
+        private readonly StrategicWorldState State;
+        private readonly AsyncUnitDamageInformationLogger UnitDamageInformationLogger;
 
         // Rulesets.
-        private readonly List<BaseEsuAIRuleset> rulesets;
+        private readonly List<BaseEsuAIRuleset> Rulesets;
 
-        private Player selfPlayer;
-        private bool isEnabled;
-        private int tickCount;
-
-        private readonly AsyncUnitDamageInformationLogger UnitDamageInformationLogger;
+        private Player SelfPlayer;
+        private bool IsEnabled;
+        private int TickCount;
 
         public EsuAI(EsuAIInfo info, ActorInitializer init)
         {
-            this.info = info;
-            this.world = init.World;
-            this.worldState = new StrategicWorldState();
+            this.Info = info;
+            this.World = init.World;
+            this.State = new StrategicWorldState();
             this.UnitDamageInformationLogger = new AsyncUnitDamageInformationLogger();
 
-            rulesets = new List<BaseEsuAIRuleset>();
+            Rulesets = new List<BaseEsuAIRuleset>();
             addRulesets();
         }
 
         private void addRulesets()
         {
-            rulesets.Add(new BuildRuleset(world, info));
-            rulesets.Add(new UnitRuleset(world, info));
+            Rulesets.Add(new BuildRuleset(World, Info));
+            Rulesets.Add(new UnitRuleset(World, Info));
         }
 
         IBotInfo IBot.Info
         {
-            get { return info; }
+            get { return Info; }
         }
 
         void IBot.Activate(Player p)
         {
-            isEnabled = true;
-            selfPlayer = p;
+            IsEnabled = true;
+            SelfPlayer = p;
 
-            foreach (BaseEsuAIRuleset rs in rulesets) {
+            foreach (BaseEsuAIRuleset rs in Rulesets) {
                 rs.Activate(p);
             }
         }
@@ -93,7 +92,12 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void OnUnitProduced(Actor producer, Actor produced)
         {
-            var notifyOtherProductionRulesets = rulesets.Where(a => a is IUnitProduced);
+            // We've produced a new unit, so set the flag to check for attack strength.
+            if (produced.Owner == SelfPlayer) {
+                State.CheckAttackStrengthPredictionFlag = true;
+            }
+
+            var notifyOtherProductionRulesets = Rulesets.Where(a => a is IUnitProduced);
             foreach (IUnitProduced rs in notifyOtherProductionRulesets)
             {
                 rs.OnUnitProduced(producer, produced);
@@ -102,55 +106,55 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void ITick.Tick(Actor self)
         {
-            if (!isEnabled) {
+            if (!IsEnabled) {
                 return;
             }
 
-            tickCount++;
+            TickCount++;
 
             // Check for initial tick.
-            if (tickCount == 1) {
+            if (TickCount == 1) {
                 DeployMcv(self);
                 return;
             }
 
-            if (!worldState.IsInitialized) {
-                worldState.Initalize(world, info, selfPlayer);
+            if (!State.IsInitialized) {
+                State.Initalize(World, Info, SelfPlayer);
             } else {
-                worldState.UpdateCurrentWorldState();
+                State.UpdateCurrentWorldState();
             }
 
             // Get and issue orders.
             Queue<Order> orders = new Queue<Order>();
-            foreach (BaseEsuAIRuleset rs in rulesets) {
-                rs.Tick(self, worldState, orders);
+            foreach (BaseEsuAIRuleset rs in Rulesets) {
+                rs.Tick(self, State, orders);
             }
             IssueOrders(orders);
         }
 
         private void IssueOrders(Queue<Order> orders)
         {
-            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(selfPlayer);
+            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(SelfPlayer);
             foreach (Order order in orders)
             {
                 // We don't have the marked minimum resources to execute this order, so ignore it.
-                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < info.AmountOfResourcesToHaveBeforeNextProduction)
+                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < Info.AmountOfResourcesToHaveBeforeNextProduction)
                 {
                     OrderDenied(order);
                 }
                 else
                 {
-                    world.IssueOrder(order);
+                    World.IssueOrder(order);
                 }
             }
         }
 
         private void DeployMcv(Actor self)
         {
-            var mcv = world.Actors.FirstOrDefault(a => a.Owner == self.Owner && a.Info.Name == "mcv");
+            var mcv = World.Actors.FirstOrDefault(a => a.Owner == self.Owner && a.Info.Name == "mcv");
 
             if (mcv != null) {
-                world.IssueOrder(new Order("DeployTransform", mcv, true));
+                World.IssueOrder(new Order("DeployTransform", mcv, true));
             } else {
                 throw new ArgumentNullException("Cannot find MCV");
             }
@@ -158,7 +162,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void OrderDenied(Order order)
         {
-            foreach (BaseEsuAIRuleset rule in rulesets) {
+            foreach (BaseEsuAIRuleset rule in Rulesets) {
                 var listener = rule as IOrderDeniedListener;
                 if (listener != null) {
                     listener.OnOrderDenied(order);

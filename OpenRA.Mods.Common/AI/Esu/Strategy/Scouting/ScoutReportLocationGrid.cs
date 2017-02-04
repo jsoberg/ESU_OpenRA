@@ -15,6 +15,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         // Number of ticks to wait between scout report data updates.
         private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
 
+        private readonly StrategicWorldState State;
         private readonly int GridWidth;
         private readonly int GridHeight;
         private readonly ScoutReportDataTable ScoutReportDataTable;
@@ -27,13 +28,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private readonly object BestScoutReportDataLock = new object();
         private BestScoutReportData CachedBestScoutReportData;
 
-        public ScoutReportLocationGrid(World world)
+        public ScoutReportLocationGrid(StrategicWorldState state)
         {
-            this.GridWidth = GetRoundedIntDividedByCellSize(world.Map.MapSize.X);
-            this.GridHeight = GetRoundedIntDividedByCellSize(world.Map.MapSize.Y);
+            this.State = state;
+
+            this.GridWidth = GetRoundedIntDividedByCellSize(state.World.Map.MapSize.X);
+            this.GridHeight = GetRoundedIntDividedByCellSize(state.World.Map.MapSize.Y);
             this.ScoutReportDataTable = new ScoutReportDataTable();
 
-            this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, world, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
+            this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, state.World, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
 
             // Load the current best scout report data initially.
             ThreadPool.QueueUserWorkItem(t => ReloadBestScoutReportDataInBackground());
@@ -51,6 +54,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 ScoutReportGridMatrix = scoutReportGridMatrix;
                 BestCellData = bestCell;
             }
+
+            // Set the flag to check for attack prediction strength now that we have a newly recreated scout report matrix.
+            State.CheckAttackStrengthPredictionFlag = true;
         }
 
         public void PerformUpdates(World world)
