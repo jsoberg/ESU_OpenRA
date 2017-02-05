@@ -57,7 +57,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
             // TODO add more logic here
             if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) 
-                == (PredictedAttackStrength) Info.PredictedAttackStrengthNeededToLaunchAttack)
+                >= (PredictedAttackStrength) Info.PredictedAttackStrengthNeededToLaunchAttack)
             {
                 ScoutReportLocationGrid reportGrid = state.ScoutReportGrid;
                 CPos stagedPosition = reportGrid.GetSafeCellPositionInbetweenCells(bestCell.RelativePosition, state.SelfIntialBaseLocation);
