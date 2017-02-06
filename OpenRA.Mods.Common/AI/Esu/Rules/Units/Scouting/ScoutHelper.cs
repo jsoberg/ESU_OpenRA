@@ -197,12 +197,30 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             var actorsWhoCanReport = world.ActorsHavingTrait<RevealsShroud>().Where(a => a.Owner == selfPlayer && a.IsInWorld && !a.IsDead);
             foreach (Actor actor in actorsWhoCanReport) {
+                CacheResourceForPosition(state, actor.Location);
+
                 ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, info, actor, CachedEnemyActors);
                 if (responseBuilder == null) {
                     continue;
                 }
 
                 state.AddScoutReportInformation(actor, responseBuilder);
+            }
+        }
+
+        private void CacheResourceForPosition(StrategicWorldState state, CPos pos)
+        {
+            ResourceTile tile = state.World.Map.Resources[new MPos(pos.X, pos.Y)];
+            if (tile.Type == 0 && tile.Index == 0) {
+                return;
+            }
+
+            if (state.ResourceCache.ContainsKey(tile)) {
+                state.ResourceCache[tile].Add(pos);
+            } else {
+                HashSet<CPos> positionSet = new HashSet<CPos>();
+                positionSet.Add(pos);
+                state.ResourceCache.Add(tile, positionSet);
             }
         }
     }

@@ -39,6 +39,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         private readonly List<Actor> InternalDefensiveStructureCache;
         public readonly ReadOnlyCollection<Actor> DefensiveStructureCache;
 
+        // Resource cache
+        public readonly Dictionary<ResourceTile, HashSet<CPos>> ResourceCache;
+
         public StrategicWorldState()
         {
             this.EnemyInfoList = new List<EnemyInfo>();
@@ -50,6 +53,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.OffensiveActorsCache = InternalOffensiveActorsCache.AsReadOnly();
             this.InternalDefensiveStructureCache = new List<Actor>();
             this.DefensiveStructureCache = InternalDefensiveStructureCache.AsReadOnly();
+
+            this.ResourceCache = new Dictionary<ResourceTile, HashSet<CPos>>();
         }
 
         public void Initalize(World world, EsuAIInfo info, Player selfPlayer)
