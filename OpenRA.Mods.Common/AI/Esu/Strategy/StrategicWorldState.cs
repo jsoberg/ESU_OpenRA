@@ -181,21 +181,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         private void RemoveDeadActorsFromCaches()
         {
-            for (int i = InternalOffensiveActorsCache.Count - 1; i >= 0; i--)
-            {
-                if (InternalOffensiveActorsCache[i].IsDead)
-                {
-                    InternalOffensiveActorsCache.RemoveAt(i);
-                }
-            }
-
-            for (int i = InternalDefensiveStructureCache.Count - 1; i >= 0; i--)
-            {
-                if (InternalDefensiveStructureCache[i].IsDead)
-                {
-                    InternalDefensiveStructureCache.RemoveAt(i);
-                }
-            }
+            InternalOffensiveActorsCache.RemoveAll(a => a.IsDead);
+            InternalDefensiveStructureCache.RemoveAll(a => a.IsDead);
         }
     }
 
