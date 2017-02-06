@@ -1,15 +1,19 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Defense;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     class UnitRuleset : BaseEsuAIRuleset, IUnitProduced, IOrderDeniedListener
     {
+        private readonly MersenneTwister Random = new MersenneTwister();
+
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
         private AttackHelper attackHelper;
@@ -54,11 +58,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             defenseHelper.Tick(self, state, orders);
 
             // Stop harvesters from idling.
-            GiveOrdersToIdleHarvesters(orders);
+            GiveOrdersToIdleHarvesters(state, orders);
         }
 
+        private readonly Dictionary<Actor, HashSet<CPos>> PreviouslyTargetedPositionsForHarvesters = new Dictionary<Actor, HashSet<CPos>>();
+
         // Modified slightly from HackyAI.
-        private void GiveOrdersToIdleHarvesters(Queue<Order> orders)
+        private void GiveOrdersToIdleHarvesters(StrategicWorldState state, Queue<Order> orders)
         {
             var harvesters = world.ActorsHavingTrait<Harvester>().Where(a => a.Owner == selfPlayer && !a.IsDead);
 
@@ -80,9 +86,41 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 if (!harv.IsEmpty)
                     continue;
 
-                // Tell the idle harvester to quit slacking:
-                orders.Enqueue(new Order("Harvest", harvester, false));
+                if (!PreviouslyTargetedPositionsForHarvesters.ContainsKey(harvester))
+                {
+                    PreviouslyTargetedPositionsForHarvesters.Add(harvester, new HashSet<CPos>());
+                }
+                
+                CPos closest = ClosestResource(state, harvester);
+                if (closest == CPos.Invalid) {
+                    orders.Enqueue(new Order("Harvest", harvester, false));
+                } else {
+                    orders.Enqueue(new Order("Harvest", harvester, false) { TargetLocation = closest });
+                }
             }
+        }
+
+        private CPos ClosestResource(StrategicWorldState state, Actor harvester)
+        {
+            double minDistance = double.MaxValue;
+            CPos minPos = CPos.Invalid;
+            foreach (KeyValuePair<ResourceTile, HashSet<CPos>> entry in state.ResourceCache)
+            {
+                foreach (CPos pos in entry.Value)
+                {
+                    if (PreviouslyTargetedPositionsForHarvesters[harvester].Contains(pos))
+                    {
+                        continue;
+                    }
+
+                    double dist = GeometryUtils.EuclideanDistance(pos, harvester.Location);
+                    if (dist < minDistance) {
+                        minDistance = dist;
+                        minPos = pos;
+                    }
+                }
+            }
+            return minPos;
         }
     }
 }
