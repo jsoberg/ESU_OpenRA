@@ -89,16 +89,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         public string GetUnitForStats(Dictionary<string, DamageKillStats> stats)
         {
-            double totalDamage = 0;
+            double totalDamagePerEntry = 0;
             foreach (DamageKillStats stat in stats.Values)
             {
-                totalDamage += stat.Damage;
+                totalDamagePerEntry += stat.DamagePerEntry();
             }
 
             Dictionary<float, string> percentDamageToUnit = new Dictionary<float, string>();
             foreach (KeyValuePair<string, DamageKillStats> stat in stats)
             {
-                percentDamageToUnit.Add((float)(stat.Value.Damage / totalDamage), stat.Key);
+                percentDamageToUnit.Add((float)(stat.Value.DamagePerEntry() / totalDamagePerEntry), stat.Key);
             }
 
             var sorted = from entry in percentDamageToUnit orderby entry.Value descending select entry;
