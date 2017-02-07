@@ -61,7 +61,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             GiveOrdersToIdleHarvesters(state, orders);
         }
 
-        private readonly Dictionary<Actor, HashSet<CPos>> PreviouslyTargetedPositionsForHarvesters = new Dictionary<Actor, HashSet<CPos>>();
+        private readonly HashSet<CPos> PreviouslyTargetedPositionsForHarvesters = new HashSet<CPos>();
 
         // Modified slightly from HackyAI.
         private void GiveOrdersToIdleHarvesters(StrategicWorldState state, Queue<Order> orders)
@@ -85,17 +85,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
                 if (!harv.IsEmpty)
                     continue;
-
-                if (!PreviouslyTargetedPositionsForHarvesters.ContainsKey(harvester))
-                {
-                    PreviouslyTargetedPositionsForHarvesters.Add(harvester, new HashSet<CPos>());
-                }
                 
                 CPos closest = ClosestResource(state, harvester);
-                if (closest == CPos.Invalid) {
-                    orders.Enqueue(new Order("Harvest", harvester, false));
-                } else {
+                if (closest != CPos.Invalid) {
+                    PreviouslyTargetedPositionsForHarvesters.Add(closest);
                     orders.Enqueue(new Order("Harvest", harvester, false) { TargetLocation = closest });
+                } else {
+                    orders.Enqueue(new Order("Harvest", harvester, false));
                 }
             }
         }
@@ -108,7 +104,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             {
                 foreach (CPos pos in entry.Value)
                 {
-                    if (PreviouslyTargetedPositionsForHarvesters[harvester].Contains(pos))
+                    if (PreviouslyTargetedPositionsForHarvesters.Contains(pos))
                     {
                         continue;
                     }
