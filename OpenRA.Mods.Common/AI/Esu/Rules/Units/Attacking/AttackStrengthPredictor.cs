@@ -3,8 +3,8 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Defense;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
 using OpenRA.Mods.Common.Traits;
-using static OpenRA.Mods.Common.AI.Esu.Strategy.Defense.BaseLethalityMetric;
-using static OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking.AttackHelper;
+using OpenRA.Traits;
+using OpenRA.Mods.Common.Warheads;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
@@ -55,7 +55,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         private PredictedAttackStrength AttackStrengthBasedOnAvailableLethality(IEnumerable<Actor> attackActors)
         {
-            int basicAttackLethality = GetBasicAttackLethality(attackActors);
+            double basicAttackLethality = GetBasicAttackLethality(attackActors);
 
             if (basicAttackLethality < MinimumLethality)
             {
@@ -77,14 +77,34 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return PredictedAttackStrength.Overwhelming;
         }
 
-        private int GetBasicAttackLethality(IEnumerable<Actor> attackActors)
+        private double GetBasicAttackLethality(IEnumerable<Actor> attackActors)
         {
-            int lethality = 0;
-            foreach (Actor item in attackActors) {
-                // TODO find actual lethality metric to use (Maybe something in item.Trait<Armament>().Weapon?)
-                lethality += item.Trait<Health>().HP;
+            double lethality = 0;
+            foreach (Actor actor in attackActors) {
+                lethality += LethalityForActor(actor);
             }
             return lethality;
+        }
+
+        private double LethalityForActor(Actor actor)
+        {
+            double totalPossibleDamage = 0;
+            double numDamageUnits = 0;
+
+            var armaments = actor.TraitsImplementing<Armament>();
+            foreach (Armament armament in armaments)
+            {
+                var warheads = armament.Weapon.Warheads;
+                foreach (IWarhead warhead in warheads)
+                {
+                    if (warhead is DamageWarhead)
+                    {
+                        totalPossibleDamage += ((DamageWarhead)warhead).Damage;
+                        numDamageUnits++;
+                    }
+                }
+            }
+            return (totalPossibleDamage / numDamageUnits);
         }
 
         private PredictedAttackStrength AttackStrengthBasedOnRiskAndReward(int risk, int reward)
