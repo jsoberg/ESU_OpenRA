@@ -25,22 +25,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private readonly BaseLethalityMetric Metric;
         private readonly StrategicWorldState State;
 
-        /** Minimum lethality before we'll consider an attack. */
-        private int MinimumLethality = 400;
-        /** Lethality step to consider our available lethality to be "on the next level"
-         *  e.g. If the minimum lethality is 400 and the step is 100, a lethality of 600 would be considered 2 levels above minimum. */
-        private int LethalityStep = 100;
-
         public AttackStrengthPredictor(BaseLethalityMetric metric, StrategicWorldState state)
         {
             this.Metric = metric;
             this.State = state;
-        }
-
-        public void SetLethalitySettings(int minimumLethality, int lethalityStep)
-        {
-            this.MinimumLethality = minimumLethality;
-            this.LethalityStep = lethalityStep;
         }
 
         public PredictedAttackStrength PredictStrengthForAttack(int risk, int reward, IEnumerable<Actor> attackActors, CPos location)
@@ -53,23 +41,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             return (PredictedAttackStrength) (((int) riskRewardStrength + (int) lethalityStrength) / 2);
         }
 
+        /*  Example: If the minimum lethality is 400 and the step is 100, a lethality of 600 would be considered 2 levels above minimum. */
         private PredictedAttackStrength AttackStrengthBasedOnAvailableLethality(IEnumerable<Actor> attackActors)
         {
             double basicAttackLethality = GetBasicAttackLethality(attackActors);
 
-            if (basicAttackLethality < MinimumLethality)
+            if (basicAttackLethality < State.Info.MinimumLethality)
             {
                 return PredictedAttackStrength.None;
             }
-            else if (basicAttackLethality < (MinimumLethality + LethalityStep))
+            else if (basicAttackLethality < (State.Info.MinimumLethality + State.Info.LethalityStep))
             {
                 return PredictedAttackStrength.Low;
             }
-            else if (basicAttackLethality < (MinimumLethality + 2 * LethalityStep))
+            else if (basicAttackLethality < (State.Info.MinimumLethality + 2 * State.Info.LethalityStep))
             {
                 return PredictedAttackStrength.Medium;
             }
-            else if (basicAttackLethality < (MinimumLethality + 3 * LethalityStep))
+            else if (basicAttackLethality < (State.Info.MinimumLethality + 3 * State.Info.LethalityStep))
             {
                 return PredictedAttackStrength.High;
             }
