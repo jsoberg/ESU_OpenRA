@@ -40,7 +40,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             try
             {
                 ColumnWithValue[] colsWithValues = {
-                    new ColumnWithValue(PlayerName, playerName),
+                    new ColumnWithValue(PlayerName, "\"" + playerName + "\""),
                     new ColumnWithValue(KillCost, stats.KillsCost),
                     new ColumnWithValue(DeathCost, stats.DeathsCost),
                     new ColumnWithValue(UnitsKilled, stats.UnitsKilled),
