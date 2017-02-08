@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using OpenRA.Traits;
+using OpenRA.Mods.Common.AI.Esu.Database;
+using OpenRA.Mods.Common.AI.Esu;
 
 namespace OpenRA.Mods.Common.Traits.Esu
 {
@@ -40,6 +42,14 @@ namespace OpenRA.Mods.Common.Traits.Esu
         {
             Console.WriteLine("Game Complete!");
             PrintPlayerFitnessInformation();
+
+            var players = world.Players.Where(a => !a.NonCombatant && a.PlayerActor.Info.TraitInfoOrDefault<EsuAIInfo>() != null);
+            if (players != null && players.Count() >= 1)
+            {
+                EndGameDataTable table = new EndGameDataTable();
+                Player p = players.First();
+                table.InsertEndGameData(p.PlayerName, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
+            }
 
             // Kill process.
             System.Environment.Exit(0);

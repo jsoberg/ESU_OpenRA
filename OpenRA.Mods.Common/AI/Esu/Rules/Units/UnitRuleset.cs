@@ -1,15 +1,21 @@
 ﻿using System.Linq;
 using System.Collections.Generic;
+using OpenRA.Support;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Defense;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.Activities;
+using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     class UnitRuleset : BaseEsuAIRuleset, IUnitProduced, IOrderDeniedListener
     {
+        private const int NumTicksToDisposeResourceUsageLog = 20000;
+
+        private readonly MersenneTwister Random = new MersenneTwister();
+
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
         private AttackHelper attackHelper;
@@ -30,7 +36,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         void IUnitProduced.OnUnitProduced(Actor producer, Actor produced)
         {
-            if (producer.Owner != selfPlayer) {
+            if (producer.Owner != selfPlayer)
+            {
                 return;
             }
 
@@ -54,12 +61,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             defenseHelper.Tick(self, state, orders);
 
             // Stop harvesters from idling.
-            GiveOrdersToIdleHarvesters(orders);
+            GiveOrdersToIdleHarvesters(state, orders);
         }
 
+        private readonly List<ResourcePositionUsageLog> PreviouslyTargetedPositionsForHarvesters = new List<ResourcePositionUsageLog>();
+
         // Modified slightly from HackyAI.
-        private void GiveOrdersToIdleHarvesters(Queue<Order> orders)
+        private void GiveOrdersToIdleHarvesters(StrategicWorldState state, Queue<Order> orders)
         {
+            // Allow previously used positions to be reused after a certain period, since resources will respawn.
+            PreviouslyTargetedPositionsForHarvesters.RemoveAll(rl => (rl.TickLogged + NumTicksToDisposeResourceUsageLog) <= state.World.GetCurrentLocalTickCount());
             var harvesters = world.ActorsHavingTrait<Harvester>().Where(a => a.Owner == selfPlayer && !a.IsDead);
 
             // Find idle harvesters and give them orders:
@@ -80,9 +91,53 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 if (!harv.IsEmpty)
                     continue;
 
-                // Tell the idle harvester to quit slacking:
-                orders.Enqueue(new Order("Harvest", harvester, false));
+                CPos closest = ClosestResource(state, harvester);
+                if (closest != CPos.Invalid)
+                {
+                    PreviouslyTargetedPositionsForHarvesters.Add(new ResourcePositionUsageLog(closest, state.World.GetCurrentLocalTickCount()));
+                    orders.Enqueue(new Order("Harvest", harvester, false) { TargetLocation = closest });
+                }
+                else
+                {
+                    orders.Enqueue(new Order("Harvest", harvester, false));
+                }
             }
+        }
+
+        private CPos ClosestResource(StrategicWorldState state, Actor harvester)
+        {
+            double minDistance = double.MaxValue;
+            CPos minPos = CPos.Invalid;
+            foreach (KeyValuePair<ResourceTile, HashSet<CPos>> entry in state.ResourceCache)
+            {
+                foreach (CPos pos in entry.Value)
+                {
+                    if (PreviouslyTargetedPositionsForHarvesters.Any(rl => rl.Position == pos))
+                    {
+                        continue;
+                    }
+
+                    double dist = GeometryUtils.EuclideanDistance(pos, harvester.Location);
+                    if (dist < minDistance)
+                    {
+                        minDistance = dist;
+                        minPos = pos;
+                    }
+                }
+            }
+            return minPos;
+        }
+    }
+
+    class ResourcePositionUsageLog
+    {
+        public readonly CPos Position;
+        public readonly int TickLogged;
+
+        public ResourcePositionUsageLog(CPos position, int tickLogged)
+        {
+            this.Position = position;
+            this.TickLogged = tickLogged;
         }
     }
 }

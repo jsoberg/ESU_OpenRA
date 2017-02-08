@@ -6,6 +6,31 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 {
     public static class SQLiteUtils
     {
+        public static void CreateTableIfNotExists(string tableName, Column[] columns)
+        {
+            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
+            if (connection == null)
+            {
+                return;
+            }
+
+            try
+            {
+                string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(tableName, columns);
+                SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
+                createTableCommand.ExecuteNonQuery();
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return;
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
         public static string GetCreateTableIfNotExistsSQLCommandString(string tableName, Column[] columns)
         {
             string sql = "CREATE TABLE IF NOT EXISTS " + tableName + " ( ";
