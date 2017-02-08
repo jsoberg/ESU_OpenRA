@@ -23,31 +23,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
         public UnitDamageDataTable()
         {
-            CreateTableIfNotExists();
-        }
-
-        private void CreateTableIfNotExists()
-        {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null) {
-                return;
-            }
-
-            try
-            {
-                string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(UnitDamageDataTableName, Columns);
-                SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
-                createTableCommand.ExecuteNonQuery();
-            }
-            catch (SQLiteException)
-            {
-                SQLiteConnectionUtils.LogSqliteException();
-                return;
-            }
-            finally
-            {
-                connection.Close();
-            }
+            SQLiteUtils.CreateTableIfNotExists(UnitDamageDataTableName, Columns);
         }
 
         public void InsertUnitDamageData(UnitDamageData data)

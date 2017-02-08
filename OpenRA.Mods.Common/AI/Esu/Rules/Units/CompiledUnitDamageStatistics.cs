@@ -18,6 +18,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             DamageKillStats stats = UnitNameToDamageStatsMap.ContainsKey(attackingUnit) ? 
                 UnitNameToDamageStatsMap[attackingUnit] : new DamageKillStats();
             stats.Damage += damage;
+            stats.NumEntries++;
             stats.KillCount += wasKill ? 1 : 0;
 
             UnitNameToDamageStatsMap[attackingUnit] = stats;
@@ -40,6 +41,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
     public class DamageKillStats
     {
         public int Damage;
+        public int NumEntries;
         public int KillCount;
+
+        public double DamagePerEntry()
+        {
+            return (double) Damage / (double) NumEntries;
+        }
     }
 }

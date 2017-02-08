@@ -254,6 +254,12 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Determines the attack strength to be predicted before launching an attack.")]
         public int PredictedAttackStrengthNeededToLaunchAttack = (int) PredictedAttackStrength.Medium;
 
+        [Desc("Minimum lethality before we'll consider an attack.")]
+        public int MinimumLethality = 400;
+
+        [Desc("Lethality step to consider our available lethality to be on the next level.")]
+        public int LethalityStep = 100;
+
         // ========================================
         // Static
         // ========================================
