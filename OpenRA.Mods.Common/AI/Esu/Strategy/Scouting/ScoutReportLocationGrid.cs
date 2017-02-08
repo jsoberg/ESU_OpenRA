@@ -169,10 +169,18 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         {
             bool hasData = false;
             BestScoutReportData.Builder builder = new BestScoutReportData.Builder();
+            List<ScoutReport>[][] reportMatrix;
+            lock (ScoutReportGridMatrixLock) {
+                reportMatrix = ScoutReportGridMatrix;
+            }
 
-            for (int i = 0; i < ScoutReportGridMatrix.Count(); i++)
+            if (reportMatrix == null) {
+                return null;
+            }
+
+            for (int i = 0; i < reportMatrix.Count(); i++)
             {
-                List<ScoutReport>[] row = ScoutReportGridMatrix[i];
+                List<ScoutReport>[] row = reportMatrix[i];
                 for (int j = 0; j < row.Count(); j++)
                 {
                     List<ScoutReport> reports = row[j];
