@@ -19,31 +19,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
         public ScoutReportDataTable()
         {
-            CreateTableIfNotExists();
-        }
-
-        private void CreateTableIfNotExists()
-        {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null) {
-                return;
-            }
-
-            try
-            {
-                string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(ScoutReportDataTableName, Columns);
-                SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
-                createTableCommand.ExecuteNonQuery();
-            }
-            catch (SQLiteException)
-            {
-                SQLiteConnectionUtils.LogSqliteException();
-                return;
-            }
-            finally
-            {
-                connection.Close();
-            }
+            SQLiteUtils.CreateTableIfNotExists(ScoutReportDataTableName, Columns);
         }
 
         public void InsertScoutReportData(BestScoutReportData data)
