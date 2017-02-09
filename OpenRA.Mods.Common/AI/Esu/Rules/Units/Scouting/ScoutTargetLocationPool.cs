@@ -11,6 +11,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class ScoutTargetLocationPool
     {
+        private const double ProbabilityUsePerimeterPosition = .25;
+        private const int MaxPerimeterDistance = 40;
         private const int DistanceToWanderTowardEnemy = 8;
 
         private readonly Player SelfPlayer;
@@ -70,10 +72,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 return wanderLocation;
             }
 
+            // Move to queued positions.
             if (AvailablePositions.Count > 0) {
                 return AvailablePositions.Dequeue();
             }
-            return GetFoundEnemyLocationOrRandom(state, scoutActor);
+
+            if (Random.NextFloat() < ProbabilityUsePerimeterPosition)
+            {
+                return GetPositionNearEnemyPerimeter(state);
+            }
+            else
+            {
+                // Choose a random position.
+                return state.World.Map.AllCells.Where(c => scoutActor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(Random);
+            }
         }
 
         private CPos GetLocationForViewedEnemy(StrategicWorldState state, Actor scoutActor)
@@ -107,14 +119,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             return CPos.Invalid;
         }
 
-        private CPos GetFoundEnemyLocationOrRandom(StrategicWorldState state, Actor scoutActor)
+        private CPos GetPositionNearEnemyPerimeter(StrategicWorldState state)
         {
-            foreach (EnemyInfo enemy in state.EnemyInfoList) {
-                if (enemy.FoundEnemyLocation != CPos.Invalid) {
-                    return enemy.FoundEnemyLocation;
-                }
-            }
-            return state.World.Map.AllCells.Where(c => scoutActor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(Random);
+            EnemyInfo enemy = state.EnemyInfoList.Random(Random);
+            CPos enemyPosition = enemy.GetBestAvailableEnemyLocation(state, SelfPlayer);
+
+            int wanderDistance = Random.Next(MaxPerimeterDistance);
+            double wanderDirection = Random.Next(360);
+
+            return GeometryUtils.MoveTowards(enemyPosition, wanderDirection, wanderDistance, state.World.Map);
         }
     }
 }
