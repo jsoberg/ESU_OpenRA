@@ -11,9 +11,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class UnitProductionHelper
     {
-        private const double DefaultInfantryPercentage = .85;
-        private const double DefaultVehiclePercentage = .15;
-
         private static MersenneTwister RANDOM = new MersenneTwister(); 
 
         private const int UNIT_PRODUCTION_COOLDOWN = 10;
@@ -52,8 +49,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 return;
             }
 
-            // TODO : debug code (we want to base this off of the aggregate info).
-            ProduceUnitForDistribution(state, orders, DefaultInfantryPercentage, DefaultVehiclePercentage, 0d);
+            ProduceUnitForDistribution(state, orders, 1f - Info.GetPercentageOfVehiclesToProduce(), Info.GetPercentageOfVehiclesToProduce(), 0d);
         }
 
         /** @return true if a harvester production order was issued this call, false otherwise. */
