@@ -260,6 +260,14 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Lethality step to consider our available lethality to be on the next level.")]
         public int LethalityStep = 100;
 
+        [Desc("Percentage of vehicle units to build vs infantry")]
+        public int PercentageOfVehiclesToProduceForDistribution = 15;
+
+        public float GetPercentageOfVehiclesToProduce()
+        {
+            return ((float) PercentageOfVehiclesToProduceForDistribution) / 100f;
+        }
+
         // ========================================
         // Static
         // ========================================
