@@ -79,13 +79,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             if (Random.NextFloat() < ProbabilityUsePerimeterPosition)
             {
-                return GetPositionNearEnemyPerimeter(state);
+                CPos position = GetPositionNearEnemyPerimeter(state);
+                return (position != CPos.Invalid) ? position : RandomCell(state, scoutActor);
             }
             else
             {
                 // Choose a random position.
-                return state.World.Map.AllCells.Where(c => scoutActor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(Random);
+                return RandomCell(state, scoutActor);
             }
+        }
+
+        private CPos RandomCell(StrategicWorldState state, Actor scoutActor)
+        {
+            return state.World.Map.AllCells.Where(c => scoutActor.Trait<Mobile>().CanMoveFreelyInto(c)).Random(Random);
         }
 
         private CPos GetLocationForViewedEnemy(StrategicWorldState state, Actor scoutActor)
@@ -123,6 +129,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         {
             EnemyInfo enemy = state.EnemyInfoList.Random(Random);
             CPos enemyPosition = enemy.GetBestAvailableEnemyLocation(state, SelfPlayer);
+            if (enemyPosition == CPos.Invalid) {
+                return CPos.Invalid; 
+            }
 
             int wanderDistance = Random.Next(MaxPerimeterDistance);
             double wanderDirection = Random.Next(360);

@@ -194,6 +194,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public readonly string EnemyName;
         public CPos FoundEnemyLocation { get; set; }
 
+        private IEnumerable<CPos> PredictedEnemyLocationsCache;
+
         public EnemyInfo(string name, World world, Player selfPlayer)
         {
             this.EnemyName = name;
@@ -211,7 +213,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             // TODO: This is "2-player centric", in that it's predicting the same location for every enemy player. 
             // This works fine for one enemy, but once we begin facing more than that we'll need a better method.
-            return EsuAIUtils.PossibleEnemyLocationsForPlayer(state.World, selfPlayer);
+            if (PredictedEnemyLocationsCache == null)
+            {
+                try {
+                    PredictedEnemyLocationsCache = EsuAIUtils.PossibleEnemyLocationsForPlayer(state.World, selfPlayer);
+                } catch (NoConstructionYardException) {
+                }
+            }
+            return PredictedEnemyLocationsCache == null ? new List<CPos>() { CPos.Invalid } : PredictedEnemyLocationsCache;
         }
     }
 }
