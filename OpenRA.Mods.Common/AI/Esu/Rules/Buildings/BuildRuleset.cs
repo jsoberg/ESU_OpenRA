@@ -106,7 +106,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             }
         }
 
-        // TODO: Tunable portion incomplete.
         private void BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             if (ShouldBuildRefinery(state)) {
