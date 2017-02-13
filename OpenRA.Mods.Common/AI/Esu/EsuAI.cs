@@ -12,6 +12,7 @@ using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking;
 using OpenRA.Mods.Common.AI.Esu.Database;
 using System.Reflection;
+using OpenRA.Mods.Common.AI.Esu.Rules.Resources;
 
 /// <summary>
 ///  This class is the implementation of the modular ESU AI, with a ruleset described at the project's <see href="https://github.com/jsoberg/ESU_OpenRA/wiki/AI-Rules">GitHub Wiki</see>.
@@ -47,6 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         {
             Rulesets.Add(new BuildRuleset(World, Info));
             Rulesets.Add(new UnitRuleset(World, Info));
+            Rulesets.Add(new ResourceGatheringRuleset(World, Info));
         }
 
         IBotInfo IBot.Info
