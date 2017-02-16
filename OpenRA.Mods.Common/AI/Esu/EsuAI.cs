@@ -270,6 +270,9 @@ namespace OpenRA.Mods.Common.AI.Esu
             return ((float) PercentageOfVehiclesToProduceForDistribution) / 100f;
         }
 
+        [Desc("Earning under this amount of resources within the specified tick span will result in a new harvester/ore refinery being built")]
+        public int EarnedResourcesThreshold = 4000;
+
         // ========================================
         // Static
         // ========================================

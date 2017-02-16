@@ -13,8 +13,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Resources
         private const int ResourcesEarnedTickInterval = 2000;
         private const int TickCheckCount = 100;
 
-        private const int ResourcesEarnedThreshold = 4000;
-
         private int LastItemProducedTick;
         private int ResourcesEarnedBeginningOfLastTickInterval;
 
@@ -29,7 +27,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Resources
                 // If the min number of refineries and harvesters aren't built yet, let the other rulesets handle this.
                 if (MinNumOreRefineriesBuilt() && MinNumHarvestersProduced())
                 {
-                    ProduceNewResourceGatheringItemIfApplicable(state, orders);
+                    ProduceNewResourceGatheringItemIfApplicable(self, state, orders);
                 }
 
                 UpdateResourcesEarnedBeginningOfLastInterval();
@@ -54,16 +52,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Resources
             return (harvesters >= info.MinNumHarvesters);
         }
 
-        private void ProduceNewResourceGatheringItemIfApplicable(StrategicWorldState state, Queue<Order> orders)
+        private void ProduceNewResourceGatheringItemIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            if ((selfPlayer.PlayerActor.Trait<PlayerResources>().Earned - ResourcesEarnedBeginningOfLastTickInterval) > ResourcesEarnedThreshold)
+            if ((selfPlayer.PlayerActor.Trait<PlayerResources>().Earned - ResourcesEarnedBeginningOfLastTickInterval) > info.EarnedResourcesThreshold)
             {
                 return;
             }
 
             if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(state.World, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE))
             {
-                orders.Enqueue(Order.StartProduction(selfPlayer.PlayerActor, EsuAIConstants.Vehicles.HARVESTER, 1));
+                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Vehicles.HARVESTER, 1));
                 LastItemProducedTick = state.World.GetCurrentLocalTickCount();
             }
             else
