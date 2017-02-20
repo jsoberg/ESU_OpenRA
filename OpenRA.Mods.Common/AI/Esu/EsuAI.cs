@@ -190,7 +190,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines precentage of resources to spend on defensive buildings (Rule PercentageOfResourcesToSpendOnDefensiveBuildings)")]
         [FieldLimits(0, 30)]
-        public readonly double PercentageOfResourcesToSpendOnDefensiveBuildings = 5;
+        public readonly int PercentageOfResourcesToSpendOnDefensiveBuildings = 5;
 
         [Desc("Determines where to place defensive buildings (Rule DefensiveBuildingPlacement)")]
         [FieldLimits(0, 2)]
@@ -314,6 +314,19 @@ namespace OpenRA.Mods.Common.AI.Esu
                     continue;
 
                 Log.Write("debug", "{0} = {1}".F(field.Name, field.GetValue(this)));
+                var fieldLimits = field.GetCustomAttributes<FieldLimits>(false);
+                if (fieldLimits != null && fieldLimits.Count() > 0)
+                {
+                    var limits = fieldLimits.First();
+                    int val = (int) field.GetValue(this);
+                    if (val < limits.Min) {
+                        Log.Write("debug", "WARNING: {0} IS LESS THAN MIN VALUE {1}".F(field.Name, limits.Min));
+                    }
+
+                    if (val > limits.Max) {
+                        Log.Write("debug", "WARNING: {0} IS GREATER THAN MAX VALUE {1}".F(field.Name, limits.Max));
+                    }
+                }
             }
 
             WasLogged = true;

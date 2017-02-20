@@ -199,7 +199,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 return;
             }
 
-            double percentageToSpend = (info.PercentageOfResourcesToSpendOnDefensiveBuildings / 100.0);
+            double percentageToSpend = ((double) info.PercentageOfResourcesToSpendOnDefensiveBuildings / 100.0);
             if (percentageSpentOnDefense < percentageToSpend) {
 
                 var defenseiveBuilding = GetDefensiveStructureToProduce(state);
