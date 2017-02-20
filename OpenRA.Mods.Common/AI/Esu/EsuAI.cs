@@ -181,24 +181,31 @@ namespace OpenRA.Mods.Common.AI.Esu
         // ========================================
 
         [Desc("Minimum excess power we should maintain (Rule BuildPowerPlantIfBelowMinimumExcessPower)")]
+        [FieldLimits(0, 100)]
         public readonly int MinimumExcessPower = 50;
 
         [Desc("Determines whether we should produce a scout before a refinery (Rule ShouldProduceScoutBeforeRefinery)")]
+        [FieldLimits(0, 1)]
         public readonly int ShouldProduceScoutBeforeRefinery = 1;
 
         [Desc("Determines precentage of resources to spend on defensive buildings (Rule PercentageOfResourcesToSpendOnDefensiveBuildings)")]
+        [FieldLimits(0, 30)]
         public readonly double PercentageOfResourcesToSpendOnDefensiveBuildings = 5;
 
         [Desc("Determines where to place defensive buildings (Rule DefensiveBuildingPlacement)")]
+        [FieldLimits(0, 2)]
         public readonly int DefensiveBuildingPlacement = RuleConstants.DefensiveBuildingPlacementValues.DISTRIBUTED_TO_IMPORTANT_STRUCTURES;
 
         [Desc("Determines how many scouts to produce (Rule NumberOfScoutsToProduce)")]
+        [FieldLimits(1, 8)]
         public readonly int NumberOfScoutsToProduce = 2;
 
         [Desc("Determines where to place normal buildings (Rule NormalBuildingPlacement)")]
+        [FieldLimits(0, 1)]
         public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
 
         [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
+        [FieldLimits(0, 40)]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;
 
         public float GetScoutRecommendationImportanceMultiplier()
@@ -207,15 +214,19 @@ namespace OpenRA.Mods.Common.AI.Esu
         }
 
         [Desc("Minimum number of refineries to have built.")]
+        [FieldLimits(1, 6)]
         public readonly int MinNumRefineries = 2;
 
         [Desc("Minimum number of active harvesters to have in the game.")]
+        [FieldLimits(1, 6)]
         public readonly int MinNumHarvesters = 3;
 
         [Desc("Amount of resources we hold before we consider it to be an excess amount.")]
+        [FieldLimits(0, 2000)]
         public readonly int ExcessResourceLevel = 800;
 
         [Desc("Determines the multiplier used for viewed harvesters when calculating scout recommendations.")]
+        [FieldLimits(0, 40)]
         public readonly int HarvesterScoutRecommendationImportanceMultiplier = 15;
 
         public float GetHarvesterScoutRecommendationImportanceMultiplier()
@@ -224,6 +235,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         }
 
         [Desc("Determines the percentage of lethality coverage we want to hold at the base for defense.")]
+        [FieldLimits(0, 10)]
         public readonly int DefenseLethalityCoverage = 2;
 
         public float GetDefenseLethalityCoveragePercentage()
@@ -232,9 +244,11 @@ namespace OpenRA.Mods.Common.AI.Esu
         }
 
         [Desc("Determines the distance to move an attack when moving toward damaged enemy units.")]
+        [FieldLimits(1, 20)]
         public int DistanceToMoveAttack = 8;
 
         [Desc("Determines the probability (in percent) that we will build a unit randomly rather than based on the compiled distribution.")]
+        [FieldLimits(1, 10)]
         public int UnitProductionRandomPercent = 1;
 
         public float GetUnitProductionRandomPercentage()
@@ -243,15 +257,19 @@ namespace OpenRA.Mods.Common.AI.Esu
         }
 
         [Desc("Determines the attack strength to be predicted before launching an attack.")]
+        [FieldLimits(0, 4)]
         public int PredictedAttackStrengthNeededToLaunchAttack = (int) PredictedAttackStrength.Medium;
 
         [Desc("Minimum lethality before we'll consider an attack.")]
+        [FieldLimits(0, 1500)]
         public int MinimumLethality = 400;
 
         [Desc("Lethality step to consider our available lethality to be on the next level.")]
+        [FieldLimits(0, 500)]
         public int LethalityStep = 100;
 
         [Desc("Percentage of vehicle units to build vs infantry")]
+        [FieldLimits(5, 95)]
         public int PercentageOfVehiclesToProduceForDistribution = 15;
 
         public float GetPercentageOfVehiclesToProduce()
@@ -260,6 +278,7 @@ namespace OpenRA.Mods.Common.AI.Esu
         }
 
         [Desc("Earning under this amount of resources within the specified tick span will result in a new harvester/ore refinery being built")]
+        [FieldLimits(0, 10000)]
         public int EarnedResourcesThreshold = 4000;
 
         // ========================================
@@ -309,5 +328,18 @@ namespace OpenRA.Mods.Common.AI.Esu
     public interface IUnitProduced
     {
         void OnUnitProduced(Actor producer, Actor produced);
+    }
+
+    [AttributeUsage(AttributeTargets.Field, Inherited = false)]
+    public class FieldLimits : Attribute
+    {
+        public readonly int Min;
+        public readonly int Max;
+
+        public FieldLimits(int min, int max)
+        {
+            Min = min;
+            Max = max;
+        }
     }
 }
