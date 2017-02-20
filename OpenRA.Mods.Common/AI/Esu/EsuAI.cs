@@ -144,15 +144,7 @@ namespace OpenRA.Mods.Common.AI.Esu
             double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(SelfPlayer);
             foreach (Order order in orders)
             {
-                // We don't have the marked minimum resources to execute this order, so ignore it.
-                if (order.OrderString == EsuAIConstants.OrderTypes.PRODUCTION_ORDER && currentResources < Info.AmountOfResourcesToHaveBeforeNextProduction)
-                {
-                    OrderDenied(order);
-                }
-                else
-                {
-                    World.IssueOrder(order);
-                }
+                World.IssueOrder(order);
             }
         }
 
@@ -205,9 +197,6 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines where to place normal buildings (Rule NormalBuildingPlacement)")]
         public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
-
-        [Desc("Determines amount of resources to have on hand before the next production is considered (Rule AmountOfResourcesToHaveBeforeNextProduction)")]
-        public readonly int AmountOfResourcesToHaveBeforeNextProduction = 200;
 
         [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
         public readonly int ScoutRecommendationImportanceMultiplier = 10;

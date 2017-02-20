@@ -61,7 +61,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Resources
 
             if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(state.World, selfPlayer, EsuAIConstants.ProductionCategories.VEHICLE))
             {
-                orders.Enqueue(Order.StartProduction(self, EsuAIConstants.Vehicles.HARVESTER, 1));
+                Order order = Order.StartProduction(self, EsuAIConstants.Vehicles.HARVESTER, 1);
+                orders.Enqueue(order);
                 LastItemProducedTick = state.World.GetCurrentLocalTickCount();
             }
             else

@@ -82,7 +82,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 AssertProductionOrderNotIssuedThisTick();
 
                 // Third most important: Offensive Unit Structures.
-                BuildOffensiveUnitProductionStructures(self, orders);
+                BuildOffensiveUnitProductionStructures(self, state, orders);
                 AssertProductionOrderNotIssuedThisTick();
 
                 // Least important: any queued builds.
@@ -126,11 +126,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             return (ownedActors != null && ownedActors.Count() < info.MinNumRefineries);
         }
 
-        private void BuildOffensiveUnitProductionStructures(Actor self, Queue<Order> orders)
+        private void BuildOffensiveUnitProductionStructures(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
-            // TODO: Right now we just build barracks, obviously this needs to do something more.
-            if (NumOwnedBarracks() < 1) {
-                StartProduction(self, orders, EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer));
+            string barracks = EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer);
+            if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, selfPlayer, barracks)) {
+                StartProduction(self, orders, barracks);
             }
         }
 
@@ -143,10 +143,19 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         {
             if (state.RequestedBuildingQueue.Count > 0) {
                 string front = state.RequestedBuildingQueue.Dequeue();
-                if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, front)) {
+                if (!IsSingleProductionBuildingThatAlreadyExists(state, front)) {
                     StartProduction(self, orders, front);
                 }
             }
+        }
+
+        private bool IsSingleProductionBuildingThatAlreadyExists(StrategicWorldState state, string building)
+        {
+            if (building == EsuAIConstants.Buildings.WAR_FACTORY || building == EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer))
+            {
+                return EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, selfPlayer, building);
+            }
+            return false;
         }
 
         private void StartProduction(Actor self, Queue<Order> orders, string buildingName)
@@ -205,7 +214,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 var prereqs = buildable.TraitInfo<BuildableInfo>().Prerequisites.Where(s => !s.StartsWith("~"));
 
                 foreach (string req in prereqs) {
-                    if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(world, selfPlayer, req)) {
+                    if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, selfPlayer, req)) {
                         // We need to build the prerequisite building first, so queue it up.
                         state.RequestedBuildingQueue.Enqueue(req);
                         return;
