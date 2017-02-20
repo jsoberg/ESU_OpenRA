@@ -20,16 +20,20 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         public static Column BuildingsDead = new Column("BuildingsDead", "INT");
         public static Column GameTickCount = new Column("GameTickCount", "INT");
 
-        public static Column[] Columns = {
+        // Columns added after initial table.
+        public static Column Winner = new Column("Winner", "INT");
+
+        public static Column[] OriginalColumns = {
             PlayerName, KillCost, DeathCost, UnitsKilled, UnitsDead, BuildingsKilled, BuildingsDead, GameTickCount
         };
 
         public EndGameDataTable()
         {
-            SQLiteUtils.CreateTableIfNotExists(EndGameDataTableName, Columns);
+            SQLiteUtils.CreateTableIfNotExists(EndGameDataTableName, OriginalColumns);
+            SQLiteUtils.AlterTableAddColumn(EndGameDataTableName, Winner);
         }
 
-        public void InsertEndGameData(string playerName, PlayerStatistics stats, World world)
+        public void InsertEndGameData(string playerName, string winnerName, PlayerStatistics stats, World world)
         {
             SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
             if (connection == null)
@@ -47,7 +51,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                     new ColumnWithValue(UnitsDead, stats.UnitsDead),
                     new ColumnWithValue(BuildingsKilled, stats.BuildingsKilled),
                     new ColumnWithValue(BuildingsDead, stats.BuildingsDead),
-                    new ColumnWithValue(GameTickCount, world.GetCurrentLocalTickCount())
+                    new ColumnWithValue(GameTickCount, world.GetCurrentLocalTickCount()),
+                    new ColumnWithValue(Winner, playerName == winnerName ? 1 : 0)
                 };
 
                 string insert = SQLiteUtils.GetInsertSQLCommandString(EndGameDataTableName, colsWithValues);
