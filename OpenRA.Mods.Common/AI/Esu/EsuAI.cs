@@ -236,7 +236,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines the percentage of lethality coverage we want to hold at the base for defense.")]
         [FieldLimits(0, 10)]
-        public readonly int DefenseLethalityCoverage = 2;
+        public readonly int DefenseLethalityCoverage = 1;
 
         public float GetDefenseLethalityCoveragePercentage()
         {
