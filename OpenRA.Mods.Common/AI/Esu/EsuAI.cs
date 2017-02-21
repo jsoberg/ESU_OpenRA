@@ -198,7 +198,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Determines how many scouts to produce (Rule NumberOfScoutsToProduce)")]
         [FieldLimits(1, 8)]
-        public readonly int NumberOfScoutsToProduce = 2;
+        public readonly int NumberOfScoutsToProduce = 3;
 
         [Desc("Determines where to place normal buildings (Rule NormalBuildingPlacement)")]
         [FieldLimits(0, 1)]
