@@ -142,6 +142,7 @@
     <Compile Include="AI\AttackOrFleeFuzzy.cs" />
     <Compile Include="AI\BaseBuilder.cs" />
     <Compile Include="AI\Esu\Database\EndGameDataTable.cs" />
+    <Compile Include="AI\Esu\Rules\Resources\ResourceGatheringRuleset.cs" />
     <Compile Include="AI\Esu\Rules\Units\CompiledUnitDamageStatistics.cs" />
     <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
     <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
@@ -341,6 +342,7 @@
     <Compile Include="Traits\Burns.cs" />
     <Compile Include="Traits\C4Demolition.cs" />
     <Compile Include="Traits\Esu\DiscoveryNotificationWatcher.cs" />
+    <Compile Include="Traits\Esu\PlayerWinLossInformation.cs" />
     <Compile Include="Traits\Esu\SignalFitnessLog.cs" />
     <Compile Include="Traits\Health.cs" />
     <Compile Include="Traits\PowerTooltip.cs" />

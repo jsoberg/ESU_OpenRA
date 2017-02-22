@@ -80,6 +80,36 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             SQLiteCommand countCommand = new SQLiteCommand(sql, openConnection);
             return (long) countCommand.ExecuteScalar();
         }
+
+        public static void AlterTableAddColumn(string tableName, Column column)
+        {
+            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
+            if (connection == null)
+            {
+                return;
+            }
+
+            try
+            {
+                string addColumn = SQLiteUtils.GetAddColumnToTableSQLCommandString(tableName, column);
+                SQLiteCommand createTableCommand = new SQLiteCommand(addColumn, connection);
+                createTableCommand.ExecuteNonQuery();
+            }
+            catch (SQLiteException)
+            {
+                SQLiteConnectionUtils.LogSqliteException();
+                return;
+            }
+            finally
+            {
+                connection.Close();
+            }
+        }
+
+        public static string GetAddColumnToTableSQLCommandString(string tableName, Column column)
+        {
+            return "ALTER TABLE " + tableName + " ADD COLUMN " + column.ColumnName + " " + column.ColumnType;
+        }
     }
 
     public class Column

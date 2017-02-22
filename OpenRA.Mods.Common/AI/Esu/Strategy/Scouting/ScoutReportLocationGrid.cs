@@ -10,7 +10,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
     public class ScoutReportLocationGrid : UpdateListener
     {
         // Size of a given cell in the report grid.
-        public const int WIDTH_PER_GRID_SQUARE = 10;
+        public const int WIDTH_PER_GRID_SQUARE = 6;
 
         // Number of ticks to wait between scout report data updates.
         private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
