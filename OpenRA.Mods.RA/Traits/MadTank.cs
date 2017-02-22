@@ -65,7 +65,7 @@ namespace OpenRA.Mods.RA.Traits
 		readonly Actor self;
 		readonly MadTankInfo info;
 		readonly WithFacingSpriteBody wfsb;
-		readonly ScreenShaker screenShaker;
+		//readonly ScreenShaker screenShaker;
 		bool deployed;
 		int tick;
 
@@ -74,7 +74,7 @@ namespace OpenRA.Mods.RA.Traits
 			this.self = self;
 			this.info = info;
 			wfsb = self.Trait<WithFacingSpriteBody>();
-			screenShaker = self.World.WorldActor.Trait<ScreenShaker>();
+			//screenShaker = self.World.WorldActor.Trait<ScreenShaker>();
 		}
 
 		public void Tick(Actor self)
@@ -90,7 +90,7 @@ namespace OpenRA.Mods.RA.Traits
 					info.ThumpDamageWeaponInfo.Impact(Target.FromPos(self.CenterPosition), self, Enumerable.Empty<int>());
 				}
 
-				screenShaker.AddEffect(info.ThumpShakeTime, self.CenterPosition, info.ThumpShakeIntensity, info.ThumpShakeMultiplier);
+				//screenShaker.AddEffect(info.ThumpShakeTime, self.CenterPosition, info.ThumpShakeIntensity, info.ThumpShakeMultiplier);
 				tick = 0;
 			}
 		}
