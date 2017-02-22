@@ -23,6 +23,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
     public class SignalFitnessLog : IGameOver, ITick
     {
         private const string FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30} | {3,-30}\n";
+        private const string END_GAME_FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30} | {3,-30} | {4,-30}\n";
 
         private readonly World world;
 
@@ -33,40 +34,58 @@ namespace OpenRA.Mods.Common.Traits.Esu
 
         void ITick.Tick(Actor self)
         {
-            if ((world.GetCurrentLocalTickCount() % world.GetFitnessLogTickIncrement()) == 0) {
+            if ((world.GetCurrentLocalTickCount() % world.GetFitnessLogTickIncrement()) == 0)
+            {
                 PrintPlayerFitnessInformation();
+            }
+        }
+
+        private void PrintPlayerFitnessInformation()
+        {
+            PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT"));
+
+            foreach (var p in world.Players.Where(a => !a.NonCombatant))
+            {
+                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
+                if (stats == null)
+                {
+                    continue;
+                }
+
+                PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount()));
             }
         }
 
         public void GameOver(World world)
         {
             Console.WriteLine("Game Complete!");
-            PrintPlayerFitnessInformation();
+            PrintEndGamePlayerFitnessInformation();
 
+            EndGameDataTable table = new EndGameDataTable();
             var players = world.Players.Where(a => !a.NonCombatant && a.PlayerActor.Info.TraitInfoOrDefault<EsuAIInfo>() != null);
             if (players != null && players.Count() >= 1)
             {
-                EndGameDataTable table = new EndGameDataTable();
                 Player p = players.First();
-                table.InsertEndGameData(p.PlayerName, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
+                table.InsertEndGameData(p.PlayerName, PlayerWinLossInformation.WinningPlayer, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
             }
 
             // Kill process.
             System.Environment.Exit(0);
         }
 
-        private void PrintPlayerFitnessInformation()
+        private void PrintEndGamePlayerFitnessInformation()
         {
-            PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT"));
-           
+            PrintToConsoleAndLog(world, String.Format(END_GAME_FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT", "WIN"));
+
             foreach (var p in world.Players.Where(a => !a.NonCombatant))
             {
                 var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
-                if (stats == null) {
+                if (stats == null)
+                {
                     continue;
                 }
 
-                PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount()));
+                PrintToConsoleAndLog(world, String.Format(END_GAME_FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount(), p.PlayerName == PlayerWinLossInformation.WinningPlayer));
             }
         }
 

@@ -5,6 +5,7 @@ using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
+using OpenRA.Mods.Common.AI.Esu.Strategy;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
@@ -63,10 +64,15 @@ namespace OpenRA.Mods.Common.AI.Esu
             return false;
         }
 
-        public static bool DoesItemCurrentlyExistOrIsBeingProducedForPlayer(World world, Player owner, string item)
+        /** @return true if this item is requested to be built, int he process of being built, or is already built. */
+        public static bool DoesItemCurrentlyExistOrIsBeingProducedForPlayer(StrategicWorldState state, Player owner, string item)
         {
-            bool currentlyExists = world.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead);
-            return (currentlyExists) ? currentlyExists : IsItemCurrentlyInProduction(world, owner, item);
+            if (state.RequestedBuildingQueue.Contains(item)) {
+                return true;
+            }
+
+            bool currentlyExists = state.World.Actors.Any(a => a.Owner == owner && a.Info.Name == item && !a.IsDead);
+            return (currentlyExists) ? currentlyExists : IsItemCurrentlyInProduction(state.World, owner, item);
         }
 
         public static IEnumerable<ProductionItem>ItemsCurrentlyInProductionQueuesForCategory(World world, Player owner, string category)

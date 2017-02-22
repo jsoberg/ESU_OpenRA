@@ -126,11 +126,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void ProduceInfantry(StrategicWorldState state, Queue<Order> orders)
         {
-            var infantry = GetInfantryToProduce(state);
-            bool wasOrderIssued = ProduceUnit(state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
-            if (!wasOrderIssued) {
-                ScheduleBuildingProduction(EsuAIConstants.Buildings.GetBarracksNameForPlayer(SelfPlayer), state, orders);
+            var barracks = EsuAIConstants.Buildings.GetBarracksNameForPlayer(SelfPlayer);
+            if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, SelfPlayer, barracks))
+            {
+                ScheduleBuildingProduction(barracks, state, orders);
             }
+
+            var infantry = GetInfantryToProduce(state);
+            ProduceUnit(state, orders, infantry, EsuAIConstants.ProductionCategories.INFANTRY);
             UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
         }
 
@@ -152,10 +155,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void ProduceVehicle(StrategicWorldState state, Queue<Order> orders, string vehicleName)
         {
-            bool wasOrderIssued = ProduceUnit(state, orders, vehicleName, EsuAIConstants.ProductionCategories.VEHICLE);
-            if (!wasOrderIssued) {
+            if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, SelfPlayer, EsuAIConstants.Buildings.WAR_FACTORY))
+            {
                 ScheduleBuildingProduction(EsuAIConstants.Buildings.WAR_FACTORY, state, orders);
+                return;
             }
+
+            ProduceUnit(state, orders, vehicleName, EsuAIConstants.ProductionCategories.VEHICLE);
             UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
         }
 
@@ -169,33 +175,29 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
         }
 
-        private bool ProduceUnit(StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)
+        private void ProduceUnit(StrategicWorldState state, Queue<Order> orders, string unitName, string productionCategory)
         {
             var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(World, SelfPlayer, productionCategory);
 
             var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == unitName);
             if (buildable == null) {
-                return false;
+                return;
             }
 
             var prereqs = buildable.TraitInfo<BuildableInfo>().Prerequisites.Where(s => !s.StartsWith("~"));
             foreach (string req in prereqs) {
-                if (ScheduleBuildingProduction(req, state, orders)) {
-                    // We have scheduled construction of this building.
-                    return true;
-                }
+                ScheduleBuildingProduction(req, state, orders);
             }
 
             // We can build now.
             orders.Enqueue(Order.StartProduction(SelfPlayer.PlayerActor, unitName, 1));
-            return false;
         }
 
         /** @return - true if the building production has been scheduled, false otherwise. */
         private bool ScheduleBuildingProduction(string building, StrategicWorldState state, Queue<Order> orders)
         {
             if (!state.RequestedBuildingQueue.Contains(building)
-                    && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(World, SelfPlayer, building)) 
+                    && !EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, SelfPlayer, building)) 
             {
                 state.RequestedBuildingQueue.Enqueue(building);
                 UnitProductionCheckCooldown = UNIT_PRODUCTION_COOLDOWN;
