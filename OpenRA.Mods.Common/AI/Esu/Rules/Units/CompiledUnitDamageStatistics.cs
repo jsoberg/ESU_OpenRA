@@ -6,7 +6,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class CompiledUnitDamageStatistics
     {
-        private readonly Dictionary<string, DamageKillStats> UnitNameToDamageStatsMap;
+        public readonly Dictionary<string, DamageKillStats> UnitNameToDamageStatsMap;
 
         public CompiledUnitDamageStatistics()
         {

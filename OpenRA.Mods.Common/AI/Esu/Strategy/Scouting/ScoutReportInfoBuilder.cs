@@ -7,7 +7,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
     public class ScoutReportInfoBuilder
     {
-        public readonly EsuAIInfo info;
+        public readonly EsuAIInfo Info;
 
         public int NumPowerPlants;
         public int NumAdvancedPowerPlants;
@@ -16,6 +16,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         public int NumAntiVehicleDefense;
         public int NumAntiAirDefense;
         public int NumOtherDefensiveBuildings;
+        public readonly Dictionary<string, int> DefensiveStructureCounts;
 
         public int NumInfantryUnits;
         public int NumHarvesters;
@@ -28,7 +29,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         public ScoutReportInfoBuilder(EsuAIInfo info)
         {
-            this.info = info;
+            this.Info = info;
+            this.DefensiveStructureCounts = new Dictionary<string, int>();
         }
 
         public int AllOffensiveUnits()
@@ -65,27 +67,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return this;
         }
 
-        public ScoutReportInfoBuilder AddAntiInfantryDefensiveBuilding()
+        public ScoutReportInfoBuilder AddDefensiveBuilding(string name)
         {
-            this.NumAntiInfantryDefense++;
-            return this;
-        }
+            if (DefensiveStructureCounts.ContainsKey(name)) {
+                DefensiveStructureCounts[name] ++;
+            } else {
+                DefensiveStructureCounts[name] = 1;
+            }
 
-        public ScoutReportInfoBuilder AddAntiVehicleDefensiveBuilding()
-        {
-            this.NumAntiVehicleDefense++;
-            return this;
-        }
-
-        public ScoutReportInfoBuilder AddAntiAirDefensiveBuilding()
-        {
-            this.NumAntiAirDefense++;
-            return this;
-        }
-
-        public ScoutReportInfoBuilder AddOtherDefensiveBuilding()
-        {
-            this.NumOtherDefensiveBuildings++;
+            if (EsuAIConstants.Defense.IsAntiInfantry(name)) {
+                NumAntiInfantryDefense++;
+            }
+            if (EsuAIConstants.Defense.IsAntiVehicle(name)) {
+                NumAntiVehicleDefense++;
+            }
+            if (EsuAIConstants.Defense.IsAntiAir(name)) {
+                NumAntiAirDefense++;
+            }
+            NumOtherDefensiveBuildings++;
             return this;
         }
 

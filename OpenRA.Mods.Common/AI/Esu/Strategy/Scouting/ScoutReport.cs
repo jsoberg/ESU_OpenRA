@@ -64,22 +64,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private int Harvesters(ScoutReportInfoBuilder builder)
         {
-            return (int)((builder.NumHarvesters) * builder.info.GetHarvesterScoutRecommendationImportanceMultiplier() * builder.info.GetScoutRecommendationImportanceMultiplier());
+            return (int)((builder.NumHarvesters) * builder.Info.GetHarvesterScoutRecommendationImportanceMultiplier() * builder.Info.GetScoutRecommendationImportanceMultiplier());
         }
 
         private int PowerPlants(ScoutReportInfoBuilder builder)
         {
-            return (int) ((builder.NumPowerPlants + (2 * builder.NumAdvancedPowerPlants)) * builder.info.GetScoutRecommendationImportanceMultiplier());
+            return (int) ((builder.NumPowerPlants + (2 * builder.NumAdvancedPowerPlants)) * builder.Info.GetScoutRecommendationImportanceMultiplier());
         }
 
         private int OreRefineries(ScoutReportInfoBuilder builder)
         {
-            return (int)(builder.NumOreRefineries * builder.info.GetScoutRecommendationImportanceMultiplier());
+            return (int)(builder.NumOreRefineries * builder.Info.GetScoutRecommendationImportanceMultiplier());
         }
 
         private int OtherBuildings(ScoutReportInfoBuilder builder)
         {
-            return (int)(builder.NumOtherBuildings * builder.info.GetScoutRecommendationImportanceMultiplier());
+            return (int)(builder.NumOtherBuildings * builder.Info.GetScoutRecommendationImportanceMultiplier());
         }
 
         // ========================================
@@ -93,7 +93,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private int UnitsAndDefensiveStructures(ScoutReportInfoBuilder builder)
         {
-            return (int) ((builder.AllOffensiveUnits() + builder.AllDefensiveStructures()) * builder.info.GetScoutRecommendationImportanceMultiplier());
+            return (int) ((builder.AllOffensiveUnits() + builder.AllDefensiveStructures()) * builder.Info.GetScoutRecommendationImportanceMultiplier());
         }
 
         public static bool operator ==(ResponseRecommendation a, ResponseRecommendation b)
