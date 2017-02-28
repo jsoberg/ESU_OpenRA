@@ -80,6 +80,16 @@ namespace OpenRA.Mods.Common.AI.Esu
                 };
             }
 
+            public static string[] VALUES = {
+                Allies.TURRET,
+                Allies.ANTI_AIR_GUN,
+                Allies.PILL_BOX,
+                Allies.CAMO_PILL_BOX,
+                Soviet.SAM_SITE,
+                Soviet.FLAME_TOWER,
+                Soviet.TESLA
+            };
+
             public static bool IsAntiInfantry(string buildingName)
             {
                 return (buildingName == Allies.PILL_BOX ||

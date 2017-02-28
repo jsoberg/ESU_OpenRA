@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using OpenRA.Mods.Common.AI.Esu.Rules.Units;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
@@ -45,10 +46,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         public readonly ScoutReportInfoBuilder InfoBuilder;
 
-        public ResponseRecommendation(ScoutReportInfoBuilder builder)
+        public ResponseRecommendation(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
         {
             this.RewardValue = ComputeRewardValue(builder);
-            this.RiskValue = ComputeRiskValue(builder, RewardValue);
+            this.RiskValue = ComputeRiskValue(builder, stats);
 
             this.InfoBuilder = builder;
         }
@@ -86,14 +87,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         // Risk Methods
         // ========================================
 
-        private int ComputeRiskValue(ScoutReportInfoBuilder builder, int responseRecommendation)
+        private int ComputeRiskValue(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
         {
-            return UnitsAndDefensiveStructures(builder);
+            return UnitsAndDefensiveStructures(builder, stats);
         }
 
-        private int UnitsAndDefensiveStructures(ScoutReportInfoBuilder builder)
+        private int UnitsAndDefensiveStructures(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
         {
             return (int) ((builder.AllOffensiveUnits() + builder.AllDefensiveStructures()) * builder.Info.GetScoutRecommendationImportanceMultiplier());
+        }
+
+        private int DefensiveStructuresRisk(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
+        {
+            int risk = 0;
+            foreach (KeyValuePair<string, int> entry in builder.DefensiveStructureCounts) {
+                int modifier = stats.GetDamageModifierForActorSubset(entry.Key, 
+                    EsuAIConstants.Defense.VALUES);
+                risk += (modifier * entry.Value);
+            }
+            return risk;
         }
 
         public static bool operator ==(ResponseRecommendation a, ResponseRecommendation b)
