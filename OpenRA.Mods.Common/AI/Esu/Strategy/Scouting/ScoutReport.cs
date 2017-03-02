@@ -94,10 +94,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private int UnitsAndDefensiveStructures(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
         {
-            return (int) ((builder.AllOffensiveUnits() + builder.AllDefensiveStructures()) * builder.Info.GetScoutRecommendationImportanceMultiplier());
+            return DefensiveStructuresModifiedRisk(builder, stats);
         }
 
-        private int DefensiveStructuresRisk(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
+        private int DefensiveStructuresModifiedRisk(ScoutReportInfoBuilder builder, CompiledUnitDamageStatistics stats)
         {
             int risk = 0;
             foreach (KeyValuePair<string, int> entry in builder.DefensiveStructureCounts) {

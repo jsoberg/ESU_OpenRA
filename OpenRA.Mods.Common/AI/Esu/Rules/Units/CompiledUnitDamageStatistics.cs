@@ -41,7 +41,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         public int GetDamageModifierForActorSubset(string actor, string[] actors)
         {
             Dictionary<string, DamageKillStats> stats = GetStatsForActors(actors);
-            var ordered = stats.OrderByDescending(a => a.Value);
+            // Don't include actors that have little to no data.
+            var ordered = stats.Where(a => a.Value.NumEntries > 10).OrderByDescending(a => a.Value);
 
             int rank = stats.Count();
             foreach (KeyValuePair<string, DamageKillStats> entry in ordered) {
