@@ -237,6 +237,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             while (KilledActors.Count > 0) {
                 KillInfo kill = KilledActors.Dequeue();
+                if (kill.Attacker.IsDead) {
+                    continue;
+                }
 
                 ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, Info, kill.Killed, CachedEnemyActors, kill.Attacker);
                 if (responseBuilder == null) {
