@@ -136,7 +136,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                 case BuildingType.Building:
                     return FindNormalBuildingPlacement(state, baseCenter, actorType);
                 case BuildingType.Defense:
-                    return FindDefensiveBuildingPlacement(baseCenter, actorType);
+                    return FindDefensiveBuildingPlacement(state, baseCenter, actorType);
             }
 
             // Can't find a build location
@@ -244,13 +244,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         }
 
         [Desc("Attempts to find a location to place a defensive structure, based on the DefensiveBuildingPlacement rule.")]
-        private CPos FindDefensiveBuildingPlacement(CPos baseCenter, string actorType)
+        private CPos FindDefensiveBuildingPlacement(StrategicWorldState state, CPos baseCenter, string actorType)
         {
             switch (info.DefensiveBuildingPlacement) {
                 case RuleConstants.DefensiveBuildingPlacementValues.CLOSEST_TO_CONSTRUCTION_YARD:
                     return FindFirstBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
                 case RuleConstants.DefensiveBuildingPlacementValues.DISTRIBUTED_TO_IMPORTANT_STRUCTURES:
                     return FindBuildableLocationForImportantStructure(actorType);
+                case RuleConstants.DefensiveBuildingPlacementValues.TOWARD_ENEMY:
+                    return FindBuildableLocationTowardEnemy(state, baseCenter, actorType);
                 case RuleConstants.DefensiveBuildingPlacementValues.RANDOM:
                 default:
                     return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
@@ -267,6 +269,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             return FindFirstBuildableLocation(chosenActor.Location, 0, info.MaxBaseRadius, actorType);
         }
 
+        private CPos FindBuildableLocationTowardEnemy(StrategicWorldState state, CPos baseCenter, string actorType)
+        {
+            var closestEnemyLoc = state.EnemyInfoList.First().GetBestAvailableEnemyLocation(state, selfPlayer);
+            double bearing = GeometryUtils.BearingBetween(baseCenter, closestEnemyLoc);
+            CPos targetLoc = GeometryUtils.MoveTowards(baseCenter, bearing, info.MaxBaseRadius, world.Map);
+            return FindFirstBuildableLocation(targetLoc, 0, info.MaxBaseRadius, actorType);
+        }
+
         [Desc("Attempts to find a location to place a defensive structure, based on the DefensiveBuildingPlacement rule.")]
         private CPos FindNormalBuildingPlacement(StrategicWorldState state, CPos baseCenter, string actorType)
         {
@@ -275,7 +285,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
                     return FindBuildableLocationAwayFromEnemies(state, baseCenter, actorType);
                 case RuleConstants.NormalBuildingPlacementValues.RANDOM:
                 default:
-                    return FindRandomBuildableLocation(baseCenter, 0, info.MaxBaseRadius, actorType);
+                    return FindRandomBuildableLocation(baseCenter, 0, 10, actorType);
             }
         }
 
