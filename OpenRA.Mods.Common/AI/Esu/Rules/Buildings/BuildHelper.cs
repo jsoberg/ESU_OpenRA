@@ -202,7 +202,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
                 return cell;
             }
-            return CPos.Invalid;
+            // Couldn't find any buildable locations from these parameters, so find a random one instead.
+            return FindRandomBuildableLocation(center, minRange, maxRange, actorType);
         }
 
         [Desc("Attempts to find a random location close to base center where a building can be placed.")]
