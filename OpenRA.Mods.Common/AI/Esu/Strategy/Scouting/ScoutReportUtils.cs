@@ -17,15 +17,26 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor, IEnumerable<Actor> enemyActors)
         {
-            Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
+            return BuildResponseInformationForActor(state, info, actor, enemyActors, null);
+        }
 
-            // Visible actors whose owners are in the enemy info list.
-            var visibileEnemyItems = enemyActors.Where(a => visibileRect.ContainsPosition(a.CenterPosition));
+        public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor, IEnumerable<Actor> enemyActors, Actor killingActor)
+        {
+            IEnumerable<Actor> visibileEnemyItems = null;
+            if (!actor.IsDead) {
+                // Actor isn't dead, so look for actors whose owners are in the enemy info list.
+                Rect visibileRect = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
+                visibileEnemyItems = enemyActors.Where(a => visibileRect.ContainsPosition(a.CenterPosition));
+            } else if (killingActor != null) {
+                // Actor is dead, so just issue report for killer.
+                var killingActorList = new List<Actor>();
+                killingActorList.Add(killingActor);
+                visibileEnemyItems = killingActorList;
+            }
 
             if (visibileEnemyItems == null || visibileEnemyItems.Count() == 0) {
                 return null;
             }
-
             ScoutReportInfoBuilder builder = new ScoutReportInfoBuilder(info);
             foreach (Actor enemy in visibileEnemyItems) {
                 AddInformationForEnemyActor(state.World, builder, enemy);
@@ -55,23 +66,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.DEFENSE))
                 {
                     string name = enemy.Info.Name;
-
-                    if (EsuAIConstants.Defense.IsAntiInfantry(name))
-                    {
-                        builder.AddAntiInfantryDefensiveBuilding();
-                    }
-
-                    if (EsuAIConstants.Defense.IsAntiVehicle(name))
-                    {
-                        builder.AddAntiVehicleDefensiveBuilding();
-                    }
-
-                    if (EsuAIConstants.Defense.IsAntiAir(name))
-                    {
-                        builder.AddAntiAirDefensiveBuilding();
-                    }
-
-                    builder.AddOtherDefensiveBuilding();
+                    builder.AddDefensiveBuilding(name);
                     return;
                 }
             }

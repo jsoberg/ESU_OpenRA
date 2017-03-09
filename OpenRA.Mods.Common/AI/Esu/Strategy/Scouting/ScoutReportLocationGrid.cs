@@ -36,7 +36,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             this.GridHeight = GetRoundedIntDividedByCellSize(state.World.Map.MapSize.Y);
             this.ScoutReportDataTable = new ScoutReportDataTable();
 
-            this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, state.World, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
+            this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, state, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
 
             // Load the current best scout report data initially.
             ThreadPool.QueueUserWorkItem(t => ReloadBestScoutReportDataInBackground());

@@ -20,7 +20,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private readonly int GridWidth;
         private readonly int GridHeight;
         private readonly int WidthPerGridSquare;
-        private readonly World World;
+        private readonly StrategicWorldState State;
 
         // Thread unsafe objects
         private readonly Queue<ScoutReport> QueuedReports = new Queue<ScoutReport>();
@@ -28,10 +28,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private List<ScoutReport>[][] CurrentScoutReportGridMatrix;
         private readonly object MatrixLock = new object();
 
-        public ScoutReportLocationGridUpdateThread(UpdateListener listener, World world, int width, int height, int widthPerGridSquare)
+        public ScoutReportLocationGridUpdateThread(UpdateListener listener, StrategicWorldState state, int width, int height, int widthPerGridSquare)
         {
             this.UpdateListener = listener;
-            this.World = world;
+            this.State = state;
             this.GridWidth = width;
             this.GridHeight = height;
             this.WidthPerGridSquare = widthPerGridSquare;
@@ -89,7 +89,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             }
 
             // Remove any dead reports.
-            RemoveDeadReports(World.GetCurrentLocalTickCount(), clonedMatrix);
+            RemoveDeadReports(State.World.GetCurrentLocalTickCount(), clonedMatrix);
 
             // Signal listener.
             var bestCell = ScoutReportLocationGridUtils.GetCurrentBestFitCell(clonedMatrix, WidthPerGridSquare);

@@ -152,7 +152,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
         public void AddScoutReportInformation(Actor scoutActor, ScoutReportInfoBuilder infoBuilder)
         {
-            ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder);
+            ResponseRecommendation recommendation = new ResponseRecommendation(infoBuilder, UnitStatsLoader.GetUnitDamageStatistics());
             // 0/0 reports tell us nothing and should be ignored.
             if (recommendation.RewardValue == 0 && recommendation.RiskValue == 0) {
                 return;

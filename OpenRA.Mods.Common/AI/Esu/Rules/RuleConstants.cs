@@ -12,7 +12,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules
         {
             public const int CLOSEST_TO_CONSTRUCTION_YARD = 0;
             public const int DISTRIBUTED_TO_IMPORTANT_STRUCTURES = 1;
-            public const int RANDOM = 2;
+            public const int TOWARD_ENEMY = 2;
+            public const int RANDOM = 3;
 
             public static readonly string[] IMPORTANT_STRUCTURES = {
                 EsuAIConstants.Buildings.CONSTRUCTION_YARD,
