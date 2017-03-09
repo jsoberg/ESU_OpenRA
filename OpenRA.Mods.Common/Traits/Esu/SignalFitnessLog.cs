@@ -62,7 +62,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
             PrintEndGamePlayerFitnessInformation();
 
             EndGameDataTable table = new EndGameDataTable();
-            var players = world.Players.Where(a => !a.NonCombatant && a.PlayerActor.Info.TraitInfoOrDefault<EsuAIInfo>() != null);
+            var players = world.Players.Where(a => !a.NonCombatant && a.PlayerName == PlayerWinLossInformation.WinningPlayer);
             if (players != null && players.Count() >= 1)
             {
                 Player p = players.First();
