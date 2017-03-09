@@ -24,6 +24,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             ReloadUnitDamageStats();
         }
 
+        public CompiledUnitDamageStatistics GetUnitDamageStatistics()
+        {
+            lock (StatsLock) {
+                return UnitDamageStats;
+            }
+        }
+
         public Dictionary<string, DamageKillStats> GetStatsForActors(string[] actors)
         {
             CompiledUnitDamageStatistics stats;

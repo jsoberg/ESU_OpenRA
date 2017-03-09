@@ -1,12 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 {
     public class CompiledUnitDamageStatistics
     {
-        private readonly Dictionary<string, DamageKillStats> UnitNameToDamageStatsMap;
+        public readonly Dictionary<string, DamageKillStats> UnitNameToDamageStatsMap;
 
         public CompiledUnitDamageStatistics()
         {
@@ -36,9 +36,27 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             return actorStats;
         }
+
+        /** @return Rank for the given actors for the specified group, where 1 is the lowest (weakest) rank. */
+        public int GetDamageModifierForActorSubset(string actor, string[] actors)
+        {
+            Dictionary<string, DamageKillStats> stats = GetStatsForActors(actors);
+            // Don't include actors that have little to no data.
+            var ordered = stats.Where(a => a.Value.NumEntries > 10).OrderByDescending(a => a.Value);
+
+            int rank = stats.Count();
+            foreach (KeyValuePair<string, DamageKillStats> entry in ordered) {
+                if (entry.Key == actor) {
+                    return rank;
+                }
+                rank--;
+            }
+            // Default rank is 1.
+            return 1;
+        }
     }
 
-    public class DamageKillStats
+    public class DamageKillStats : System.IComparable<DamageKillStats>
     {
         public int Damage;
         public int NumEntries;
@@ -47,6 +65,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         public double DamagePerEntry()
         {
             return (double) Damage / (double) NumEntries;
+        }
+
+        int IComparable<DamageKillStats>.CompareTo(DamageKillStats other)
+        {
+            return DamagePerEntry().CompareTo(other.DamagePerEntry());
         }
     }
 }
