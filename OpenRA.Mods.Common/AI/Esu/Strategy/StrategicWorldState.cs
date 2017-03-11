@@ -145,7 +145,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             }
 
             // If we're just finding this enemy's location now, set it for later.
-            if (info.FoundEnemyLocation != CPos.Invalid && visibility.ContainsPosition(enemyConstructionYard.CenterPosition)) {
+            if (info.FoundEnemyLocation == CPos.Invalid && visibility.ContainsPosition(enemyConstructionYard.CenterPosition)) {
                 info.FoundEnemyLocation = enemyConstructionYard.Location;
             }
         }
