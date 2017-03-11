@@ -65,22 +65,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private int Harvesters(ScoutReportInfoBuilder builder)
         {
-            return (int)((builder.NumHarvesters) * builder.Info.GetHarvesterScoutRecommendationImportanceMultiplier() * builder.Info.GetScoutRecommendationImportanceMultiplier());
+            return (int)((builder.NumHarvesters) * builder.Info.GetHarvesterScoutRecommendationImportanceMultiplier());
         }
 
         private int PowerPlants(ScoutReportInfoBuilder builder)
         {
-            return (int) ((builder.NumPowerPlants + (2 * builder.NumAdvancedPowerPlants)) * builder.Info.GetScoutRecommendationImportanceMultiplier());
+            return (int) ((builder.NumPowerPlants + (2 * builder.NumAdvancedPowerPlants)));
         }
 
         private int OreRefineries(ScoutReportInfoBuilder builder)
         {
-            return (int)(builder.NumOreRefineries * builder.Info.GetScoutRecommendationImportanceMultiplier());
+            return (int)(builder.NumOreRefineries);
         }
 
         private int OtherBuildings(ScoutReportInfoBuilder builder)
         {
-            return (int)(builder.NumOtherBuildings * builder.Info.GetScoutRecommendationImportanceMultiplier());
+            return (int)(builder.NumOtherBuildings);
         }
 
         // ========================================
