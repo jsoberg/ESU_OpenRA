@@ -28,7 +28,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public EsuAIInfo Info;
 
         public bool CheckNewDefensiveStructureFlag;
-
         public bool CheckAttackStrengthPredictionFlag;
         public ActiveAttackController ActiveAttackController;
 
@@ -114,9 +113,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 }
             }
 
-            VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(World, SelfPlayer);
-            foreach (EnemyInfo info in EnemyInfoList) {
-                TryFindEnemyConstructionYard(info, visibility);
+            // Check for enemy info every 10 ticks.
+            if (World.GetCurrentLocalTickCount() % 10 == 0)
+            {
+                VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(World, SelfPlayer);
+                foreach (EnemyInfo info in EnemyInfoList)
+                {
+                    TryFindEnemy(info, visibility);
+                }
             }
 
             ScoutReportGrid.PerformUpdates(World);
@@ -137,8 +141,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             return false;
         }
 
-        private void TryFindEnemyConstructionYard(EnemyInfo info, VisibilityBounds visibility)
+        private void TryFindEnemy(EnemyInfo info, VisibilityBounds visibility)
         {
+            if (info.FirstFoundEnemyStructureLocation == CPos.Invalid)
+            {
+                var enemyStructures = World.Actors.Where(a => a.Owner.InternalName == info.EnemyName 
+                    && (EsuAIUtils.IsActorOfType(World, a, EsuAIConstants.ProductionCategories.BUILDING) 
+                    || EsuAIUtils.IsActorOfType(World, a, EsuAIConstants.ProductionCategories.DEFENSE)));
+
+                foreach (Actor structure in enemyStructures) {
+                    if (visibility.ContainsPosition(structure.CenterPosition)) {
+                        info.FirstFoundEnemyStructureLocation = structure.Location;
+                        break;
+                    }
+                }
+            }
+
             var enemyConstructionYard = World.Actors.FirstOrDefault(a => a.Owner.InternalName == info.EnemyName && a.Info.Name == EsuAIConstants.Buildings.CONSTRUCTION_YARD);
             if (enemyConstructionYard == null) {
                 return;
@@ -193,6 +211,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
     {
         public readonly string EnemyName;
         public CPos FoundEnemyLocation { get; set; }
+        public CPos FirstFoundEnemyStructureLocation { get; set; }
 
         private IEnumerable<CPos> PredictedEnemyLocationsCache;
 
@@ -202,6 +221,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
 
             // Default
             FoundEnemyLocation = CPos.Invalid;
+            FirstFoundEnemyStructureLocation = CPos.Invalid;
         }
         
         public CPos GetBestAvailableEnemyLocation(StrategicWorldState state, Player selfPlayer)
