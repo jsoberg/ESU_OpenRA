@@ -62,9 +62,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                 reader = UnitDamageDataTable.Query(connection);
                 LoadNewUnitDamageDataFromReader(reader);
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                SQLiteConnectionUtils.LogSqliteException();
+                SQLiteConnectionUtils.LogSqliteException(e);
                 return;
             }
             finally

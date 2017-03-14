@@ -162,14 +162,14 @@ namespace OpenRA.Mods.Common.AI.Esu
                 public const string MAMMOTH_TANK = "4tnk";
                 public const string APC = "apc";
                 public const string MOBILE_FLAK = "ftrk";
-                public const string MAD_TANK = "qtnk";
+                //public const string MAD_TANK = "qtnk";
 
                 public static string[] VALUES = {
                     V2_ROCKET,
                     MAMMOTH_TANK,
                     APC,
                     MOBILE_FLAK,
-                    MAD_TANK
+                    //MAD_TANK
                 };
             }
 
@@ -195,7 +195,7 @@ namespace OpenRA.Mods.Common.AI.Esu
                 Soviet.MAMMOTH_TANK,
                 Soviet.APC,
                 Soviet.MOBILE_FLAK,
-                Soviet.MAD_TANK,
+                //Soviet.MAD_TANK,
                 Allies.LIGHT_TANK,
                 Allies.MEDIUM_TANK,
                 Allies.HEAVY_TANK,

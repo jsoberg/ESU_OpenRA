@@ -22,9 +22,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 connection.Open();
                 return connection;
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                LogSqliteException();
+                LogSqliteException(e);
                 return null;
             }
         }
@@ -48,10 +48,45 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             }
         }
 
-        public static void LogSqliteException()
+        public static void LogSqliteException(Exception e)
         {
             Log.AddChannel("sqlite_errors", "sqlite_errors.log");
-            Log.Write("sqlite_errors", "Problem opening SQLite connection ");
+            Log.Write("sqlite_errors", "Problem opening SQLite connection: ");
+
+            if (e != null) {
+                StringBuilder exceptionReport = BuildExceptionReport(e);
+                Log.Write("sqlite_errors", exceptionReport.ToString());
+            }
+        }
+
+        static StringBuilder BuildExceptionReport(Exception e)
+        {
+            return BuildExceptionReport(e, new StringBuilder(), 0);
+        }
+
+        static StringBuilder BuildExceptionReport(Exception e, StringBuilder sb, int d)
+        {
+            if (e == null)
+                return sb;
+
+            sb.AppendFormat("Exception of type `{0}`: {1}", e.GetType().FullName, e.Message);
+      
+            if (e.InnerException != null)
+            {
+                sb.AppendLine();
+                Indent(sb, d); sb.Append("Inner ");
+                BuildExceptionReport(e.InnerException, sb, d + 1);
+            }
+
+            sb.AppendLine();
+            Indent(sb, d); sb.Append(e.StackTrace);
+
+            return sb;
+        }
+
+        static void Indent(StringBuilder sb, int d)
+        {
+            sb.Append(new string(' ', d * 2));
         }
     }
 }

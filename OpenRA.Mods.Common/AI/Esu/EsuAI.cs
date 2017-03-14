@@ -204,15 +204,6 @@ namespace OpenRA.Mods.Common.AI.Esu
         [FieldLimits(0, 1)]
         public readonly int NormalBuildingPlacement = RuleConstants.NormalBuildingPlacementValues.FARTHEST_FROM_ENEMY_LOCATIONS;
 
-        [Desc("Determines the multiplier used when calculating scout recommendations. (Rule ScoutRecommendationImportanceMultiplier)")]
-        [FieldLimits(0, 40)]
-        public readonly int ScoutRecommendationImportanceMultiplier = 10;
-
-        public float GetScoutRecommendationImportanceMultiplier()
-        {
-            return ScoutRecommendationImportanceMultiplier == 0 ? 1 : ((float)ScoutRecommendationImportanceMultiplier / 10f);
-        }
-
         [Desc("Minimum number of refineries to have built.")]
         [FieldLimits(1, 6)]
         public readonly int MinNumRefineries = 2;
