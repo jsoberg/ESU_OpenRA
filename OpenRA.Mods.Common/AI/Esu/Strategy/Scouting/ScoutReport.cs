@@ -101,8 +101,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         {
             int risk = 0;
             foreach (KeyValuePair<string, int> entry in builder.DefensiveStructureCounts) {
-                int modifier = stats.GetDamageModifierForActorSubset(entry.Key, 
-                    EsuAIConstants.Defense.VALUES);
+                int modifier = stats != null ? stats.GetDamageModifierForActorSubset(entry.Key, 
+                    EsuAIConstants.Defense.VALUES) : 1;
                 risk += (modifier * entry.Value);
             }
             return risk;
