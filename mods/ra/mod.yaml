@@ -52,6 +52,16 @@ Rules:
 	ra|rules/aircraft.yaml
 	ra|rules/ships.yaml
 	ra|rules/fakes.yaml
+	ra|rules/GA_AI0.yaml
+	ra|rules/GA_AI1.yaml
+	ra|rules/GA_AI2.yaml
+	ra|rules/GA_AI3.yaml
+	ra|rules/GA_AI4.yaml
+	ra|rules/GA_AI5.yaml
+	ra|rules/GA_AI6.yaml
+	ra|rules/GA_AI7.yaml
+	ra|rules/GA_AI8.yaml
+	ra|rules/GA_AI9.yaml
 
 Sequences:
 	ra|sequences/ships.yaml

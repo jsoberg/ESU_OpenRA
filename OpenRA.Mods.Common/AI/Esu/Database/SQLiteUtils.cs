@@ -20,9 +20,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
                 createTableCommand.ExecuteNonQuery();
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                SQLiteConnectionUtils.LogSqliteException();
+                SQLiteConnectionUtils.LogSqliteException(e);
                 return;
             }
             finally
@@ -95,9 +95,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 SQLiteCommand createTableCommand = new SQLiteCommand(addColumn, connection);
                 createTableCommand.ExecuteNonQuery();
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                SQLiteConnectionUtils.LogSqliteException();
+                SQLiteConnectionUtils.LogSqliteException(e);
                 return;
             }
             finally

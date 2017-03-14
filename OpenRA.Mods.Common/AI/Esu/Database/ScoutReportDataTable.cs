@@ -43,9 +43,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
                 insertCommand.ExecuteNonQuery();
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                SQLiteConnectionUtils.LogSqliteException();
+                SQLiteConnectionUtils.LogSqliteException(e);
                 return;
             }
             finally
@@ -75,9 +75,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                     .addRewardValue(QueryFirstValueOrderedByColumn(connection, HighestReward, "DESC"));
                 return builder.Build();
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                SQLiteConnectionUtils.LogSqliteException();
+                SQLiteConnectionUtils.LogSqliteException(e);
                 return null;
             }
             finally
