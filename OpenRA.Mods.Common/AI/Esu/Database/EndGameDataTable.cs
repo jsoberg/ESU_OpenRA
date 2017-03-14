@@ -59,9 +59,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                 SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
                 insertCommand.ExecuteNonQuery();
             }
-            catch (SQLiteException)
+            catch (SQLiteException e)
             {
-                SQLiteConnectionUtils.LogSqliteException();
+                SQLiteConnectionUtils.LogSqliteException(e);
                 return;
             }
             finally
