@@ -22,13 +22,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         // Columns added after initial table.
         public static Column Winner = new Column("Winner", "INT");
 
-        public static Column[] OriginalColumns = {
+        public static Column[] Columns = {
             PlayerName, KillCost, DeathCost, UnitsKilled, UnitsDead, BuildingsKilled, BuildingsDead, GameTickCount, Winner
         };
 
         public EndGameDataTable()
         {
-            SQLiteUtils.CreateTableIfNotExists(EndGameDataTableName, OriginalColumns);
+            SQLiteUtils.CreateTableIfNotExists(EndGameDataTableName, Columns);
         }
 
         public void InsertEndGameData(string playerName, string winnerName, PlayerStatistics stats, World world)
