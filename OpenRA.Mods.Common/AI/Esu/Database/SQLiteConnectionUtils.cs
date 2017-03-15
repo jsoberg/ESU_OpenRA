@@ -36,6 +36,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             builder.Pooling = true;
             builder.SyncMode = SynchronizationModes.Full;
             builder.FailIfMissing = false;
+            builder.DefaultTimeout = 10000;
 
             return builder.ConnectionString;
         }

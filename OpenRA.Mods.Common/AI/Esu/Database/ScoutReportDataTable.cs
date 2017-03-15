@@ -24,65 +24,60 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
         public void InsertScoutReportData(BestScoutReportData data)
         {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null) {
-                return;
-            }
-
-            try
+            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
             {
-                ColumnWithValue[] colsWithValues = {
-                    new ColumnWithValue(LowestRisk, data.LowestRisk),
-                    new ColumnWithValue(HighestRisk, data.HighestRisk),
-                    new ColumnWithValue(LowestReward, data.LowestReward),
-                    new ColumnWithValue(HighestReward, data.HighestReward)
+                if (connection == null) {
+                    return;
+                }
 
-                };
+                try
+                {
+                    ColumnWithValue[] colsWithValues = {
+                        new ColumnWithValue(LowestRisk, data.LowestRisk),
+                        new ColumnWithValue(HighestRisk, data.HighestRisk),
+                        new ColumnWithValue(LowestReward, data.LowestReward),
+                        new ColumnWithValue(HighestReward, data.HighestReward) };
 
-                string insert = SQLiteUtils.GetInsertSQLCommandString(ScoutReportDataTableName, colsWithValues);
-                SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
-                insertCommand.ExecuteNonQuery();
-            }
-            catch (SQLiteException e)
-            {
-                SQLiteConnectionUtils.LogSqliteException(e);
-                return;
-            }
-            finally
-            {
-                connection.Close();
+                    string insert = SQLiteUtils.GetInsertSQLCommandString(ScoutReportDataTableName, colsWithValues);
+                    using (SQLiteCommand insertCommand = new SQLiteCommand(insert, connection)) {
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+                catch (SQLiteException e)
+                {
+                    SQLiteConnectionUtils.LogSqliteException(e);
+                    return;
+                }
             }
         }
 
         public BestScoutReportData QueryForBestScoutReportData()
         {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null) {
-                return null;
-            }
-
-            try
+            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
             {
-                long count = SQLiteUtils.GetCountForTable(connection, ScoutReportDataTableName);
-                if (count <= 0) {
+                if (connection == null) {
                     return null;
                 }
 
-                BestScoutReportData.Builder builder = new BestScoutReportData.Builder()
-                    .addRiskValue(QueryFirstValueOrderedByColumn(connection, LowestRisk, "ASC"))
-                    .addRiskValue(QueryFirstValueOrderedByColumn(connection, HighestRisk, "DESC"))
-                    .addRewardValue(QueryFirstValueOrderedByColumn(connection, LowestReward, "ASC"))
-                    .addRewardValue(QueryFirstValueOrderedByColumn(connection, HighestReward, "DESC"));
-                return builder.Build();
-            }
-            catch (SQLiteException e)
-            {
-                SQLiteConnectionUtils.LogSqliteException(e);
-                return null;
-            }
-            finally
-            {
-                connection.Close();
+                try
+                {
+                    long count = SQLiteUtils.GetCountForTable(connection, ScoutReportDataTableName);
+                    if (count <= 0) {
+                        return null;
+                    }
+
+                    BestScoutReportData.Builder builder = new BestScoutReportData.Builder()
+                        .addRiskValue(QueryFirstValueOrderedByColumn(connection, LowestRisk, "ASC"))
+                        .addRiskValue(QueryFirstValueOrderedByColumn(connection, HighestRisk, "DESC"))
+                        .addRewardValue(QueryFirstValueOrderedByColumn(connection, LowestReward, "ASC"))
+                        .addRewardValue(QueryFirstValueOrderedByColumn(connection, HighestReward, "DESC"));
+                    return builder.Build();
+                }
+                catch (SQLiteException e)
+                {
+                    SQLiteConnectionUtils.LogSqliteException(e);
+                    return null;
+                }
             }
         }
 

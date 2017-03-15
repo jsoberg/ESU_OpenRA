@@ -8,26 +8,24 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
     {
         public static void CreateTableIfNotExists(string tableName, Column[] columns)
         {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null)
+            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
             {
-                return;
-            }
+                if (connection == null) {
+                    return;
+                }
 
-            try
-            {
-                string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(tableName, columns);
-                SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection);
-                createTableCommand.ExecuteNonQuery();
-            }
-            catch (SQLiteException e)
-            {
-                SQLiteConnectionUtils.LogSqliteException(e);
-                return;
-            }
-            finally
-            {
-                connection.Close();
+                try
+                {
+                    string createTable = SQLiteUtils.GetCreateTableIfNotExistsSQLCommandString(tableName, columns);
+                    using (SQLiteCommand createTableCommand = new SQLiteCommand(createTable, connection)) {
+                        createTableCommand.ExecuteNonQuery();
+                    }
+                }
+                catch (SQLiteException e)
+                {
+                    SQLiteConnectionUtils.LogSqliteException(e);
+                    return;
+                }
             }
         }
 
@@ -77,32 +75,31 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         public static long GetCountForTable(SQLiteConnection openConnection, string tableName)
         {
             string sql = "SELECT COUNT(*) FROM " + tableName;
-            SQLiteCommand countCommand = new SQLiteCommand(sql, openConnection);
-            return (long) countCommand.ExecuteScalar();
+            using (SQLiteCommand countCommand = new SQLiteCommand(sql, openConnection)) {
+                return (long)countCommand.ExecuteScalar();
+            }
         }
 
         public static void AlterTableAddColumn(string tableName, Column column)
         {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null)
+            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
             {
-                return;
-            }
+                if (connection == null) {
+                    return;
+                }
 
-            try
-            {
-                string addColumn = SQLiteUtils.GetAddColumnToTableSQLCommandString(tableName, column);
-                SQLiteCommand createTableCommand = new SQLiteCommand(addColumn, connection);
-                createTableCommand.ExecuteNonQuery();
-            }
-            catch (SQLiteException e)
-            {
-                SQLiteConnectionUtils.LogSqliteException(e);
-                return;
-            }
-            finally
-            {
-                connection.Close();
+                try
+                {
+                    string addColumn = SQLiteUtils.GetAddColumnToTableSQLCommandString(tableName, column);
+                    using (SQLiteCommand createTableCommand = new SQLiteCommand(addColumn, connection)) {
+                        createTableCommand.ExecuteNonQuery();
+                    }
+                }
+                catch (SQLiteException e)
+                {
+                    SQLiteConnectionUtils.LogSqliteException(e);
+                    return;
+                }
             }
         }
 

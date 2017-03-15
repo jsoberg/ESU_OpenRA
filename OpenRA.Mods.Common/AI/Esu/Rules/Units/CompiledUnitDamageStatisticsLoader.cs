@@ -51,28 +51,23 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void LoadUnitDamageStats()
         {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null) {
-                return;
-            }
-
-            SQLiteDataReader reader = null;
-            try
+            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
             {
-                reader = UnitDamageDataTable.Query(connection);
-                LoadNewUnitDamageDataFromReader(reader);
-            }
-            catch (SQLiteException e)
-            {
-                SQLiteConnectionUtils.LogSqliteException(e);
-                return;
-            }
-            finally
-            {
-                if (reader != null) {
-                    reader.Close();
+                if (connection == null) {
+                    return;
                 }
-                connection.Close();
+
+                try
+                {
+                    using (SQLiteDataReader reader = UnitDamageDataTable.Query(connection)) {
+                        LoadNewUnitDamageDataFromReader(reader);
+                    }
+                }
+                catch (SQLiteException e)
+                {
+                    SQLiteConnectionUtils.LogSqliteException(e);
+                    return;
+                }
             }
         }
 
