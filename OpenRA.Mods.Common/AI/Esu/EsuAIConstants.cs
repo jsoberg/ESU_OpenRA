@@ -65,6 +65,12 @@ namespace OpenRA.Mods.Common.AI.Esu
                     PILL_BOX,
                     CAMO_PILL_BOX
                 };
+
+                public static string[] VALUES_NO_AA = {
+                    TURRET,
+                    PILL_BOX,
+                    CAMO_PILL_BOX
+                };
             }
 
             public static class Soviet
@@ -75,6 +81,12 @@ namespace OpenRA.Mods.Common.AI.Esu
 
                 public static string[] VALUES = {
                     SAM_SITE,
+                    FLAME_TOWER,
+                    TESLA
+                };
+
+
+                public static string[] VALUES_NO_AA = {
                     FLAME_TOWER,
                     TESLA
                 };
@@ -120,9 +132,9 @@ namespace OpenRA.Mods.Common.AI.Esu
                 switch (player.Faction.Side)
                 {
                     case ALLIES:
-                        return Allies.VALUES;
+                        return Allies.VALUES_NO_AA;
                     case SOVIET:
-                        return Soviet.VALUES;
+                        return Soviet.VALUES_NO_AA;
                     default:
                         throw new SystemException("Unknown faction side: " + player.Faction.Side);
                 }
