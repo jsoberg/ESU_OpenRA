@@ -28,40 +28,39 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
 
         public void InsertUnitDamageData(UnitDamageData data)
         {
-            SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection();
-            if (connection == null) {
-                return;
-            }
+            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
+            {
+                if (connection == null) {
+                    return;
+                }
 
-            try
-            {
-                ColumnWithValue[] colsWithValues = {
-                    new ColumnWithValue(AttackingUnit, data.AttackerName),
-                    new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
-                    new ColumnWithValue(Damage, data.Damage),
-                    new ColumnWithValue(WasUnitKilled, data.WasKilled ? 1 : 0)
-                };
+                try
+                {
+                    ColumnWithValue[] colsWithValues = {
+                        new ColumnWithValue(AttackingUnit, data.AttackerName),
+                        new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
+                        new ColumnWithValue(Damage, data.Damage),
+                        new ColumnWithValue(WasUnitKilled, data.WasKilled ? 1 : 0) };
 
-                string insert = SQLiteUtils.GetInsertSQLCommandString(UnitDamageDataTableName, colsWithValues);
-                SQLiteCommand insertCommand = new SQLiteCommand(insert, connection);
-                insertCommand.ExecuteNonQuery();
-            }
-            catch (SQLiteException e)
-            {
-                SQLiteConnectionUtils.LogSqliteException(e);
-                return;
-            }
-            finally
-            {
-                connection.Close();
+                    string insert = SQLiteUtils.GetInsertSQLCommandString(UnitDamageDataTableName, colsWithValues);
+                    using (SQLiteCommand insertCommand = new SQLiteCommand(insert, connection)) {
+                        insertCommand.ExecuteNonQuery();
+                    }
+                }
+                catch (SQLiteException e)
+                {
+                    SQLiteConnectionUtils.LogSqliteException(e);
+                    return;
+                }
             }
         }
 
         public SQLiteDataReader Query(SQLiteConnection connection)
         {
             string sql = "SELECT * FROM " + UnitDamageDataTableName;
-            SQLiteCommand queryCommand = new SQLiteCommand(sql, connection);
-            return queryCommand.ExecuteReader();
+            using (SQLiteCommand queryCommand = new SQLiteCommand(sql, connection)) {
+                return queryCommand.ExecuteReader();
+            }
         }
     }
 }
