@@ -62,10 +62,12 @@ namespace OpenRA.Mods.Common.Traits.Esu
             PrintEndGamePlayerFitnessInformation();
 
             EndGameDataTable table = new EndGameDataTable();
-            var players = world.Players.Where(a => !a.NonCombatant && a.PlayerName == PlayerWinLossInformation.WinningPlayer);
-            if (players != null && players.Count() >= 1)
+            foreach (var p in world.Players.Where(a => !a.NonCombatant))
             {
-                Player p = players.First();
+                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
+                if (stats == null) {
+                    continue;
+                }
                 table.InsertEndGameData(p.PlayerName, PlayerWinLossInformation.WinningPlayer, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
             }
 
