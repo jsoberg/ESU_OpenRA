@@ -28,11 +28,28 @@ namespace OpenRA
         // ===========================================================================================================================
 
         private static string LogPrepend;
+        private static bool Debug;
 
-        public static void Initialize(string prepend)
+        public static void Initialize(string prepend, bool debug)
         {
             LogPrepend = prepend;
+            Debug = debug;
         }
+
+        private static List<string> DebugLogs = new List<string> {
+            "perf",
+            "debug",
+			"sync",
+			"server",
+			"sound",
+			"graphics", 
+			"geoip", 
+			"irc",
+            "scout_report",
+            "order_manager",
+            "lua",
+            "attack_data"
+        };
 
         // ===========================================================================================================================
         // END JJS - Issue 22 - Add log prepend
@@ -51,6 +68,14 @@ namespace OpenRA
 
 		public static ChannelInfo Channel(string channelName)
 		{
+            if (!Debug && DebugLogs.Contains(channelName)) {
+                return new ChannelInfo
+                {
+                    Filename = null,
+                    Writer = null
+                };
+            }
+
 			ChannelInfo info;
 			lock (Channels)
 				if (!Channels.TryGetValue(channelName, out info))
@@ -61,7 +86,12 @@ namespace OpenRA
 
 		public static void AddChannel(string channelName, string baseFilename)
 		{
-			lock (Channels)
+            if (!Debug && DebugLogs.Contains(channelName))
+            {
+                return;
+            }
+
+            lock (Channels)
 			{
 				if (Channels.ContainsKey(channelName)) return;
 
@@ -99,7 +129,12 @@ namespace OpenRA
 
 		public static void Write(string channel, string value)
 		{
-			var writer = Channel(channel).Writer;
+            if (!Debug && DebugLogs.Contains(channel))
+            {
+                return;
+            }
+
+            var writer = Channel(channel).Writer;
 			if (writer == null)
 				return;
 
@@ -108,7 +143,12 @@ namespace OpenRA
 
 		public static void Write(string channel, string format, params object[] args)
 		{
-			var writer = Channel(channel).Writer;
+            if (!Debug && DebugLogs.Contains(channel))
+            {
+                return;
+            }
+
+            var writer = Channel(channel).Writer;
 			if (writer == null)
 				return;
 

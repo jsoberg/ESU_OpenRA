@@ -47,6 +47,9 @@ namespace OpenRA
         [Desc("Increment of ticks which we will log fitness information.")]
         public string FitnessLogTickIncrement;
 
+        [Desc("Whether or not we should include debug logs.")]
+        public bool Debug;
+
         public LaunchArguments(Arguments args)
 		{
 			if (args == null)
