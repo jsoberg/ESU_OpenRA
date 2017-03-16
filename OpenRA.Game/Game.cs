@@ -502,7 +502,7 @@ namespace OpenRA
             // ===========================================================================================================================
             if (launchArgs.LogPrepend != null)
             {
-                Log.Initialize(launchArgs.LogPrepend);
+                Log.Initialize(launchArgs.LogPrepend, launchArgs.Debug);
             }
 
             Log.AddChannel("perf", "perf.log");
