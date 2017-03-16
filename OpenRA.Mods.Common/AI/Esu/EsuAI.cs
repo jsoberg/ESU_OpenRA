@@ -68,12 +68,20 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         void INotifyDamage.Damaged(Actor self, AttackInfo e)
         {
+            if (!IsEnabled) {
+                return;
+            }
+
             UnitDamageInformationLogger.QueueUnitDamageData(new UnitDamageData(self, e));
             DamageNotifier.Damaged(self, e);
         }
 
         void INotifyAppliedDamage.AppliedDamage(Actor self, Actor damaged, AttackInfo e)
         {
+            if (!IsEnabled) {
+                return;
+            }
+
             UnitDamageInformationLogger.QueueUnitDamageData(new UnitDamageData(damaged, e));
             DamageNotifier.Damaged(damaged, e);
         }
@@ -95,6 +103,10 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void OnUnitProduced(Actor producer, Actor produced)
         {
+            if (!IsEnabled) {
+                return;
+            }
+
             // We've produced a new unit, so set the flag to check for attack strength.
             if (produced.Owner == SelfPlayer) {
                 State.CheckAttackStrengthPredictionFlag = true;
