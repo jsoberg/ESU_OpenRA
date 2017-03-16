@@ -38,7 +38,6 @@ namespace OpenRA
 
         private static List<string> DebugLogs = new List<string> {
             "perf",
-            "debug",
 			"sync",
 			"server",
 			"sound",
