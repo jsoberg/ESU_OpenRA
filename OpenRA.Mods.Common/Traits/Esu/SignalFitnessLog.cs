@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using OpenRA.Traits;
 using OpenRA.Mods.Common.AI.Esu.Database;
+using System.Threading.Tasks;
 using OpenRA.Mods.Common.AI.Esu;
 
 namespace OpenRA.Mods.Common.Traits.Esu
@@ -71,8 +72,19 @@ namespace OpenRA.Mods.Common.Traits.Esu
                 table.InsertEndGameData(p.PlayerName, PlayerWinLossInformation.WinningPlayer, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
             }
 
-            // Kill process.
+            Log.Flush();
             System.Environment.Exit(0);
+        }
+
+        public static Task Delay(double milliseconds)
+        {
+            var tcs = new TaskCompletionSource<bool>();
+            System.Timers.Timer timer = new System.Timers.Timer();
+            timer.Elapsed += (o, e) => tcs.TrySetResult(true);
+            timer.Interval = milliseconds;
+            timer.AutoReset = false;
+            timer.Start();
+            return tcs.Task;
         }
 
         private void PrintEndGamePlayerFitnessInformation()
