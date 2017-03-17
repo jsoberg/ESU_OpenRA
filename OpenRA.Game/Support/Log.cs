@@ -153,5 +153,13 @@ namespace OpenRA
 
 			writer.WriteLine(format, args);
 		}
-	}
+
+        public static void Flush()
+        {
+            foreach (KeyValuePair<string, ChannelInfo> entry in Channels)
+            {
+                entry.Value.Writer.Flush();
+            }
+        }
+    }
 }
