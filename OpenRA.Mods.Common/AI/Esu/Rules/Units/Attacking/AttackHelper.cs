@@ -4,6 +4,7 @@ using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Defense;
 using OpenRA.Mods.Common.AI.Esu.Strategy.Scouting;
+using OpenRA.Mods.Common.AI.Esu.Geometry;
 
 namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 {
@@ -15,11 +16,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         private readonly Player SelfPlayer;
         private readonly EsuAIInfo Info;
 
+        private readonly PathFinder PathFinder;
+
         public AttackHelper(World world, Player selfPlayer, EsuAIInfo info)
         {
             this.World = world;
             this.SelfPlayer = selfPlayer;
             this.Info = info;
+
+            this.PathFinder = new PathFinder(world);
         }
 
         public void Tick(Actor self, StrategicWorldState state, Queue<Order> orders)
@@ -61,11 +66,33 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
             {
                 ScoutReportLocationGrid reportGrid = state.ScoutReportGrid;
                 CPos stagedPosition = reportGrid.GetSafeCellPositionInbetweenCells(bestCell.RelativePosition, state.SelfIntialBaseLocation);
-                state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, stagedPosition, possibleAttackActors);
+                stagedPosition = ClosestMoveableCell(state, possibleAttackActors, stagedPosition, 0);
+                CPos targetPosition = ClosestMoveableCell(state, possibleAttackActors, bestCell.RelativePosition, 0);
+                state.ActiveAttackController.AddNewActiveAttack(orders, targetPosition, stagedPosition, possibleAttackActors);
             }
 
             // We've checked for attack strength, so don't check again until we have new information.
             state.CheckAttackStrengthPredictionFlag = false;
+        }
+
+        // Note: In an attempt to ensure that we don't have an infinite recursive loop, we only try and find a moveable cell 4 times.
+        private CPos ClosestMoveableCell(StrategicWorldState state, IEnumerable<Actor> possibleAttackActors, CPos target, int numTries)
+        {
+            if (numTries == 4) {
+                return target;
+            }
+
+            CPos start = state.SelfIntialBaseLocation;
+            Actor first = possibleAttackActors.First();
+
+            var positions = PathFinder.FindUnitPath(start, target, first);
+            if (positions.Count == 0) {
+                // Move closer and try again.
+                target = GeometryUtils.MoveTowards(target, start, 2, state.World.Map);
+                return ClosestMoveableCell(state, possibleAttackActors, target, numTries + 1);
+            } else {
+                return positions.First();
+            }
         }
 
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(StrategicWorldState state, IEnumerable<Actor> defensiveActors)
