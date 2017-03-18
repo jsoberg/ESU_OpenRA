@@ -154,7 +154,6 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void IssueOrders(Queue<Order> orders)
         {
-            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(SelfPlayer);
             foreach (Order order in orders)
             {
                 World.IssueOrder(order);
