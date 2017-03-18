@@ -126,7 +126,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                     for (int colNum = startPosY; colNum <= endPosY; colNum++) {
                         AggregateScoutReportData cellData = ScoutReportLocationGridUtils.GetAggregateDataForCell(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, MapMinimumX, MapMinimumY, rowNum, colNum);
                         if (cellData == null || cellData.AverageRiskValue == 0) {
-                            CPos position = new CPos(rowNum * WIDTH_PER_GRID_SQUARE, colNum * WIDTH_PER_GRID_SQUARE);
+                            CPos position = new CPos((rowNum * WIDTH_PER_GRID_SQUARE) + MapMinimumX, (colNum * WIDTH_PER_GRID_SQUARE) + MapMinimumY);
                             possiblePositions.Add(position);
                         }
                     }

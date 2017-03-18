@@ -102,6 +102,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             return new CPos[] { topLeft, topRight, botLeft, botRight };
         }
 
+        public static CPos Center(IEnumerable<Actor> actors)
+        {
+            List<CPos> positions = new List<CPos>();
+            foreach (Actor a in actors) {
+                positions.Add(a.Location);
+            }
+            return Center(positions);
+        }
+
         /** @return The center position of all specified positions. */
         public static CPos Center(IEnumerable<CPos> positions)
         {
