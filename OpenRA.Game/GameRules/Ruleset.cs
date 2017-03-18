@@ -183,20 +183,9 @@ namespace OpenRA
 				// TODO: Add support for custom voxel sequences
 				ruleset = new Ruleset(actors, weapons, voices, notifications, music, ts, sequences);
 			};
-
-			if (modData.IsOnMainThread)
-			{
-				modData.HandleLoadingProgress();
-
-				var loader = new Task(f);
-				loader.Start();
-
-				// Animate the loadscreen while we wait
-				while (!loader.Wait(40))
-					modData.HandleLoadingProgress();
-			}
-			else
-				f();
+            
+            // NOTE: Graphics version would handle loading screen here (see #73 on GitHub).
+			f();
 
 			return ruleset;
 		}
