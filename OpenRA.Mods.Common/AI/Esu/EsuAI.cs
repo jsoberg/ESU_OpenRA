@@ -112,15 +112,15 @@ namespace OpenRA.Mods.Common.AI.Esu
                 State.CheckAttackStrengthPredictionFlag = true;
             }
 
+            // Inform the world state.
+            State.UnitProduced(producer, produced);
+
             // Notify rulesets.
             var notifyOtherProductionRulesets = Rulesets.Where(a => a is IUnitProduced);
             foreach (IUnitProduced rs in notifyOtherProductionRulesets)
             {
                 rs.OnUnitProduced(State, producer, produced);
             }
-
-            // Inform the world state.
-            State.UnitProduced(producer, produced);
         }
 
         void ITick.Tick(Actor self)
@@ -284,6 +284,11 @@ namespace OpenRA.Mods.Common.AI.Esu
         [Desc("Earning under this amount of resources within the specified tick span will result in a new harvester/ore refinery being built")]
         [FieldLimits(0, 10000)]
         public int EarnedResourcesThreshold = 4000;
+
+
+        [Desc("Number of offensive units to use as a rush force at the beginning of a game.")]
+        [FieldLimits(0, 20)]
+        public int NumberOfRushUnits = 10;
 
         // ========================================
         // Static

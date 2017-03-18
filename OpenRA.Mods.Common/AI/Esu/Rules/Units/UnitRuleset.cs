@@ -19,6 +19,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         private ScoutHelper scoutHelper;
         private UnitProductionHelper unitHelper;
         private AttackHelper attackHelper;
+        private RushAttackHelper rushAttackHelper;
         private DefenseHelper defenseHelper;
 
         public UnitRuleset(World world, EsuAIInfo info) : base(world, info)
@@ -31,6 +32,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.scoutHelper = new ScoutHelper(world, selfPlayer, info);
             this.unitHelper = new UnitProductionHelper(world, selfPlayer, info);
             this.attackHelper = new AttackHelper(world, selfPlayer, info);
+            this.rushAttackHelper = new RushAttackHelper(world, selfPlayer, info);
             this.defenseHelper = new DefenseHelper(world, selfPlayer, info);
         }
 
@@ -42,6 +44,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             }
 
             scoutHelper.UnitProduced(state, producer, produced);
+            rushAttackHelper.UnitProduced(state, producer, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)
@@ -54,10 +57,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             scoutHelper.AddScoutOrdersIfApplicable(self, state, orders);
             unitHelper.AddUnitOrdersIfApplicable(state, orders);
 
-            // Allow the attack helper to add orders.
+            rushAttackHelper.Tick(self, state, orders);
             attackHelper.Tick(self, state, orders);
-
-            // Allow the defense helper to add orders.
             defenseHelper.Tick(self, state, orders);
 
             // Stop harvesters from idling.

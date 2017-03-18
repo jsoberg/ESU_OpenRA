@@ -35,6 +35,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         // Actor caches
         private readonly List<Actor> InternalOffensiveActorsCache;
         public readonly ReadOnlyCollection<Actor> OffensiveActorsCache;
+        public IEnumerable<Actor> OffensiveActorsExceptScouts()
+        {
+            return OffensiveActorsCache.Where(a => !CurrentScouts.Any(sc => sc.Actor == a));
+        }
 
         private readonly List<Actor> InternalDefensiveStructureCache;
         public readonly ReadOnlyCollection<Actor> DefensiveStructureCache;
@@ -94,7 +98,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public void UnitProduced(Actor producer, Actor produced)
         {
             if (produced.Owner == SelfPlayer && produced.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.BUILDING)
-                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE) && !CurrentScouts.Any(a => a.Actor == produced))
+                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE))
             {
                 InternalOffensiveActorsCache.Add(produced);
             }

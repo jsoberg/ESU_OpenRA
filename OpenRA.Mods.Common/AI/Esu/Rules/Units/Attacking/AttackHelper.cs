@@ -64,13 +64,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 state.ActiveAttackController.AddNewActiveAttack(orders, bestCell.RelativePosition, stagedPosition, possibleAttackActors);
             }
 
-            // We've checked for attack strength, so don't check again until we have new viable information.
+            // We've checked for attack strength, so don't check again until we have new information.
             state.CheckAttackStrengthPredictionFlag = false;
         }
 
         private IEnumerable<Actor> ActorsCurrentlyAvailableForAttack(StrategicWorldState state, IEnumerable<Actor> defensiveActors)
         {
-            var actorsNotInAttack = state.OffensiveActorsCache.Except(AllActorsInAttack(state));
+            var actorsNotInAttack = state.OffensiveActorsExceptScouts().Except(AllActorsInAttack(state));
             return actorsNotInAttack.Except(defensiveActors);
         }
 
