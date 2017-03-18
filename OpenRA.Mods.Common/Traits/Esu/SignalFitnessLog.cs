@@ -21,7 +21,7 @@ namespace OpenRA.Mods.Common.Traits.Esu
     }
 
     /** A simple callback to tell us when the game is over, or we need to log a periodic fitness value. */
-    public class SignalFitnessLog : IGameOver, ITick
+    public class SignalFitnessLog : ITick
     {
         private const string FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30} | {3,-30}\n";
         private const string END_GAME_FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30} | {3,-30} | {4,-30}\n";
@@ -54,52 +54,6 @@ namespace OpenRA.Mods.Common.Traits.Esu
                 }
 
                 PrintToConsoleAndLog(world, String.Format(FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount()));
-            }
-        }
-
-        public void GameOver(World world)
-        {
-            Console.WriteLine("Game Complete!");
-            PrintEndGamePlayerFitnessInformation();
-
-            EndGameDataTable table = new EndGameDataTable();
-            foreach (var p in world.Players.Where(a => !a.NonCombatant))
-            {
-                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
-                if (stats == null) {
-                    continue;
-                }
-                table.InsertEndGameData(p.PlayerName, PlayerWinLossInformation.WinningPlayer, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
-            }
-
-            Log.Flush();
-            System.Environment.Exit(0);
-        }
-
-        public static Task Delay(double milliseconds)
-        {
-            var tcs = new TaskCompletionSource<bool>();
-            System.Timers.Timer timer = new System.Timers.Timer();
-            timer.Elapsed += (o, e) => tcs.TrySetResult(true);
-            timer.Interval = milliseconds;
-            timer.AutoReset = false;
-            timer.Start();
-            return tcs.Task;
-        }
-
-        private void PrintEndGamePlayerFitnessInformation()
-        {
-            PrintToConsoleAndLog(world, String.Format(END_GAME_FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT", "WIN"));
-
-            foreach (var p in world.Players.Where(a => !a.NonCombatant))
-            {
-                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
-                if (stats == null)
-                {
-                    continue;
-                }
-
-                PrintToConsoleAndLog(world, String.Format(END_GAME_FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount(), p.PlayerName == PlayerWinLossInformation.WinningPlayer));
             }
         }
 

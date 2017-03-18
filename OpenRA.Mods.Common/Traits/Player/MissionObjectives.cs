@@ -14,6 +14,9 @@ using System.Collections.Generic;
 using System.Linq;
 using OpenRA.Traits;
 
+using OpenRA.Mods.Common.AI.Esu.Database;
+using OpenRA.Mods.Common.Traits.Esu;
+
 namespace OpenRA.Mods.Common.Traits
 {
 	public enum ObjectiveType { Primary, Secondary }
@@ -153,13 +156,59 @@ namespace OpenRA.Mods.Common.Traits
 					if (!Game.IsCurrentWorld(player.World))
 						return;
 
-					player.World.EndGame();
-					player.World.SetPauseState(true);
-					player.World.PauseStateLocked = true;
+                    debug_GameOver(player.World);
+                    Game.AutoStartGame(Game.PersistedArgs);
+					//player.World.EndGame();
+					//player.World.SetPauseState(true);
+					//player.World.PauseStateLocked = true;
 				});
 		}
 
-		public void OnPlayerWon(Player player)
+
+        void debug_GameOver(World world)
+        {
+            Console.WriteLine("Game Complete!");
+            PrintEndGamePlayerFitnessInformation(world);
+
+            EndGameDataTable table = new EndGameDataTable();
+            foreach (var p in world.Players.Where(a => !a.NonCombatant))
+            {
+                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
+                if (stats == null)
+                {
+                    continue;
+                }
+                table.InsertEndGameData(p.PlayerName, p.WinState == WinState.Won, p.PlayerActor.TraitOrDefault<PlayerStatistics>(), world);
+            }
+
+            Log.Flush();
+        }
+
+        private const string END_GAME_FORMAT_STRING = "{0,-30} | {1,-30} | {2,-30} | {3,-30} | {4,-30}\n";
+
+        private void PrintEndGamePlayerFitnessInformation(World world)
+        {
+            PrintToConsoleAndLog(world, String.Format(END_GAME_FORMAT_STRING, "PLAYER NAME", "KILL COST", "DEATH COST", "TICK COUNT", "WIN"));
+
+            foreach (var p in world.Players.Where(a => !a.NonCombatant))
+            {
+                var stats = p.PlayerActor.TraitOrDefault<PlayerStatistics>();
+                if (stats == null)
+                {
+                    continue;
+                }
+
+                PrintToConsoleAndLog(world, String.Format(END_GAME_FORMAT_STRING, p.PlayerName, stats.KillsCost, stats.DeathsCost, world.GetCurrentLocalTickCount(), p.PlayerName == PlayerWinLossInformation.WinningPlayer));
+            }
+        }
+
+        private void PrintToConsoleAndLog(World world, string message)
+        {
+            Console.WriteLine(message);
+            Log.Write(SignalFitnessLogInfo.DEFAULT_FITNESS_LOG_NAME, message);
+        }
+
+        public void OnPlayerWon(Player player)
 		{
 			var players = player.World.Players.Where(p => !p.NonCombatant);
 			var enemies = players.Where(p => !p.IsAlliedWith(player));

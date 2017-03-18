@@ -31,7 +31,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             SQLiteUtils.CreateTableIfNotExists(EndGameDataTableName, Columns);
         }
 
-        public void InsertEndGameData(string playerName, string winnerName, PlayerStatistics stats, World world)
+        public void InsertEndGameData(string playerName, bool won, PlayerStatistics stats, World world)
         {
             using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
             {
@@ -50,7 +50,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                         new ColumnWithValue(BuildingsKilled, stats.BuildingsKilled),
                         new ColumnWithValue(BuildingsDead, stats.BuildingsDead),
                         new ColumnWithValue(GameTickCount, world.GetCurrentLocalTickCount()),
-                        new ColumnWithValue(Winner, playerName == winnerName ? 1 : 0) };
+                        new ColumnWithValue(Winner, won? 1 : 0) };
 
                     string insert = SQLiteUtils.GetInsertSQLCommandString(EndGameDataTableName, colsWithValues);
                     using (SQLiteCommand insertCommand = new SQLiteCommand(insert, connection)) {

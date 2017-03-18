@@ -674,8 +674,15 @@ namespace OpenRA
 
         private static readonly string DEFAULT_AI_NAME = "Rush AI";
 
-        private static void AutoStartGame(LaunchArguments args)
-        {  
+        public static LaunchArguments PersistedArgs;
+
+        public static void AutoStartGame(LaunchArguments args)
+        {
+            Console.WriteLine("============================================================");
+            Console.WriteLine("NEW GAME");
+            Console.WriteLine("============================================================\n\n");
+
+            PersistedArgs = args;
             FitnessLogTickIncrement = args.FitnessLogTickIncrement != null ? int.Parse(args.FitnessLogTickIncrement) : DEFAULT_FITNESS_TICKS;
             var myMap = GetSpecifiedLaunchMapOrRandom(args);
 
