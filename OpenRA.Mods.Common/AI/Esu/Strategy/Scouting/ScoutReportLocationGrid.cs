@@ -16,7 +16,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private const int TICKS_UNTIL_REPORT_DATABASE_UPDATE = 1000;
 
         private readonly StrategicWorldState State;
+        private readonly int MapMinimumX;
         private readonly int GridWidth;
+        private readonly int MapMinimumY;
         private readonly int GridHeight;
         private readonly ScoutReportDataTable ScoutReportDataTable;
         private readonly ScoutReportLocationGridUpdateThread ScoutReportUpdateThread;
@@ -32,11 +34,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         {
             this.State = state;
 
-            this.GridWidth = GetRoundedIntDividedByCellSize(state.World.Map.MapSize.X);
-            this.GridHeight = GetRoundedIntDividedByCellSize(state.World.Map.MapSize.Y);
+            this.MapMinimumX = state.World.Map.Bounds.Left;
+            this.GridWidth = GetRoundedIntDividedByCellSize(state.World.Map.Bounds.Right - state.World.Map.Bounds.Left);
+            this.MapMinimumY = state.World.Map.Bounds.Top;
+            this.GridHeight = GetRoundedIntDividedByCellSize(state.World.Map.Bounds.Bottom - state.World.Map.Bounds.Top);
             this.ScoutReportDataTable = new ScoutReportDataTable();
 
-            this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, state, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
+            this.ScoutReportUpdateThread = new ScoutReportLocationGridUpdateThread(this, state, MapMinimumX, MapMinimumY, GridWidth, GridHeight, WIDTH_PER_GRID_SQUARE);
 
             // Load the current best scout report data initially.
             ThreadPool.QueueUserWorkItem(t => ReloadBestScoutReportDataInBackground());
@@ -75,8 +79,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 return null;
             }
 
-            int cellGridPosX = cell.X / WIDTH_PER_GRID_SQUARE;
-            int cellGridPosY = cell.Y / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosX = (cell.X - MapMinimumX) / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosY = (cell.Y - MapMinimumY) / WIDTH_PER_GRID_SQUARE;
 
             int startPosX = (cellGridPosX - 1 < 0) ? cellGridPosX : cellGridPosX - 1;
             int startPosY = (cellGridPosY - 1 < 0) ? cellGridPosY : cellGridPosY - 1;
@@ -87,7 +91,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 AggregateScoutReportData best = null;
                 for (int rowNum = startPosX; rowNum <= endPosX; rowNum++) {
                     for (int colNum = startPosY; colNum <= endPosY; colNum++) {
-                        AggregateScoutReportData cellData = ScoutReportLocationGridUtils.GetAggregateDataForCell(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, rowNum, colNum);
+                        AggregateScoutReportData cellData = ScoutReportLocationGridUtils.GetAggregateDataForCell(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, MapMinimumX, MapMinimumY, rowNum, colNum);
                         if (best == null) {
                             best = cellData;
                         } else {
@@ -108,8 +112,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 return CPos.Invalid;
             }
 
-            int cellGridPosX = cell.X / WIDTH_PER_GRID_SQUARE;
-            int cellGridPosY = cell.Y / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosX = (cell.X - MapMinimumX) / WIDTH_PER_GRID_SQUARE;
+            int cellGridPosY = (cell.Y - MapMinimumY) / WIDTH_PER_GRID_SQUARE;
 
             int startPosX = (cellGridPosX - 1 < 0) ? cellGridPosX : cellGridPosX - 1;
             int startPosY = (cellGridPosY - 1 < 0) ? cellGridPosY : cellGridPosY - 1;
@@ -120,9 +124,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 List<CPos> possiblePositions = new List<CPos>();
                 for (int rowNum = startPosX; rowNum <= endPosX; rowNum++) {
                     for (int colNum = startPosY; colNum <= endPosY; colNum++) {
-                        AggregateScoutReportData cellData = ScoutReportLocationGridUtils.GetAggregateDataForCell(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, rowNum, colNum);
+                        AggregateScoutReportData cellData = ScoutReportLocationGridUtils.GetAggregateDataForCell(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, MapMinimumX, MapMinimumY, rowNum, colNum);
                         if (cellData == null || cellData.AverageRiskValue == 0) {
-                            CPos position = new CPos(rowNum * WIDTH_PER_GRID_SQUARE, colNum * WIDTH_PER_GRID_SQUARE);
+                            CPos position = new CPos((rowNum * WIDTH_PER_GRID_SQUARE) + MapMinimumX, (colNum * WIDTH_PER_GRID_SQUARE) + MapMinimumY);
                             possiblePositions.Add(position);
                         }
                     }
@@ -143,7 +147,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         public AggregateScoutReportData GetCurrentBestFitCellExcludingPosition(CPos position)
         {
             lock (ScoutReportGridMatrixLock) {
-                return ScoutReportLocationGridUtils.GetCurrentBestFitCellExcludingPosition(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, position);
+                return ScoutReportLocationGridUtils.GetCurrentBestFitCellExcludingPosition(ScoutReportGridMatrix, WIDTH_PER_GRID_SQUARE, MapMinimumX, MapMinimumY, position);
             }
         }
 

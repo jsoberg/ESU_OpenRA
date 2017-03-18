@@ -20,6 +20,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public readonly Queue<string> RequestedBuildingQueue;
 
         public readonly CompiledUnitDamageStatisticsLoader UnitStatsLoader;
+        public readonly List<ScoutActor> CurrentScouts;
 
         public ScoutReportLocationGrid ScoutReportGrid;
         public CPos SelfIntialBaseLocation;
@@ -34,6 +35,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         // Actor caches
         private readonly List<Actor> InternalOffensiveActorsCache;
         public readonly ReadOnlyCollection<Actor> OffensiveActorsCache;
+        public IEnumerable<Actor> OffensiveActorsExceptScouts()
+        {
+            return OffensiveActorsCache.Where(a => !CurrentScouts.Any(sc => sc.Actor == a));
+        }
 
         private readonly List<Actor> InternalDefensiveStructureCache;
         public readonly ReadOnlyCollection<Actor> DefensiveStructureCache;
@@ -41,12 +46,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         // Resource cache
         public readonly Dictionary<ResourceTile, HashSet<CPos>> ResourceCache;
 
+        // Built Structure Cache
+        public readonly HashSet<string> ProducedBuildingsCache;
+
         public StrategicWorldState()
         {
             this.EnemyInfoList = new List<EnemyInfo>();
             this.RequestedBuildingQueue = new Queue<string>();
 
             this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+            this.CurrentScouts = new List<ScoutActor>();
 
             this.InternalOffensiveActorsCache = new List<Actor>();
             this.OffensiveActorsCache = InternalOffensiveActorsCache.AsReadOnly();
@@ -54,6 +63,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.DefensiveStructureCache = InternalDefensiveStructureCache.AsReadOnly();
 
             this.ResourceCache = new Dictionary<ResourceTile, HashSet<CPos>>();
+
+            this.ProducedBuildingsCache = new HashSet<string>();
         }
 
         public void Initalize(World world, EsuAIInfo info, Player selfPlayer)

@@ -17,7 +17,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private int TicksSinceLastRecreation = 0;
 
         private readonly UpdateListener UpdateListener;
+        private readonly int MapMinimumX;
         private readonly int GridWidth;
+        private readonly int MapMinimumY;
         private readonly int GridHeight;
         private readonly int WidthPerGridSquare;
         private readonly StrategicWorldState State;
@@ -28,11 +30,13 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         private List<ScoutReport>[][] CurrentScoutReportGridMatrix;
         private readonly object MatrixLock = new object();
 
-        public ScoutReportLocationGridUpdateThread(UpdateListener listener, StrategicWorldState state, int width, int height, int widthPerGridSquare)
+        public ScoutReportLocationGridUpdateThread(UpdateListener listener, StrategicWorldState state, int minX, int minY, int width, int height, int widthPerGridSquare)
         {
             this.UpdateListener = listener;
             this.State = state;
+            this.MapMinimumX = minX;
             this.GridWidth = width;
+            this.MapMinimumY = minY;
             this.GridHeight = height;
             this.WidthPerGridSquare = widthPerGridSquare;
 
@@ -92,7 +96,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             RemoveDeadReports(State.World.GetCurrentLocalTickCount(), clonedMatrix);
 
             // Signal listener.
-            var bestCell = ScoutReportLocationGridUtils.GetCurrentBestFitCell(clonedMatrix, WidthPerGridSquare);
+            var bestCell = ScoutReportLocationGridUtils.GetCurrentBestFitCell(clonedMatrix, WidthPerGridSquare, MapMinimumX, MapMinimumY);
             UpdateListener.OnGridUpdated(clonedMatrix, bestCell);
 
             // Set new matrix.
@@ -103,9 +107,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 
         private void AddScoutToMatrix(ScoutReport report, List<ScoutReport>[][] matrix)
         {
-            int x = GetRoundedIntDividedByCellSize(report.ReportedCPosition.X);
+            int x = GetRoundedIntDividedByCellSize(report.ReportedCPosition.X - MapMinimumX);
             x = Normalize(x, GridWidth - 1);
-            int y = GetRoundedIntDividedByCellSize(report.ReportedCPosition.Y);
+            int y = GetRoundedIntDividedByCellSize(report.ReportedCPosition.Y - MapMinimumY);
             y = Normalize(y, GridHeight - 1);
 
             List<ScoutReport> reportsForLocation = matrix[x][y];

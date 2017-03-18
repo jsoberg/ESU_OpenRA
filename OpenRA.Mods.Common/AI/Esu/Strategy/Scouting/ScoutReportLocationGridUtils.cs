@@ -7,12 +7,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
 {
     public static class ScoutReportLocationGridUtils
     {
-        public static AggregateScoutReportData GetCurrentBestFitCell(List<ScoutReport>[][] ScoutReportGridMatrix, int widthPerGridSquare)
+        public static AggregateScoutReportData GetCurrentBestFitCell(List<ScoutReport>[][] ScoutReportGridMatrix, int widthPerGridSquare, int minX, int minY)
         {
-            return GetCurrentBestFitCellExcludingPosition(ScoutReportGridMatrix, widthPerGridSquare, CPos.Invalid);
+            return GetCurrentBestFitCellExcludingPosition(ScoutReportGridMatrix, widthPerGridSquare, minX, minY, CPos.Invalid);
         }
 
-        public static AggregateScoutReportData GetCurrentBestFitCellExcludingPosition(List<ScoutReport>[][] ScoutReportGridMatrix, int widthPerGridQuare, CPos excludingPosition)
+        public static AggregateScoutReportData GetCurrentBestFitCellExcludingPosition(List<ScoutReport>[][] ScoutReportGridMatrix, int widthPerGridQuare, int minX, int minY, CPos excludingPosition)
         {
             int x = excludingPosition != CPos.Invalid ? GetRoundedIntDividedByCellSize(widthPerGridQuare, excludingPosition.X) : -1;
             int y = excludingPosition != CPos.Invalid ? GetRoundedIntDividedByCellSize(widthPerGridQuare, excludingPosition.Y) : -1;
@@ -29,7 +29,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                         continue;
                     }
 
-                    AggregateScoutReportData current = GetAggregateDataForCell(ScoutReportGridMatrix, widthPerGridQuare, i, j);
+                    AggregateScoutReportData current = GetAggregateDataForCell(ScoutReportGridMatrix, widthPerGridQuare, minX, minY, i, j);
                     if (best == null || (current != null && (current.CompareTo(best) > 0)))
                     {
                         best = current;
@@ -40,7 +40,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
             return best;
         }
 
-        public static AggregateScoutReportData GetAggregateDataForCell(List<ScoutReport>[][] ScoutReportGridMatrix, int widthPerGridSquare, int X, int Y)
+        public static AggregateScoutReportData GetAggregateDataForCell(List<ScoutReport>[][] ScoutReportGridMatrix, int widthPerGridSquare, int minX, int minY, int X, int Y)
         {
             List<ScoutReport> cell = ScoutReportGridMatrix[X][Y];
             if (cell == null || cell.Count() == 0)
@@ -48,7 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
                 return null;
             }
 
-            CPos pos = new CPos(X * widthPerGridSquare, Y * widthPerGridSquare);
+            CPos pos = new CPos((X * widthPerGridSquare) + minX, (Y * widthPerGridSquare) + minY);
             AggregateScoutReportData.Builder builder = new AggregateScoutReportData.Builder()
                 .withNumReports(cell.Count())
                 .withRelativePosition(pos);

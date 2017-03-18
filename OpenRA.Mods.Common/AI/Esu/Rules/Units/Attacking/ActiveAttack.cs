@@ -9,7 +9,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
     public class ActiveAttack
     {
         private const int DistanceToMoveAttackTowardEnemy = 10;
-        private const int DistanceFromPositionToConsiderOnTarget = 8;
+        private const int DistanceFromPositionToConsiderOnTarget = 2;
 
         public List<Actor> AttackTroops;
         public int LastActionTick;
@@ -88,19 +88,16 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         private bool HasReachedPosition(CPos position)
         {
-            foreach (Actor troop in AttackTroops)
+            CPos attackCenter = GeometryUtils.Center(AttackTroops);
+            if (((position.X - DistanceFromPositionToConsiderOnTarget) < attackCenter.X && attackCenter.X < (position.X + DistanceFromPositionToConsiderOnTarget))
+                    && ((position.Y - DistanceFromPositionToConsiderOnTarget) < attackCenter.Y && attackCenter.Y < (position.Y + DistanceFromPositionToConsiderOnTarget)))
             {
-                if (((position.X - DistanceFromPositionToConsiderOnTarget) < troop.Location.X && troop.Location.X < (position.X + DistanceFromPositionToConsiderOnTarget))
-                        && ((position.Y - DistanceFromPositionToConsiderOnTarget) < troop.Location.Y && troop.Location.Y < (position.Y + DistanceFromPositionToConsiderOnTarget)))
-                {
-                    continue;
-                }
-                else
-                {
-                    return false;
-                }
+                return true;
             }
-            return true;
+            else
+            {
+                return false;
+            }
         }
 
         public void MoveStagedPosition(Queue<Order> orders, CPos newStagedPosition)
