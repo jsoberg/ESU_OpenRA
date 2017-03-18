@@ -287,7 +287,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         [Desc("Number of offensive units to use as a rush force at the beginning of a game.")]
         [FieldLimits(0, 20)]
-        public int NumberOfRushUnits = 0;
+        public int NumberOfRushUnits = 10;
 
         // ========================================
         // Static
