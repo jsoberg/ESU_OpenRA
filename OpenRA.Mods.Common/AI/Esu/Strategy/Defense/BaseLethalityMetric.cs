@@ -28,7 +28,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
         private Dictionary<Actor, int> BuildVulnerableActorMapForPlayer(StrategicWorldState state, Player selfPlayer)
         {
             var vulnerableItems = state.World.Actors.Where(a => a.Owner == selfPlayer && !a.IsDead 
-                && (!a.Info.HasTraitInfo<ArmamentInfo>() && !a.Info.HasTraitInfo<AttackGarrisonedInfo>()) && a.TraitOrDefault<Health>() != null);
+                && (!a.Info.HasTraitInfo<ArmamentInfo>() && !a.Info.HasTraitInfo<AttackGarrisonedInfo>())
+                && a.TraitOrDefault<Health>() != null);
 
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
             foreach (Actor actor in vulnerableItems) {

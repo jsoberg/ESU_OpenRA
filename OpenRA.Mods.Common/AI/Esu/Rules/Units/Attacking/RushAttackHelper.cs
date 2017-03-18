@@ -53,6 +53,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         private void IssueAttackMoveOrders(StrategicWorldState state, EnemyInfo enemy, Queue<Order> orders)
         {
+            if (RushActors.Count == 0) {
+                return;
+            }
+
             CPos attackLocation = GetBestAvailableEnemyLocation(state, enemy);
             foreach (Actor actor in RushActors)
             {
