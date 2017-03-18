@@ -20,6 +20,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public readonly Queue<string> RequestedBuildingQueue;
 
         public readonly CompiledUnitDamageStatisticsLoader UnitStatsLoader;
+        public readonly List<ScoutActor> CurrentScouts;
 
         public ScoutReportLocationGrid ScoutReportGrid;
         public CPos SelfIntialBaseLocation;
@@ -47,6 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.RequestedBuildingQueue = new Queue<string>();
 
             this.UnitStatsLoader = new CompiledUnitDamageStatisticsLoader();
+            this.CurrentScouts = new List<ScoutActor>();
 
             this.InternalOffensiveActorsCache = new List<Actor>();
             this.OffensiveActorsCache = InternalOffensiveActorsCache.AsReadOnly();
@@ -92,7 +94,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         public void UnitProduced(Actor producer, Actor produced)
         {
             if (produced.Owner == SelfPlayer && produced.Info.Name != "harv" && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.BUILDING)
-                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE))
+                && !EsuAIUtils.IsActorOfType(World, produced, EsuAIConstants.ProductionCategories.DEFENSE) && !CurrentScouts.Any(a => a.Actor == produced))
             {
                 InternalOffensiveActorsCache.Add(produced);
             }

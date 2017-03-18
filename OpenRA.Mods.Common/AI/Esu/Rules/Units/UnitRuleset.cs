@@ -34,14 +34,14 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
             this.defenseHelper = new DefenseHelper(world, selfPlayer, info);
         }
 
-        void IUnitProduced.OnUnitProduced(Actor producer, Actor produced)
+        void IUnitProduced.OnUnitProduced(StrategicWorldState state, Actor producer, Actor produced)
         {
             if (producer.Owner != selfPlayer)
             {
                 return;
             }
 
-            scoutHelper.UnitProduced(producer, produced);
+            scoutHelper.UnitProduced(state, producer, produced);
         }
 
         void IOrderDeniedListener.OnOrderDenied(Order order)

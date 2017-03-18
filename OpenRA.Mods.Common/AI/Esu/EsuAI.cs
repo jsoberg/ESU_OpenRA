@@ -112,14 +112,15 @@ namespace OpenRA.Mods.Common.AI.Esu
                 State.CheckAttackStrengthPredictionFlag = true;
             }
 
-            // Inform the world state.
-            State.UnitProduced(producer, produced);
-
+            // Notify rulesets.
             var notifyOtherProductionRulesets = Rulesets.Where(a => a is IUnitProduced);
             foreach (IUnitProduced rs in notifyOtherProductionRulesets)
             {
-                rs.OnUnitProduced(producer, produced);
+                rs.OnUnitProduced(State, producer, produced);
             }
+
+            // Inform the world state.
+            State.UnitProduced(producer, produced);
         }
 
         void ITick.Tick(Actor self)
@@ -343,7 +344,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
     public interface IUnitProduced
     {
-        void OnUnitProduced(Actor producer, Actor produced);
+        void OnUnitProduced(StrategicWorldState state, Actor producer, Actor produced);
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]
