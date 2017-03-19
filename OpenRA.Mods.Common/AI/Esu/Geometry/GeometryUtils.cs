@@ -31,21 +31,15 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
 
         public static CPos OppositeLocationOnMap(CPos location, Map map)
         {
-            var width = map.MapSize.X;
-            var height = map.MapSize.Y;
-
-            var x = width - location.X;
-            var y = height - location.Y;
-
+            var x = (map.Bounds.Right - (location.X - map.Bounds.Left));
+            var y = (map.Bounds.Bottom - (location.Y - map.Bounds.Top));
             return new CPos(x, y);
         }
 
         public static CPos ParallelXLocationOnMap(CPos location, Map map)
         {
-            var width = map.MapSize.X;
-            var x = width - location.X;
+            var x = (map.Bounds.Right - (location.X - map.Bounds.Left));
             var y = location.Y;
-
             return new CPos(x, y);
         }
 
@@ -67,8 +61,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
             int changeX = (int)(distance * Math.Cos(bearing));
             int changeY = (int)(distance * Math.Sin(bearing));
 
-            int towardX = SanitizedValue(start.X + changeX, 0, map.MapSize.X);
-            int towardY = SanitizedValue(start.Y + changeY, 0, map.MapSize.Y);
+            int towardX = SanitizedValue(start.X + changeX, map.Bounds.Left, map.Bounds.Right);
+            int towardY = SanitizedValue(start.Y + changeY, map.Bounds.Top, map.Bounds.Bottom);
             return new CPos(towardX, towardY);
         }
 
@@ -100,15 +94,21 @@ namespace OpenRA.Mods.Common.AI.Esu.Geometry
 
         public static CPos[] GetMapCorners(Map map)
         {
-            var width = map.MapSize.X;
-            var height = map.MapSize.Y;
-
-            var topLeft = new CPos(0, 0);
-            var topRight = new CPos(width, 0);
-            var botLeft = new CPos(0, height);
-            var botRight = new CPos(width, height);
+            var topLeft = new CPos(map.Bounds.Left, map.Bounds.Top);
+            var topRight = new CPos(map.Bounds.Right, map.Bounds.Top);
+            var botLeft = new CPos(map.Bounds.Left, map.Bounds.Bottom);
+            var botRight = new CPos(map.Bounds.Right, map.Bounds.Bottom);
 
             return new CPos[] { topLeft, topRight, botLeft, botRight };
+        }
+
+        public static CPos Center(IEnumerable<Actor> actors)
+        {
+            List<CPos> positions = new List<CPos>();
+            foreach (Actor a in actors) {
+                positions.Add(a.Location);
+            }
+            return Center(positions);
         }
 
         /** @return The center position of all specified positions. */

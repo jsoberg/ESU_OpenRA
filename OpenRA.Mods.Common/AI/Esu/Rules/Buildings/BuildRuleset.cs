@@ -74,7 +74,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             // Issue build orders in order of importance.
             try {
                 // Most important: Power Plants
-                BuildPowerPlantIfBelowMinimumExcessPower(self, orders);
+                BuildPowerPlantIfBelowMinimumExcessPower(self, state, orders);
                 AssertProductionOrderNotIssuedThisTick();
 
                 // Second most important: Ore Refineries
@@ -94,7 +94,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         }
 
         [Desc("Tunable rule: Build power plant if below X power.")]
-        private void BuildPowerPlantIfBelowMinimumExcessPower(Actor self, Queue<Order> orders)
+        private void BuildPowerPlantIfBelowMinimumExcessPower(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             if (!EsuAIUtils.CanBuildItemWithNameForCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.BUILDING, EsuAIConstants.Buildings.POWER_PLANT)) {
                 return;
@@ -102,6 +102,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
             PowerManager pm = self.Trait<PowerManager>();
             if (pm.ExcessPower < info.MinimumExcessPower) {
+                state.ProducedBuildingsCache.Add(EsuAIConstants.Buildings.POWER_PLANT);
                 StartProduction(self, orders, EsuAIConstants.Buildings.POWER_PLANT);
             }
         }
@@ -109,6 +110,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private void BuildOreRefineryIfApplicable(Actor self, StrategicWorldState state, Queue<Order> orders)
         {
             if (ShouldBuildRefinery(state)) {
+                state.ProducedBuildingsCache.Add(EsuAIConstants.Buildings.ORE_REFINERY);
                 StartProduction(self, orders, EsuAIConstants.Buildings.ORE_REFINERY);
             }
         }
@@ -130,6 +132,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         {
             string barracks = EsuAIConstants.Buildings.GetBarracksNameForPlayer(selfPlayer);
             if (!EsuAIUtils.DoesItemCurrentlyExistOrIsBeingProducedForPlayer(state, selfPlayer, barracks)) {
+                state.ProducedBuildingsCache.Add(barracks);
                 StartProduction(self, orders, barracks);
             }
         }
@@ -144,6 +147,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             if (state.RequestedBuildingQueue.Count > 0) {
                 string front = state.RequestedBuildingQueue.Dequeue();
                 if (!IsSingleProductionBuildingThatAlreadyExists(state, front)) {
+                    state.ProducedBuildingsCache.Add(front);
                     StartProduction(self, orders, front);
                 }
             }
