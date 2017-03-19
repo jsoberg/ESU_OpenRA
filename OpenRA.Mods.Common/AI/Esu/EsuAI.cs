@@ -115,10 +115,11 @@ namespace OpenRA.Mods.Common.AI.Esu
             // Inform the world state.
             State.UnitProduced(producer, produced);
 
+            // Notify rulesets.
             var notifyOtherProductionRulesets = Rulesets.Where(a => a is IUnitProduced);
             foreach (IUnitProduced rs in notifyOtherProductionRulesets)
             {
-                rs.OnUnitProduced(producer, produced);
+                rs.OnUnitProduced(State, producer, produced);
             }
         }
 
@@ -153,7 +154,6 @@ namespace OpenRA.Mods.Common.AI.Esu
 
         private void IssueOrders(Queue<Order> orders)
         {
-            double currentResources = EsuAIUtils.GetCurrentResourcesForPlayer(SelfPlayer);
             foreach (Order order in orders)
             {
                 World.IssueOrder(order);
@@ -284,6 +284,11 @@ namespace OpenRA.Mods.Common.AI.Esu
         [FieldLimits(0, 10000)]
         public int EarnedResourcesThreshold = 4000;
 
+
+        [Desc("Number of offensive units to use as a rush force at the beginning of a game.")]
+        [FieldLimits(0, 20)]
+        public int NumberOfRushUnits = 10;
+
         // ========================================
         // Static
         // ========================================
@@ -343,7 +348,7 @@ namespace OpenRA.Mods.Common.AI.Esu
 
     public interface IUnitProduced
     {
-        void OnUnitProduced(Actor producer, Actor produced);
+        void OnUnitProduced(StrategicWorldState state, Actor producer, Actor produced);
     }
 
     [AttributeUsage(AttributeTargets.Field, Inherited = false)]

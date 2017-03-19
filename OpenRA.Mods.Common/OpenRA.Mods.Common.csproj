@@ -143,6 +143,7 @@
     <Compile Include="AI\BaseBuilder.cs" />
     <Compile Include="AI\Esu\Database\EndGameDataTable.cs" />
     <Compile Include="AI\Esu\Rules\Resources\ResourceGatheringRuleset.cs" />
+    <Compile Include="AI\Esu\Rules\Units\Attacking\RushAttackHelper.cs" />
     <Compile Include="AI\Esu\Rules\Units\CompiledUnitDamageStatistics.cs" />
     <Compile Include="AI\Esu\Database\ScoutReportDataTable.cs" />
     <Compile Include="AI\Esu\Database\SQLiteConnectionUtils.cs" />
