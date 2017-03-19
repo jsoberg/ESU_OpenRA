@@ -760,7 +760,7 @@ namespace OpenRA
             if (LocalTick >= MAX_TICKS_BEFORE_END_GAME)
             {
                 Log.Write("order_manager", "Maximum Ticks Reached: {0}".F(MAX_TICKS_BEFORE_END_GAME));
-                world.EndGame();
+                AutoStartGame(PersistedArgs);
             }
         }
 
