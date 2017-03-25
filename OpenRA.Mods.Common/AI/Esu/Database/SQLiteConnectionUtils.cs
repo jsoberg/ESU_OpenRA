@@ -37,7 +37,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             builder.SyncMode = SynchronizationModes.Full;
             builder.DefaultIsolationLevel = System.Data.IsolationLevel.Serializable;
             builder.FailIfMissing = false;
-            builder.DefaultTimeout = 10000;
+            builder.DefaultTimeout = 60000;
 
             return builder.ConnectionString;
         }
