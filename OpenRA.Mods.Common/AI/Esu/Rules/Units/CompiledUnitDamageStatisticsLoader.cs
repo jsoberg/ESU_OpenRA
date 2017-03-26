@@ -68,6 +68,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                     SQLiteConnectionUtils.LogSqliteException(e);
                     return;
                 }
+                connection.Close();
             }
         }
 
