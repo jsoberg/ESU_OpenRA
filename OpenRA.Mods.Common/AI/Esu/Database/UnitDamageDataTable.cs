@@ -26,32 +26,25 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
             SQLiteUtils.CreateTableIfNotExists(UnitDamageDataTableName, Columns);
         }
 
-        public void InsertUnitDamageData(UnitDamageData data)
+        public void InsertUnitDamageData(SQLiteConnection connection, UnitDamageData data)
         {
-            using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
+            try
             {
-                if (connection == null) {
-                    return;
-                }
+                ColumnWithValue[] colsWithValues = {
+                    new ColumnWithValue(AttackingUnit, data.AttackerName),
+                    new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
+                    new ColumnWithValue(Damage, data.Damage),
+                    new ColumnWithValue(WasUnitKilled, data.WasKilled ? 1 : 0) };
 
-                try
-                {
-                    ColumnWithValue[] colsWithValues = {
-                        new ColumnWithValue(AttackingUnit, data.AttackerName),
-                        new ColumnWithValue(DamagedUnit, data.DamagedUnitName),
-                        new ColumnWithValue(Damage, data.Damage),
-                        new ColumnWithValue(WasUnitKilled, data.WasKilled ? 1 : 0) };
-
-                    string insert = SQLiteUtils.GetInsertSQLCommandString(UnitDamageDataTableName, colsWithValues);
-                    using (SQLiteCommand insertCommand = new SQLiteCommand(insert, connection)) {
-                        insertCommand.ExecuteNonQuery();
-                    }
+                string insert = SQLiteUtils.GetInsertSQLCommandString(UnitDamageDataTableName, colsWithValues);
+                using (SQLiteCommand insertCommand = new SQLiteCommand(insert, connection)) {
+                    insertCommand.ExecuteNonQuery();
                 }
-                catch (SQLiteException e)
-                {
-                    SQLiteConnectionUtils.LogSqliteException(e);
-                    return;
-                }
+            }
+            catch (SQLiteException e)
+            {
+                SQLiteConnectionUtils.LogSqliteException(e);
+                return;
             }
         }
 

@@ -48,6 +48,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                     SQLiteConnectionUtils.LogSqliteException(e);
                     return;
                 }
+                connection.Close();
             }
         }
 
@@ -78,6 +79,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
                     SQLiteConnectionUtils.LogSqliteException(e);
                     return null;
                 }
+                connection.Close();
             }
         }
 

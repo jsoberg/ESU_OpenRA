@@ -5,12 +5,13 @@ using System.Linq;
 using System.Text;
 using System.Threading;
 using OpenRA.Mods.Common.AI.Esu.Database;
+using System.Data.SQLite;
 
 namespace OpenRA.Mods.Common.AI.Esu.Strategy
 {
     public class AsyncUnitDamageInformationLogger
     {
-        private const int TicksUntilBatchLog = 100;
+        private const int TicksUntilBatchLog = 400;
 
         private readonly Queue<UnitDamageData> DamageDataQueue;
         private readonly UnitDamageDataTable UnitDamageDataTable;
@@ -53,9 +54,22 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
         {
             lock (UnitDamageDataTableLock)
             {
-                foreach (UnitDamageData data in damageDataQueue)
+                using (SQLiteConnection connection = SQLiteConnectionUtils.GetDatabaseConnection())
                 {
-                    UnitDamageDataTable.InsertUnitDamageData(data);
+                    if (connection == null) {
+                        return;
+                    }
+
+                    using (SQLiteTransaction transaction = connection.BeginTransaction(System.Data.IsolationLevel.Serializable))
+                    {
+                        foreach (UnitDamageData data in damageDataQueue)
+                        {
+                            UnitDamageDataTable.InsertUnitDamageData(connection, data);
+                        }
+
+                        transaction.Commit();
+                    }
+                    connection.Close();
                 }
             }
         }
