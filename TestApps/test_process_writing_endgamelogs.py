@@ -37,8 +37,7 @@ def run_process(process_num):
     print('Running Process %d' % process_num)
     process_args = list(BASE_PROCESS_ARGS)
     process_args[-1] = process_args[-1] % process_num
-    p = subprocess.Popen(process_args, shell=True)
-    p.wait()
+    subprocess.call(process_args, shell=True)
 
 
 def main(n):
