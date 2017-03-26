@@ -462,8 +462,6 @@ namespace OpenRA
                         {
                             ++orderManager.LocalFrameNumber;
 
-                            Log.Write("debug", "--Tick: {0} ({1})", LocalTick, isNetTick ? "net" : "local");
-
                             if (BenchmarkMode)
                                 Log.Write("cpu", "{0};{1}".F(LocalTick, PerfHistory.Items["tick_time"].LastValue));
 
