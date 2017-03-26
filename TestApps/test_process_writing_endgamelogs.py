@@ -6,30 +6,29 @@ import subprocess
 import os
 
 
-BASE_PROCESS_ARGS = ['..\OpenRA.Game', 'Launch.Ai=\"ESU AI\"', 'Launch.MapName=\"Forest Path\"',
+BASE_PROCESS_ARGS = ['OpenRA.Game', 'Launch.Ai=ESU AI', 'Launch.MapName=Forest Path',
                      'Launch.AiSpawnPoint=0', 'Launch.AiFaction=russia', 'Launch.LogPrepend=%d']
-END_GAME_FITNESS_LOG_DOC_FILEPATH = '\OpenRA\Logs\%d_end_game_fitness.txt'
+END_GAME_FITNESS_LOG_DOC_FILEPATH = 'OpenRA\\Logs\\%d_end_game_fitness.log'
 WIN_SEARCH_PHRASE = 'WIN'
 
 
 def winlog_exists(process_num):
     doc_path = os.path.expanduser('~\Documents')
-    logpath = doc_path + (END_GAME_FITNESS_LOG_DOC_FILEPATH % process_num)
+    logpath = os.path.join(doc_path, (END_GAME_FITNESS_LOG_DOC_FILEPATH % process_num))
     print('Checking ' + logpath + "...")
 
     if not os.path.isfile(logpath):
-        print(logpath + ' does not exist, fail')
+        print('FAIL: %s does not exist' % logpath)
         return False
 
-    logfile = open(logpath, "r")
-    lines = logfile.readlines()
-    logfile.close()
+    with open(logpath, "r") as logfile:
+        lines = logfile.readlines()
     for line in reversed(lines):
         if WIN_SEARCH_PHRASE in line:
-            print('Definitive win log for %s exists!' % logpath)
+            print('SUCCESS: Definitive win log for %s exists' % logpath)
             return True
 
-    print('Could not find definitive win log for %s' % logpath)
+    print('FAIL: Could not find definitive win log in %s' % logpath)
     return False
 
 
@@ -37,7 +36,7 @@ def run_process(process_num):
     print('Running Process %d' % process_num)
     process_args = list(BASE_PROCESS_ARGS)
     process_args[-1] = process_args[-1] % process_num
-    subprocess.call(process_args, shell=True)
+    subprocess.call(process_args, shell=True, cwd='..\\')
 
 
 def main(n):
