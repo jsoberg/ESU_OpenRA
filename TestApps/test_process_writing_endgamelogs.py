@@ -64,9 +64,15 @@ def run_process(iteration_num, process_num):
     global _log_prepend
     process_args[-1] = process_args[-1] % (_log_prepend, iteration_num, process_num)
     start_time = time.time()
-    with open('output\\%siter%d_process%d_console.log' % (_log_prepend, iteration_num, process_num), 'w') as console:
-        with open('output\\%siter%d_process%d_errors.log' % (_log_prepend, iteration_num, process_num), 'w') as error:
+
+    consolelog_path = 'output\\%siter%d_process%d_console.log' % (_log_prepend, iteration_num, process_num)
+    errorlog_path = 'output\\%siter%d_process%d_errors.log' % (_log_prepend, iteration_num, process_num)
+    with open(consolelog_path, 'w') as console:
+        with open(errorlog_path, 'w') as error:
             subprocess.call(process_args, shell=True, cwd='..\\', stdout=console, stderr=error)
+            if os.stat(errorlog_path).st_size > 0:
+                print_all("WARNING: Errors found for iter %d process %d, check %s" % (iteration_num, process_num,
+                                                                                      error.name))
 
     end_time = time.time()
     print_all('Iteration %d, Process %d completed at %s' % (iteration_num, process_num,
