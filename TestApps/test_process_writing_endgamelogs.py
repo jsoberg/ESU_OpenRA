@@ -14,6 +14,7 @@ BASE_PROCESS_ARGS = ['OpenRA.Game', 'Launch.Ai=ESU AI', 'Launch.MapName=Forest P
                      'Launch.AiSpawnPoint=0', 'Launch.AiFaction=russia', 'Launch.LogPrepend=%siter-%d_process-%d']
 END_GAME_FITNESS_LOG_DOC_FILEPATH = 'OpenRA\\Logs\\%siter-%d_process-%d_end_game_fitness.log'
 WIN_SEARCH_PHRASE = 'WIN'
+OUTPUT_DIR = 'output'
 
 _log_prepend = ""
 _output_log_lock = Lock()
@@ -28,6 +29,8 @@ def print_elapsedtime(prepend, start_time, end_time):
 def print_all(log):
     print(log)
     with _output_log_lock:
+        if not os.path.exists(OUTPUT_DIR):
+            os.makedirs(OUTPUT_DIR)
         global _log_prepend
         with open('output\\%stest_process_writing_endgamelogs_output.log' % _log_prepend, 'a') as output:
             output.write(log + "\n")
@@ -61,7 +64,10 @@ def run_process(iteration_num, process_num):
     global _log_prepend
     process_args[-1] = process_args[-1] % (_log_prepend, iteration_num, process_num)
     start_time = time.time()
-    subprocess.call(process_args, shell=True, cwd='..\\')
+    with open('output\\%siter%d_process%d_console.log' % (_log_prepend, iteration_num, process_num), 'w') as console:
+        with open('output\\%siter%d_process%d_errors.log' % (_log_prepend, iteration_num, process_num), 'w') as error:
+            subprocess.call(process_args, shell=True, cwd='..\\', stdout=console, stderr=error)
+
     end_time = time.time()
     print_all('Iteration %d, Process %d completed at %s' % (iteration_num, process_num,
                                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
