@@ -91,7 +91,7 @@ def perform_iterations(ai_name, iters, num_procs):
     for i in range(iters):
         start_time = time.time()
         futures = []
-        with ThreadPoolExecutor(max_workers=20) as executor:
+        with ThreadPoolExecutor(max_workers=30) as executor:
             # Spawn processes.
             for j in range(num_procs):
                 future = executor.submit(handle_process, ai_name, i, j)
