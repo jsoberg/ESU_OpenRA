@@ -10,7 +10,7 @@ from concurrent.futures import ThreadPoolExecutor
 from datetime import datetime
 
 
-BASE_PROCESS_ARGS = ['OpenRA.Game', 'Launch.Ai=ESU AI', 'Launch.MapName=Forest Path',
+BASE_PROCESS_ARGS = ['OpenRA.Game', 'Launch.Ai=%s', 'Launch.MapName=Forest Path',
                      'Launch.AiSpawnPoint=0', 'Launch.AiFaction=russia', 'Launch.LogPrepend=%siter-%d_process-%d']
 END_GAME_FITNESS_LOG_DOC_FILEPATH = 'OpenRA\\Logs\\%siter-%d_process-%d_end_game_fitness.log'
 WIN_SEARCH_PHRASE = 'WIN'
@@ -57,10 +57,11 @@ def winlog_exists(iteration_num, process_num):
     return False
 
 
-def run_process(iteration_num, process_num):
+def run_process(ai_name, iteration_num, process_num):
     print_all('Running Iteration %d, Process %d at %s' % (iteration_num, process_num,
                                                           datetime.now().strftime('%Y-%m-%d %H:%M:%S')))
     process_args = list(BASE_PROCESS_ARGS)
+    process_args[1] = process_args[1] % ai_name
     global _log_prepend
     process_args[-1] = process_args[-1] % (_log_prepend, iteration_num, process_num)
     start_time = time.time()
@@ -80,12 +81,12 @@ def run_process(iteration_num, process_num):
     print_elapsedtime('Runtime for Iteration %d, Process %d' % (iteration_num, process_num), start_time, end_time)
 
 
-def handle_process(iteration_num, process_num):
-    run_process(iteration_num, process_num)
+def handle_process(ai_name, iteration_num, process_num):
+    run_process(ai_name, iteration_num, process_num)
     return winlog_exists(iteration_num, process_num)
 
 
-def perform_iterations(iters, num_procs):
+def perform_iterations(ai_name, iters, num_procs):
     num_failures = 0
     for i in range(iters):
         start_time = time.time()
@@ -93,7 +94,7 @@ def perform_iterations(iters, num_procs):
         with ThreadPoolExecutor(max_workers=20) as executor:
             # Spawn processes.
             for j in range(num_procs):
-                future = executor.submit(handle_process, i, j)
+                future = executor.submit(handle_process, ai_name, i, j)
                 futures.append(future)
             # Wait for spawned processes.
             for current_future in futures:
@@ -119,10 +120,15 @@ def main():
         num_processes = int(args[1])
     except IndexError:
         num_processes = 1
-    print_all('Starting test with %d iterations of %d processes each' % (iterations, num_processes))
+    try:
+        ai_name = args[2]
+    except IndexError:
+        ai_name = "ESU AI"
+
+    print_all('Starting test for %s with %d iterations of %d processes each' % (ai_name, iterations, num_processes))
 
     start_time = time.time()
-    num_failures = perform_iterations(iterations, num_processes)
+    num_failures = perform_iterations(ai_name, iterations, num_processes)
     print_all('%d failures out of %d runs.' % (num_failures, iterations * num_processes))
     end_time = time.time()
     print_elapsedtime('Total Runtime', start_time, end_time)
