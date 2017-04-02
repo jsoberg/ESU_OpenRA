@@ -95,6 +95,7 @@ def perform_iterations(ai_name, iters, num_procs):
             # Spawn processes.
             for j in range(num_procs):
                 future = executor.submit(handle_process, ai_name, i, j)
+                time.sleep(10)
                 futures.append(future)
             # Wait for spawned processes.
             for current_future in futures:
