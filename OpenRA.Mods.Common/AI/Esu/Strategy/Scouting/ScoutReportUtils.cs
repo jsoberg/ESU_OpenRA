@@ -9,10 +9,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
     public static class ScoutReportUtils
     {
 
-        public static List<Actor> EnemyActorsInWorld(StrategicWorldState state, Player selfPlayer)
+        public static List<Actor> EnemyActorsInWorld(StrategicWorldState state, Player selfPlayer, List<Actor> reuse)
         {
-            return new List<Actor>(state.World.Actors.Where(a => a.Owner != selfPlayer && state.EnemyInfoList.Any(e => e.EnemyName == a.Owner.InternalName)
+            reuse.Clear();
+            reuse.AddRange(state.World.Actors.Where(a => a.Owner != selfPlayer && state.EnemyInfoList.Any(e => e.EnemyName == a.Owner.InternalName)
                 && a.OccupiesSpace != null));
+            return reuse;
         }
 
         public static ScoutReportInfoBuilder BuildResponseInformationForActor(StrategicWorldState state, EsuAIInfo info, Actor actor, IEnumerable<Actor> enemyActors)
@@ -79,7 +81,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                     return;
                 }
 
-                if (enemy.TraitOrDefault<Harvester>() != null) {
+                if (!enemy.IsDead && enemy.TraitOrDefault<Harvester>() != null) {
                     builder.AddHarvester();
                     return;
                 } else if (EsuAIUtils.IsActorOfType(world, enemy, EsuAIConstants.ProductionCategories.VEHICLE)) {
