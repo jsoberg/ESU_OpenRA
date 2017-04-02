@@ -32,6 +32,9 @@ namespace OpenRA
         [Desc("AI name to automatically start with.")]
         public string Ai;
 
+        [Desc("second AI name to automatically start with.")]
+        public string SecondAi;
+
         [Desc("Map name to automatically load.")]
         public string MapName;
 

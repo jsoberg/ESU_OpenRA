@@ -440,8 +440,9 @@ namespace OpenRA
 
                 // Create bots.
                 string aiName = (args.Ai != null) ? args.Ai : DEFAULT_AI_NAME;
+                string secondAiName = (args.SecondAi != null) ? args.SecondAi : DEFAULT_AI_NAME;
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi0 0 {0}".F(aiName)));
-                OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 {0}".F(DEFAULT_AI_NAME)));
+                OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 {0}".F(secondAiName)));
                 OrderManager.TickImmediate();
 
                 // Specify AI faction if argument was given.
