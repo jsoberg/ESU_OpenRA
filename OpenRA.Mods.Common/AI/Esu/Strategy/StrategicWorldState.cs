@@ -40,6 +40,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             return OffensiveActorsCache.Where(a => !CurrentScouts.Any(sc => sc.Actor == a));
         }
 
+        // Enemy actor caches
+        private readonly List<Actor> InternalEnemyActorsCache;
+        public readonly ReadOnlyCollection<Actor> EnemyActorsCache;
+
         private readonly List<Actor> InternalDefensiveStructureCache;
         public readonly ReadOnlyCollection<Actor> DefensiveStructureCache;
 
@@ -62,8 +66,10 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
             this.InternalDefensiveStructureCache = new List<Actor>();
             this.DefensiveStructureCache = InternalDefensiveStructureCache.AsReadOnly();
 
-            this.ResourceCache = new Dictionary<ResourceTile, HashSet<CPos>>();
+            this.InternalEnemyActorsCache = new List<Actor>();
+            this.EnemyActorsCache = InternalEnemyActorsCache.AsReadOnly();
 
+            this.ResourceCache = new Dictionary<ResourceTile, HashSet<CPos>>();
             this.ProducedBuildingsCache = new HashSet<string>();
         }
 
@@ -124,7 +130,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 }
             }
 
-            // Check for enemy info every 10 ticks.
+            // Check for enemy info every 10 ticks to cut down on unnecessary calculations.
             if (World.GetCurrentLocalTickCount() % 10 == 0)
             {
                 VisibilityBounds visibility = VisibilityBounds.CurrentVisibleAreaForPlayer(World, SelfPlayer);
@@ -132,6 +138,9 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy
                 {
                     TryFindEnemy(info, visibility);
                 }
+
+                // Since finding enemy actors in the world is relatively taxing, cache it here.
+                ScoutReportUtils.EnemyActorsInWorld(this, SelfPlayer, InternalEnemyActorsCache);
             }
 
             ScoutReportGrid.PerformUpdates(World);

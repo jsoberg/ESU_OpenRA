@@ -186,7 +186,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         // Scout Reporting
         // ========================================
 
-        private List<Actor> CachedEnemyActors;
         private readonly Queue<KillInfo> KilledActors = new Queue<KillInfo>();
 
         struct KillInfo
@@ -213,19 +212,11 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
         private void IssueScoutReports(StrategicWorldState state)
         {
-            // Since finding enemy actors in the world is relatively taxing, 
-            //     cache it here every 4 ticks and send it in when building response info.
-            if (CachedEnemyActors == null || (state.World.GetCurrentLocalTickCount() % 4) == 0) {
-                CachedEnemyActors = ScoutReportUtils.EnemyActorsInWorld(state, SelfPlayer);
-            } else {
-                CachedEnemyActors.RemoveAll(a => a.IsDead);
-            }
-
             var actorsWhoCanReport = World.ActorsHavingTrait<RevealsShroud>().Where(a => a.Owner == SelfPlayer && a.IsInWorld && !a.IsDead);
             foreach (Actor actor in actorsWhoCanReport) {
                 CacheResourceForPosition(state, actor.Location);
 
-                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, Info, actor, CachedEnemyActors);
+                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, Info, actor, state.EnemyActorsCache);
                 if (responseBuilder == null) {
                     continue;
                 }
@@ -239,7 +230,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                     continue;
                 }
 
-                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, Info, kill.Killed, CachedEnemyActors, kill.Attacker);
+                ScoutReportInfoBuilder responseBuilder = ScoutReportUtils.BuildResponseInformationForActor(state, Info, kill.Killed, state.EnemyActorsCache, kill.Attacker);
                 if (responseBuilder == null) {
                     continue;
                 }
