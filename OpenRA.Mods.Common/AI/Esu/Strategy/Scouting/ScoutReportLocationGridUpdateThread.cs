@@ -13,7 +13,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Scouting
         // How many ticks before more transient scout reports (units) time out and are thrown away.
         private const int TickTransientReportTimeout = 800;
 
-        private const int NumTicksBeforeRecreation = 30;
+        private const int NumTicksBeforeRecreation = 60;
         private int TicksSinceLastRecreation = 0;
 
         private readonly UpdateListener UpdateListener;

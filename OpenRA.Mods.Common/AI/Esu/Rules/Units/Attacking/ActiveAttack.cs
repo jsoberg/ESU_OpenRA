@@ -127,7 +127,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
             CPos attackerCenter = GeometryUtils.Center(AttackerLocationList);
             if (attackerCenter != CPos.Invalid) {
-                nextMove = GeometryUtils.MoveTowards(attackerCenter, AttackTroops[0].Location, state.Info.DistanceToMoveAttack, state.World.Map);
+                CPos ourCenter = GeometryUtils.Center(AttackTroops);
+                nextMove = GeometryUtils.MoveTowards(ourCenter, attackerCenter, state.Info.DistanceToMoveAttack, state.World.Map);
                 Log.Write(ActiveAttackController.AttackDataLogName, "{0} is moving toward attackers, position [{1},{2}]".F(Id, nextMove.X, nextMove.Y));
             }
 
