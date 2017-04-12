@@ -6,6 +6,7 @@ using OpenRA.Traits;
 using OpenRA.Mods.Common.Traits;
 using OpenRA.Mods.Common.AI.Esu.Geometry;
 using OpenRA.Mods.Common.AI.Esu.Strategy;
+using OpenRA.Mods.Common.Activities;
 
 namespace OpenRA.Mods.Common.AI.Esu
 {
@@ -167,6 +168,23 @@ namespace OpenRA.Mods.Common.AI.Esu
                 }
             }
             return false;
+        }
+
+        public static void AttackTargetIfVisible(StrategicWorldState state, IEnumerable<Actor> actors, string targetName)
+        {
+            var offensiveEnemyActors = state.EnemyActorsCache.Where(a => a.Info.Name == targetName);
+            foreach (Actor actor in actors)
+            {
+                var visiblity = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
+                var visibleEnemies = offensiveEnemyActors.Where(a => visiblity.ContainsPosition(a.CenterPosition));
+                if (visibleEnemies.Count() > 0)
+                {
+                    var target = visibleEnemies.First();
+                    var current = actor.GetCurrentActivity();
+                    actor.QueueActivity(false, new Attack(actor, Target.FromPos(target.CenterPosition), true, true));
+                    actor.QueueActivity(true, current);
+                }
+            }
         }
     }
 

@@ -35,7 +35,14 @@ namespace OpenRA.Mods.Common.Traits.Esu
 
         void ITick.Tick(Actor self)
         {
-            if ((world.GetCurrentLocalTickCount() % world.GetFitnessLogTickIncrement()) == 0)
+            var tick = world.GetCurrentLocalTickCount();
+            if ((tick % 100) == 0)
+            {
+                var currentTime = DateTime.Now.ToString("h:mm:ss");
+                Log.Write("debug", "Tick: " + tick + ", Time: " + currentTime);
+            }
+
+            if ((tick % world.GetFitnessLogTickIncrement()) == 0)
             {
                 PrintPlayerFitnessInformation();
             }
