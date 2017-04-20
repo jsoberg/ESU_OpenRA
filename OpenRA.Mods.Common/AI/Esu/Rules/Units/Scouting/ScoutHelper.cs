@@ -167,6 +167,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
                         scout.PreviousCheckedLocation = scout.Actor.Location;
                         scout.MovementCooldown = ScoutActor.MOVEMENT_COOLDOWN_TICKS;
                     }
+                } else {
+                    EsuAIUtils.AttackTargetIfVisible(state, scout.Actor, "dog");
                 }
             }
         }

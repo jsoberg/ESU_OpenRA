@@ -170,22 +170,34 @@ namespace OpenRA.Mods.Common.AI.Esu
             return false;
         }
 
-        public static void AttackTargetIfVisible(StrategicWorldState state, IEnumerable<Actor> actors, string targetName)
+        public static void AttackTargetIfVisible(StrategicWorldState state, IEnumerable<Actor> actorsToPerformAttack, string targetName)
         {
             var offensiveEnemyActors = state.EnemyActorsCache.Where(a => a.Info.Name == targetName);
-            foreach (Actor actor in actors)
+            foreach (Actor actor in actorsToPerformAttack)
             {
-                var visiblity = VisibilityBounds.GetCurrentVisibilityRectForActor(actor);
-                var visibleEnemies = offensiveEnemyActors.Where(a => visiblity.ContainsPosition(a.CenterPosition));
-                if (visibleEnemies.Count() > 0)
-                {
-                    var target = visibleEnemies.First();
-                    var current = actor.GetCurrentActivity();
-                    actor.QueueActivity(false, new Attack(actor, Target.FromPos(target.CenterPosition), true, true));
-                    actor.QueueActivity(true, current);
-                }
+                AttackTargetIfVisible(state, actor, offensiveEnemyActors, targetName);
             }
         }
+
+        public static void AttackTargetIfVisible(StrategicWorldState state, Actor actorToPerformAttack, string targetName)
+        {
+            var offensiveEnemyActors = state.EnemyActorsCache.Where(a => a.Info.Name == targetName);
+            AttackTargetIfVisible(state, actorToPerformAttack, offensiveEnemyActors, targetName);
+        }
+
+        private static void AttackTargetIfVisible(StrategicWorldState state, Actor actorToPerformAttack, IEnumerable<Actor> enemyActors, string targetName)
+        {
+            var visiblity = VisibilityBounds.GetCurrentVisibilityRectForActor(actorToPerformAttack);
+            var visibleEnemies = enemyActors.Where(a => visiblity.ContainsPosition(a.CenterPosition));
+            if (visibleEnemies.Count() > 0)
+            {
+                var target = visibleEnemies.First();
+                var current = actorToPerformAttack.GetCurrentActivity();
+                actorToPerformAttack.QueueActivity(false, new Attack(actorToPerformAttack, Target.FromPos(target.CenterPosition), true, true));
+                actorToPerformAttack.QueueActivity(true, current);
+            }
+        }
+
     }
 
     // ========================================
