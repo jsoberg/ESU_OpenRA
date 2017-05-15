@@ -104,7 +104,8 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             public static bool IsAntiInfantry(string buildingName)
             {
-                return (buildingName == Allies.PILL_BOX ||
+				// Description for TESLA states that it is used for anti-infantry OR anti-vehicle, but it seems most effective against infantry.
+				return (buildingName == Allies.PILL_BOX ||
                     buildingName == Allies.CAMO_PILL_BOX ||
                     buildingName == Soviet.FLAME_TOWER ||
                     buildingName == Soviet.TESLA);
@@ -112,7 +113,6 @@ namespace OpenRA.Mods.Common.AI.Esu
 
             public static bool IsAntiVehicle(string buildingName)
             {
-                // TODO: Description for TESLA states that it is used for anti-infantry OR anti-vehicle. Combined category, or leave with infantry?
                 return (buildingName == Allies.TURRET);
             }
 
