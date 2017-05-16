@@ -1,0 +1,25 @@
+Player:
+	# ============================================
+	# Custom AI Code
+	# ============================================
+	EsuAI@BestEsuAI:#20 1 24 1 2 1 0 1 5 700 0 3 3 8 4 1150 450 55 8500
+		Name: BestEsuAI
+		MinimumExcessPower: 20
+    	ShouldProduceScoutBeforeRefinery: 1
+    	PercentageOfResourcesToSpendOnDefensiveBuildings: 24
+    	DefensiveBuildingPlacement: 1
+    	NumberOfScoutsToProduce: 2
+    	NormalBuildingPlacement: 1
+    	ScoutRecommendationImportanceMultiplier: 0
+    	MinNumRefineries: 1
+    	MinNumHarvesters: 5
+    	ExcessResourceLevel: 700
+    	HarvesterScoutRecommendationImportanceMultiplier: 0
+    	DefenseLethalityCoverage: 3
+    	DistanceToMoveAttack: 3
+    	UnitProductionRandomPercent: 8
+    	PredictedAttackStrengthNeededToLaunchAttack: 4
+    	MinimumLethality: 1150
+    	LethalityStep: 450
+    	PercentageOfVehiclesToProduceForDistribution: 55
+    	EarnedResourcesThreshold: 8500

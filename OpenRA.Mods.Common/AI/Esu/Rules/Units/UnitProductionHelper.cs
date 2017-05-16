@@ -94,7 +94,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
 
             if (!EsuAIUtils.IsAnyItemCurrentlyInProductionForCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.INFANTRY))
             {
-                // TODO: Check here for vehicle and air.
                 double currentInfantryPercentage = PercentageOfSelfOffensiveUnitsCurrentlyInWorldOfType(state, EsuAIConstants.ProductionCategories.INFANTRY);
                 if (currentInfantryPercentage < infantryPercent || currentResources > Info.ExcessResourceLevel)
                 {

@@ -47,7 +47,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             DefensiveOrderCheckCooldown--;
 
             // No producers in world; this could be while we are building the construction yard, or if all yards have been destroyed.
-            // TODO: Do we need this check, or will the build checks take care of it for us?
             if (!world.Actors.Any(a => a.Owner == selfPlayer && a.IsInWorld && !a.IsDead && a.TraitOrDefault<Production>() != null)) {
                 return;
             }
@@ -208,7 +207,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
 
                 var defenseiveBuilding = GetDefensiveStructureToProduce(state);
                 var queues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(world, selfPlayer, EsuAIConstants.ProductionCategories.DEFENSE);
-                // TODO not first, decide where to go.
                 var buildable = queues.First().AllItems().FirstOrDefault(a => a.Name == defenseiveBuilding);
                 if (buildable == null) {
                     // We have no construction yard.

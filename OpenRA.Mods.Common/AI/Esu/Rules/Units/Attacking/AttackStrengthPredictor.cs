@@ -35,7 +35,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
         {
             BestScoutReportData data = State.ScoutReportGrid.GetBestScoutReportDataFromDatabase();
 
-            // TODO: Add more factors into attack strength (enemy composition, etc).
             PredictedAttackStrength riskRewardStrength = AttackStrengthBasedOnRiskAndReward(risk, reward);
             PredictedAttackStrength lethalityStrength = AttackStrengthBasedOnAvailableLethality(attackActors);
             return (PredictedAttackStrength) (((int) riskRewardStrength + (int) lethalityStrength) / 2);
