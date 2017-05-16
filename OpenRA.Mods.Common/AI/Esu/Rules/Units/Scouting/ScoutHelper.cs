@@ -99,7 +99,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units
         {
             var productionQueues = EsuAIUtils.FindProductionQueuesForPlayerAndCategory(World, SelfPlayer, EsuAIConstants.ProductionCategories.INFANTRY);
             foreach (ProductionQueue queue in productionQueues) {
-                // TODO faction checks for dogs?
                 if (queue.BuildableItems().Count(a => a.Name == EsuAIConstants.Infantry.RIFLE_INFANTRY) > 0) {
                     return EsuAIConstants.Infantry.RIFLE_INFANTRY;
                 }

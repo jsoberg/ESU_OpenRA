@@ -33,8 +33,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
 
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
             foreach (Actor actor in vulnerableItems) {
-                // TODO do we want current HP, or max HP? Also consider cost, test and see what's most useful.
-                map.Add(actor, LethalityForActor(actor));
+                map.Add(actor, LethalityRequiredToProtectActor(actor));
             }
             return map;
         }
@@ -43,13 +42,12 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
         {
             Dictionary<Actor, int> map = new Dictionary<Actor, int>();
             foreach (Actor actor in state.OffensiveActorsCache) {
-                // TODO find actual lethality metric to use (Maybe something in item.Trait<Armament>().Weapon?)
-                map.Add(actor, LethalityForActor(actor));
+                map.Add(actor, LethalityRequiredToProtectActor(actor));
             }
             return map;
         }
 
-        private int LethalityForActor(Actor actor)
+        private int LethalityRequiredToProtectActor(Actor actor)
         {
             return actor.Trait<Health>().HP;
         }
@@ -88,7 +86,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Strategy.Defense
 
             // Account for static defensive coverage at base.
             foreach (Actor defender in state.DefensiveStructureCache) {
-                lethalityNeeded -= LethalityForActor(defender);
+                lethalityNeeded -= LethalityRequiredToProtectActor(defender);
             }
 
             return (int) Math.Round(lethalityNeeded * desiredDefensePercentage);

@@ -60,7 +60,8 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
             IEnumerable<Actor> possibleAttackActors = ActorsCurrentlyAvailableForAttack(state, defensiveCoverage.ActorsNecessaryForDefense);
             AttackStrengthPredictor predictor = new AttackStrengthPredictor(metric, state);
-            // TODO add more logic here
+
+			// Predict strength for attack on most favorable cell.
             if (predictor.PredictStrengthForAttack(bestCell.AverageRiskValue, bestCell.AverageRewardValue, possibleAttackActors, bestCell.RelativePosition) 
                 >= (PredictedAttackStrength) Info.PredictedAttackStrengthNeededToLaunchAttack)
             {

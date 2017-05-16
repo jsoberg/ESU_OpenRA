@@ -670,9 +670,10 @@ namespace OpenRA
         // BEGIN Headless Auto-Start Game Methods
         // ==============================================================================================================
 
-        private static readonly string DEFAULT_AI_NAME = "Rush AI";
+        private static readonly string DEFAULT_AI_NAME = "ESU AI";
+		private static readonly string DEFAULT_SECONDARY_AI_NAME = "Rush AI";
 
-        private static void AutoStartGame(LaunchArguments args)
+		private static void AutoStartGame(LaunchArguments args)
         {  
             FitnessLogTickIncrement = args.FitnessLogTickIncrement != null ? int.Parse(args.FitnessLogTickIncrement) : DEFAULT_FITNESS_TICKS;
             var myMap = GetSpecifiedLaunchMapOrRandom(args);
@@ -690,7 +691,7 @@ namespace OpenRA
 
                 // Create bots.
                 string aiName = (args.Ai != null) ? args.Ai : DEFAULT_AI_NAME;
-                string secondAiName = (args.SecondAi != null) ? args.SecondAi : DEFAULT_AI_NAME;
+                string secondAiName = (args.SecondAi != null) ? args.SecondAi : DEFAULT_SECONDARY_AI_NAME;
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi0 0 {0}".F(aiName)));
                 OrderManager.IssueOrder(Order.Command("slot_bot Multi1 0 {0}".F(secondAiName)));
                 OrderManager.TickImmediate();

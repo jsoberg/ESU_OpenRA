@@ -172,7 +172,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             int maxRad_4 = info.MaxBaseRadius / 4;
             for (int radius = maxRad_4 / 4; radius <= info.MaxBaseRadius; radius += maxRad_4)
             {
-                // TODO: Figure out obstacles in the way (i.e water separating ore from harvester, cliffs etc).
                 var nearbyResources = world.Map.FindTilesInAnnulus(baseCenter, 0, info.MaxBaseRadius)
                     .Where(a => resourceTypeIndices.Get(world.Map.GetTerrainIndex(a)))
                     .Shuffle(Random).Take(6);
@@ -233,8 +232,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
             return bi;
         }
 
-        // TODO: This was copied from HackyAI; We want to be smarter about this than 
-        // just building at a random construction yard, but this will do for now.
         private CPos GetRandomBaseCenter()
         {
             var randomConstructionYard = world.Actors.Where(a => a.Owner == selfPlayer &&
@@ -264,7 +261,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Buildings
         private CPos FindBuildableLocationForImportantStructure(string actorType)
         {
             var importantOwnedActors = world.Actors.Where(a => a.Owner == selfPlayer && RuleConstants.DefensiveBuildingPlacementValues.IMPORTANT_STRUCTURES.Contains(a.Info.Name));
-            // TODO: Choose at random here?
             var chosenActor = importantOwnedActors.Random(Random);
 
             return FindFirstBuildableLocation(chosenActor.Location, 0, info.MaxBaseRadius, actorType);
