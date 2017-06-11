@@ -33,8 +33,6 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
 
         public PredictedAttackStrength PredictStrengthForAttack(int risk, int reward, IEnumerable<Actor> attackActors, CPos location)
         {
-            BestScoutReportData data = State.ScoutReportGrid.GetBestScoutReportDataFromDatabase();
-
             PredictedAttackStrength riskRewardStrength = AttackStrengthBasedOnRiskAndReward(risk, reward);
             PredictedAttackStrength lethalityStrength = AttackStrengthBasedOnAvailableLethality(attackActors);
             return (PredictedAttackStrength) (((int) riskRewardStrength + (int) lethalityStrength) / 2);
@@ -103,25 +101,52 @@ namespace OpenRA.Mods.Common.AI.Esu.Rules.Units.Attacking
                 return PredictedAttackStrength.Medium;
             }
 
-            int rewardStep = (data.HighestReward - data.LowestReward) / 2;
-            int riskStep = (data.HighestRisk - data.LowestRisk) / 2;
-            if (risk < data.LowestRisk && reward > data.HighestReward)
-            {
-                return PredictedAttackStrength.Overwhelming;
-            }
-            else if (risk <= data.LowestRisk && reward >= data.HighestReward)
-            {
-                return PredictedAttackStrength.High;
-            }
-            else if (risk <= (data.LowestRisk + (riskStep / 2)) && reward >= (data.HighestReward - (rewardStep / 2)))
-            {
-                return PredictedAttackStrength.Medium;
-            }
-            else if (risk <= (data.LowestRisk + riskStep) && reward >= (data.HighestReward - rewardStep))
-            {
-                return PredictedAttackStrength.Low;
-            }
-            return PredictedAttackStrength.None;
-        }
-    }
+			return (PredictedAttackStrength) (((int) AttackStrengthBasedOnReward(reward, data) + (int) AttackStrengthBasedOnRisk(risk, data)) / 2);
+		}
+
+		private PredictedAttackStrength AttackStrengthBasedOnReward(int reward, BestScoutReportData data)
+		{
+			int rewardStep = (data.HighestReward - data.LowestReward) / 2;
+			if (reward > data.HighestReward)
+			{
+				return PredictedAttackStrength.Overwhelming;
+			}
+			else if (reward >= data.HighestReward)
+			{
+				return PredictedAttackStrength.High;
+			}
+			else if (reward >= (data.HighestReward - (rewardStep / 2)))
+			{
+				return PredictedAttackStrength.Medium;
+			}
+			else if (reward >= (data.HighestReward - rewardStep))
+			{
+				return PredictedAttackStrength.Low;
+			}
+			return PredictedAttackStrength.None;
+		}
+
+		private PredictedAttackStrength AttackStrengthBasedOnRisk(int risk, BestScoutReportData data)
+		{
+			int riskStep = (data.HighestRisk - data.LowestRisk) / 2;
+			if (risk < data.LowestRisk)
+			{
+				return PredictedAttackStrength.Overwhelming;
+			}
+			else if (risk <= data.LowestRisk)
+			{
+				return PredictedAttackStrength.High;
+			}
+			else if (risk <= (data.LowestRisk + (riskStep / 2)))
+			{
+				return PredictedAttackStrength.Medium;
+			}
+			else if (risk <= (data.LowestRisk + riskStep))
+			{
+				return PredictedAttackStrength.Low;
+			}
+			return PredictedAttackStrength.None;
+		}
+
+	}
 }
