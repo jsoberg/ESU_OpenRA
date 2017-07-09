@@ -25,20 +25,22 @@ namespace OpenRA.Mods.Common.AI.Esu
         private readonly World World;
         private readonly StrategicWorldState State;
         private readonly AsyncUnitDamageInformationLogger UnitDamageInformationLogger;
+		private readonly FundBalanceTable FundTable;
 
-        // Rulesets.
-        private readonly List<BaseEsuAIRuleset> Rulesets;
+		// Rulesets.
+		private readonly List<BaseEsuAIRuleset> Rulesets;
 
         private Player SelfPlayer;
         private bool IsEnabled;
         private int TickCount;
 
-        public EsuAI(EsuAIInfo info, ActorInitializer init)
+		public EsuAI(EsuAIInfo info, ActorInitializer init)
         {
             this.Info = info;
             this.World = init.World;
             this.State = new StrategicWorldState();
             this.UnitDamageInformationLogger = new AsyncUnitDamageInformationLogger();
+			this.FundTable = new FundBalanceTable();
 
             Rulesets = new List<BaseEsuAIRuleset>();
             addRulesets();
@@ -150,6 +152,14 @@ namespace OpenRA.Mods.Common.AI.Esu
                 rs.Tick(self, State, orders);
             }
             IssueOrders(orders);
+
+			if (World.GetCurrentLocalTickCount() % 100 == 0)
+			{
+				foreach (var p in World.Players.Where(a => !a.NonCombatant))
+				{
+					FundTable.InsertFundData(p, World);
+				}
+			}
         }
 
         private void IssueOrders(Queue<Order> orders)

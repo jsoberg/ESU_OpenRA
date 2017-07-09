@@ -109,7 +109,7 @@ namespace OpenRA.Mods.Common.AI.Esu.Database
         {
             return "ALTER TABLE " + tableName + " ADD COLUMN " + column.ColumnName + " " + column.ColumnType;
         }
-    }
+	}
 
     public class Column
     {
